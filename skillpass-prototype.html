@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>OG SkillsPass</title>
+  <title>OG Skills-Pass</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
@@ -201,7 +201,7 @@
   .pdf-btn { position: fixed; bottom: 24px; right: 20px; background: var(--accent); color: #000; border: none; border-radius: 50px; padding: 14px 22px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 20px #f5c80044; display: flex; align-items: center; gap: 8px; z-index: 50; transition: all .2s; }
   .pdf-btn:hover { background: #ffd700; transform: translateY(-2px); }
 
-  /* ── ADMIN SCREEN ─────────────────────── */
+  /* ââ ADMIN SCREEN âââââââââââââââââââââââ */
   .admin-tab-bar { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
   .admin-tab-bar::-webkit-scrollbar { display: none; }
   .admin-tab {
@@ -293,7 +293,7 @@
 </head>
 <body>
 
-<!-- ────────────── HEADER ────────────── -->
+<!-- ââââââââââââââ HEADER ââââââââââââââ -->
 <div class="header">
   <div class="header-left">
     <svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
@@ -312,33 +312,33 @@
             fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/>
     </svg>
     <div>
-      <div class="logo">OG <span>SkillsPass</span></div>
-      <div class="header-sub">Overground Basel · Coach Tool</div>
+      <div class="logo">OG <span>Skills-Pass</span></div>
+      <div class="header-sub">Overground Basel Â· Coach Tool</div>
     </div>
   </div>
   <div class="header-right">
-    <button class="icon-btn" onclick="openSharePanel()" title="Stand teilen">🔗</button>
-    <button class="icon-btn admin-btn" onclick="showAdmin()" title="Kurse & Kinder verwalten">⚙</button>
+    <button class="icon-btn" onclick="openSharePanel()" title="Stand teilen">ð</button>
+    <button class="icon-btn admin-btn" onclick="showAdmin()" title="Kurse & Kinder verwalten">â</button>
   </div>
 </div>
 
 <!-- COACH BANNER -->
 <div class="coach-banner" id="coach-banner" style="display:none">
-  👁 Coach-Ansicht &nbsp;·&nbsp; <strong id="cb-trainer"></strong>
-  &nbsp;·&nbsp; <span id="cb-time" style="font-size:11px"></span>
-  <button class="coach-banner-close" onclick="clearCoachView()">✕</button>
+  ð Coach-Ansicht &nbsp;Â·&nbsp; <strong id="cb-trainer"></strong>
+  &nbsp;Â·&nbsp; <span id="cb-time" style="font-size:11px"></span>
+  <button class="coach-banner-close" onclick="clearCoachView()">â</button>
 </div>
 
-<!-- ────────────── SCREEN: WOCHE ────────────── -->
+<!-- ââââââââââââââ SCREEN: WOCHE ââââââââââââââ -->
 <div class="screen active" id="screen-week">
   <div class="days-row" id="days-row"></div>
-  <div class="section-title" id="courses-day-label">Tag wählen</div>
+  <div class="section-title" id="courses-day-label">Tag wÃ¤hlen</div>
   <div id="courses-list"></div>
 </div>
 
-<!-- ────────────── SCREEN: KINDER ────────────── -->
+<!-- ââââââââââââââ SCREEN: KINDER ââââââââââââââ -->
 <div class="screen" id="screen-kids">
-  <button class="back-btn" onclick="showScreen('week')">← Zurück zu Kursen</button>
+  <button class="back-btn" onclick="showScreen('week')">â ZurÃ¼ck zu Kursen</button>
   <div class="course-header" id="ch-kids">
     <h2 id="ch-name"></h2>
     <div class="ch-meta" id="ch-meta"></div>
@@ -346,12 +346,12 @@
   </div>
   <div class="section-title">Kinder</div>
   <div id="kids-list"></div>
-  <button class="pdf-btn" onclick="printKlass()">🖨 Klasse drucken</button>
+  <button class="pdf-btn" onclick="printKlass()">ð¨ Klasse drucken</button>
 </div>
 
-<!-- ────────────── SCREEN: KIND DETAIL ────────────── -->
+<!-- ââââââââââââââ SCREEN: KIND DETAIL ââââââââââââââ -->
 <div class="screen" id="screen-kid">
-  <button class="back-btn" onclick="showScreen('kids')">← Zurück zur Klasse</button>
+  <button class="back-btn" onclick="showScreen('kids')">â ZurÃ¼ck zur Klasse</button>
   <div class="course-header" id="ch-kid"></div>
   <div class="section-title">Skills bewerten</div>
   <div id="skills-list"></div>
@@ -360,39 +360,39 @@
     <textarea class="notes-area" id="kid-notes" placeholder="Bemerkungen zum Kind..."></textarea>
   </div>
   <div class="btn-row">
-    <button class="btn btn-outline" onclick="saveKid(false)">💾 Zwischenspeichern</button>
-    <button class="btn btn-success" onclick="saveKid(true)">✓ Abgeschlossen</button>
+    <button class="btn btn-outline" onclick="saveKid(false)">ð¾ Zwischenspeichern</button>
+    <button class="btn btn-success" onclick="saveKid(true)">â Abgeschlossen</button>
   </div>
 </div>
 
-<!-- ────────────── SCREEN: ADMIN ────────────── -->
+<!-- ââââââââââââââ SCREEN: ADMIN ââââââââââââââ -->
 <div class="screen" id="screen-admin">
-  <button class="back-btn" onclick="showScreen('week')" style="margin-bottom:14px">← Zurück</button>
+  <button class="back-btn" onclick="showScreen('week')" style="margin-bottom:14px">â ZurÃ¼ck</button>
   <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--accent);margin-bottom:14px">Kurse verwalten</div>
   <div class="admin-tab-bar" id="admin-tab-bar"></div>
   <div id="admin-content"></div>
 </div>
 
-<!-- ────────────── SHARE MODAL ────────────── -->
+<!-- ââââââââââââââ SHARE MODAL ââââââââââââââ -->
 <div class="modal-overlay" id="share-overlay" onclick="closeSharePanel()" style="display:none"></div>
 <div class="modal" id="share-modal" style="display:none">
   <div class="modal-title">Stand teilen</div>
-  <div class="modal-desc">Generiere einen Link mit deinem aktuellen Bewertungsstand. Der Headcoach öffnet den Link und sieht alle Daten – live als Snapshot.</div>
+  <div class="modal-desc">Generiere einen Link mit deinem aktuellen Bewertungsstand. Der Headcoach Ã¶ffnet den Link und sieht alle Daten â live als Snapshot.</div>
   <div class="field-row" style="margin-bottom:14px">
     <label class="field-label">Dein Name (erscheint beim Headcoach)</label>
     <input class="field-input" id="share-name-input" placeholder="z.B. Chris Harmat">
   </div>
   <div class="share-url-box" id="share-url-preview" style="display:none">Generiere Link...</div>
-  <button class="btn btn-primary" onclick="generateShareLink()" style="margin-bottom:8px">🔗 Link generieren & kopieren</button>
+  <button class="btn btn-primary" onclick="generateShareLink()" style="margin-bottom:8px">ð Link generieren & kopieren</button>
   <button class="btn btn-outline" onclick="closeSharePanel()">Schliessen</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // NAME POOLS
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 const POOL_Y = ['Luca','Mia','Noah','Emma','Ben','Lea','Felix','Anna','Tim','Sara','Max','Lena','Jonas','Clara','Finn'];
 const POOL_M = ['Marco','Jana','Niklas','Leonie','Pascal','Alina','Simon','Marlene','Tanja','Patrick','Sophie','Fabian'];
 const POOL_T = ['Alexander','Valentina','Tobias','Melissa','Raphael','Jasmin','Sandra','David','Laura','Dominik','Selina'];
@@ -403,19 +403,19 @@ function genKids(n, age) {
   return Array.from({length: n}, (_, i) => pool[i % pool.length] + ' ' + POOL_S[i % POOL_S.length]);
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // DEFAULT SKILLS BY COURSE TYPE
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 const DEFAULT_SKILLS = {
   polysport: [
     { id:'weitsprung',   label:'Weitsprung',    type:'mass',   unit:'cm', min:0,   max:300, step:5   },
     { id:'hochsprung',   label:'Hochsprung',    type:'mass',   unit:'cm', min:0,   max:150, step:5   },
     { id:'sprint_20m',   label:'20m Sprint',    type:'time',   unit:'s',  min:2.0, max:8.0, step:0.1 },
-    { id:'liegestuetze', label:'Liegestütze',   type:'count',  unit:'Wdh',min:0,   max:50,  step:1   },
+    { id:'liegestuetze', label:'LiegestÃ¼tze',   type:'count',  unit:'Wdh',min:0,   max:50,  step:1   },
     { id:'balance',      label:'Balance',       type:'time',   unit:'s',  min:0,   max:60,  step:1   },
   ],
   akrobatik: [
-    { id:'rolle_vw',     label:'Rolle vorwärts', type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'rolle_vw',     label:'Rolle vorwÃ¤rts', type:'rating', unit:'/5', min:1, max:5, step:1 },
     { id:'handstand',    label:'Handstand',      type:'time',   unit:'s',  min:0, max:60, step:1 },
     { id:'rad',          label:'Rad',            type:'rating', unit:'/5', min:1, max:5, step:1 },
     { id:'koordination', label:'Koordination',   type:'rating', unit:'/5', min:1, max:5, step:1 },
@@ -448,7 +448,7 @@ const DEFAULT_SKILLS = {
   ],
   wct: [
     { id:'speed',        label:'Speed',          type:'rating', unit:'/5', min:1, max:5, step:1 },
-    { id:'agility',      label:'Agilität',       type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'agility',      label:'AgilitÃ¤t',       type:'rating', unit:'/5', min:1, max:5, step:1 },
     { id:'taktik',       label:'Taktik',         type:'rating', unit:'/5', min:1, max:5, step:1 },
     { id:'ausdauer',     label:'Ausdauer',       type:'rating', unit:'/5', min:1, max:5, step:1 },
   ],
@@ -494,79 +494,79 @@ function lvBadgeClass(course) {
   return lvClass(course.level);
 }
 
-// ─────────────────────────────────────────────
-// KURSDATEN (Overground Basel – Sportsnow)
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
+// KURSDATEN (Overground Basel â Sportsnow)
+// âââââââââââââââââââââââââââââââââââââââââââââ
 const COURSES = {
   0: [ // Sonntag
-    { id:'so_pk10',  name:'Parkour Einsteiger 10–13J', code:'',   time:'11:30', trainer:'Chris Harmat',        level:'Basis',      kids: genKids(4,'9-12')  },
-    { id:'so_pk14',  name:'Parkour Einsteiger 14–18J', code:'',   time:'14:00', trainer:'Chris Harmat',        level:'Basis',      kids: genKids(3,'13-15') },
-    { id:'so_grapp', name:'Öko-Grappling',             code:'',   time:'14:00', trainer:'Loki Pacheco-Taylor', level:'Alle Stufen',kids: genKids(0,'9-12')  },
+    { id:'so_pk10',  name:'Parkour Einsteiger 10â13J', code:'',   time:'11:30', trainer:'Chris Harmat',        level:'Basis',      kids: genKids(4,'9-12')  },
+    { id:'so_pk14',  name:'Parkour Einsteiger 14â18J', code:'',   time:'14:00', trainer:'Chris Harmat',        level:'Basis',      kids: genKids(3,'13-15') },
+    { id:'so_grapp', name:'Ãko-Grappling',             code:'',   time:'14:00', trainer:'Loki Pacheco-Taylor', level:'Alle Stufen',kids: genKids(0,'9-12')  },
   ],
   1: [ // Montag
-    { id:'mob1',   name:'Basic: Polysport 5–8',           code:'MoB1', time:'15:30', trainer:'Agrena Schuler',   level:'Basis',      kids:['Aedan Ferry','Anouk Weber','Caetano Frisoli','Emil Frei','Janosh Weber','Lydia Ros','Naomi Ros','Niccolò Frei','Niklas Adam'] },
-    { id:'mob2',   name:'Fortgeschritten: Polysport 5–8', code:'MoB2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(3,'5-8')   },
-    { id:'moc1',   name:'Basic: Polysport 9–12',          code:'MoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(5,'9-12')  },
-    { id:'mo_nj1', name:'Ninja Kidz 6–9J',               code:'MoN1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(6,'5-8')   },
-    { id:'mod1',   name:'Basic: Polysport 13–15',         code:'MoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(1,'13-15') },
-    { id:'mod2',   name:'Fortgeschritten: Polysport 13–15',code:'MoD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(2,'13-15') },
-    { id:'mo_nj2', name:'Ninja Kidz 10–13J',             code:'MoN2', time:'17:30', trainer:'Robin Simon',      level:'Mittel',     kids: genKids(7,'9-12')  },
-    { id:'moc2',   name:'Fortgeschritten: Polysport 9–12',code:'MoC2', time:'18:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(12,'9-12') },
+    { id:'mob1',   name:'Basic: Polysport 5â8',           code:'MoB1', time:'15:30', trainer:'Agrena Schuler',   level:'Basis',      kids:['Aedan Ferry','Anouk Weber','Caetano Frisoli','Emil Frei','Janosh Weber','Lydia Ros','Naomi Ros','NiccolÃ² Frei','Niklas Adam'] },
+    { id:'mob2',   name:'Fortgeschritten: Polysport 5â8', code:'MoB2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',      kids: genKids(3,'5-8'   },
+    { id:'moc1',   name:'Basic: Polysport 9â12',          code:'MoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(5,'9-12')  },
+    { id:'mo_nj1', name:'Ninja Kidz 6â9J',               code:'MoN1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(6,'5-8')   },
+    { id:'mod1',   name:'Basic: Polysport 13â15',         code:'MoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(1,'13-15') },
+    { id:'mod2',   name:'Fortgeschritten: Polysport 13â15',code:'MoD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(2,'13-15') },
+    { id:'mo_nj2', name:'Ninja Kidz 10â13J',             code:'MoN2', time:'17:30', trainer:'Robin Simon',      level:'Mittel',     kids: genKids(7,'9-12')  },
+    { id:'moc2',   name:'Fortgeschritten: Polysport 9â12',code:'MoC2', time:'18:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(12,'9-12') },
     { id:'mo_kt',  name:'Kids Team',                     code:'MoKT', time:'18:30', trainer:'Agrena Schuler',   level:'Team',       kids: genKids(8,'9-12'), isTeam:true },
   ],
   2: [ // Dienstag
-    { id:'dib1',   name:'Basic: Polysport 5–8',           code:'DiB1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(5,'5-8')   },
-    { id:'dik1',   name:'Akrobatik',                      code:'DiK1', time:'16:30', trainer:'Mathis Rüsch',     level:'Basis',      kids: genKids(8,'9-12')  },
-    { id:'dic1',   name:'Basic: Polysport 9–12',          code:'DiC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
-    { id:'di_nj1', name:'Ninja Kidz 6–9J',               code:'DiN1', time:'16:30', trainer:'Chris Harmat',     level:'Basis',      kids: genKids(8,'5-8')   },
-    { id:'dib2',   name:'Fortgeschritten: Polysport 5–8', code:'DiB2', time:'17:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(4,'5-8')   },
-    { id:'dic2',   name:'Fortgeschritten: Polysport 9–12',code:'DiC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(5,'9-12')  },
-    { id:'did1',   name:'Basic: Polysport 13–15',         code:'DiD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(7,'13-15') },
-    { id:'di_nj2', name:'Ninja Kidz 10–13J',             code:'DiN2', time:'17:30', trainer:'Chris Harmat',     level:'Mittel',     kids: genKids(6,'9-12')  },
-    { id:'did2',   name:'Fortgeschritten: Polysport 13–15',code:'DiD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(5,'13-15') },
-    { id:'dipm1',  name:'Basic: Girls Parkour',           code:'DiPM1',time:'18:30', trainer:'Julia Menz / Anja Rüfenacht',level:'Alle Stufen',kids: genKids(5,'9-12') },
+    { id:'dib1',   name:'Basic: Polysport 5â8',           code:'DiB1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(5,'5-8')   },
+    { id:'dik1',   name:'Akrobatik',                      code:'DiK1', time:'16:30', trainer:'Mathis RÃ¼sch',     level:'Basis',      kids: genKids(8,'9-12')  },
+    { id:'dic1',   name:'Basic: Polysport 9â12',          code:'DiC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'di_nj1', name:'Ninja Kidz 6â9J',               code:'DiN1', time:'16:30', trainer:'Chris Harmat',     level:'Basis',      kids: genKids(8,'5-8')   },
+    { id:'dib2',   name:'Fortgeschritten: Polysport 5â8', code:'DiB2', time:'17:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(4,'5-8')   },
+    { id:'dic2',   name:'Fortgeschritten: Polysport 9â12',code:'DiC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(5,'9-12')  },
+    { id:'did1',   name:'Basic: Polysport 13â15',         code:'DiD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(7,'13-15') },
+    { id:'di_nj2', name:'Ninja Kidz 10â13J',             code:'DiN2', time:'17:30', trainer:'Chris Harmat',     level:'Mittel',     kids: genKids(6,'9-12')  },
+    { id:'did2',   name:'Fortgeschritten: Polysport 13â15',code:'DiD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(5,'13-15') },
+    { id:'dipm1',  name:'Basic: Girls Parkour',           code:'DiPM1',time:'18:30', trainer:'Julia Menz / Anja RÃ¼fenacht',level:'Alle Stufen',kids: genKids(5,'9-12') },
     { id:'di_kt',  name:'Kids Team',                     code:'DiKT', time:'19:00', trainer:'Agrena Schuler',   level:'Team',       kids: genKids(10,'9-12'),isTeam:true },
     { id:'di_ct',  name:'Comp Team',                     code:'DiCT', time:'20:00', trainer:'Chris Harmat',     level:'Team',       kids: genKids(8,'13-15'),isTeam:true },
   ],
   3: [ // Mittwoch
-    { id:'mic1',   name:'Basic: Polysport 9–12',          code:'MiC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
-    { id:'mic2',   name:'Fortgeschritten: Polysport 9–12',code:'MiC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(5,'9-12')  },
+    { id:'mic1',   name:'Basic: Polysport 9â12',          code:'MiC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'mic2',   name:'Fortgeschritten: Polysport 9â12',code:'MiC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(5,'9-12')  },
     { id:'mi_wct', name:'World Chase Tag',               code:'MiWCT',time:'17:30', trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids: genKids(10,'9-12') },
-    { id:'mid1',   name:'Basic: Polysport 13–15',         code:'MiD1', time:'18:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(4,'13-15') },
-    { id:'mid2',   name:'Fortgeschritten: Polysport 13–15',code:'MiD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
+    { id:'mid1',   name:'Basic: Polysport 13â15',         code:'MiD1', time:'18:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(4,'13-15') },
+    { id:'mid2',   name:'Fortgeschritten: Polysport 13â15',code:'MiD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
   ],
   4: [ // Donnerstag
-    { id:'dob1',   name:'Basic: Polysport 5–8',           code:'DoB1', time:'16:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(4,'5-8')   },
-    { id:'doc1',   name:'Basic: Polysport 9–12',          code:'DoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
-    { id:'do_nj1', name:'Ninja Kidz 6–9J',               code:'DoN1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(7,'5-8')   },
-    { id:'dob2',   name:'Fortgeschritten: Polysport 5–8', code:'DoB2', time:'17:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(5,'5-8')   },
-    { id:'doc2',   name:'Fortgeschritten: Polysport 9–12',code:'DoC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(4,'9-12')  },
-    { id:'dod1',   name:'Basic: Polysport 13–15',         code:'DoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(7,'13-15') },
-    { id:'do_njt', name:'Ninja Teen 14–17J',             code:'DoNT', time:'17:30', trainer:'Chris Harmat',     level:'Mittel',     kids: genKids(5,'13-15') },
-    { id:'dod2',   name:'Fortgeschritten: Polysport 13–15',code:'DoD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
+    { id:'dob1',   name:'Basic: Polysport 5â8',           code:'DoB1', time:'16:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(4,'5-8')   },
+    { id:'doc1',   name:'Basic: Polysport 9â12',          code:'DoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'do_nj1', name:'Ninja Kidz 6â9J',               code:'DoN1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(7,'5-8')   },
+    { id:'dob2',   name:'Fortgeschritten: Polysport 5â8', code:'DoB2', time:'17:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(5,'5-8')   },
+    { id:'doc2',   name:'Fortgeschritten: Polysport 9â12',code:'DoC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(4,'9-12')  },
+    { id:'dod1',   name:'Basic: Polysport 13â15',         code:'DoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(7,'13-15') },
+    { id:'do_njt', name:'Ninja Teen 14â17J',             code:'DoNT', time:'17:30', trainer:'Chris Harmat',     level:'Mittel',     kids: genKids(5,'13-15') },
+    { id:'dod2',   name:'Fortgeschritten: Polysport 13â15',code:'DoD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
     { id:'do_kt',  name:'Kids Team',                     code:'DoKT', time:'18:30', trainer:'Robin Simon',      level:'Team',       kids: genKids(8,'9-12'), isTeam:true },
     { id:'do_ct',  name:'Comp Team',                     code:'DoCT', time:'19:30', trainer:'Chris Harmat',     level:'Team',       kids: genKids(10,'13-15'),isTeam:true },
   ],
   5: [ // Freitag
-    { id:'fra1',   name:'Basic: Polysport 5–8',           code:'FrA1', time:'15:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(8,'5-8')   },
-    { id:'frc1',   name:'Basic: Polysport 9–12',          code:'FrC1', time:'15:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
-    { id:'fra2',   name:'Fortgeschritten: Polysport 5–8', code:'FrA2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(5,'5-8')   },
-    { id:'frc2',   name:'Fortgeschritten: Polysport 9–12',code:'FrC2', time:'16:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(4,'9-12')  },
-    { id:'frd1',   name:'Basic: Polysport 13–15',         code:'FrD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(6,'13-15') },
-    { id:'frd2',   name:'Fortgeschritten: Polysport 13–15',code:'FrD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
+    { id:'fra1',   name:'Basic: Polysport 5â8',           code:'FrA1', time:'15:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(8,'5-8')   },
+    { id:'frc1',   name:'Basic: Polysport 9â12',          code:'FrC1', time:'15:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'fra2',   name:'Fortgeschritten: Polysport 5â8', code:'FrA2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(5,'5-8')   },
+    { id:'frc2',   name:'Fortgeschritten: Polysport 9â12',code:'FrC2', time:'16:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(4,'9-12')  },
+    { id:'frd1',   name:'Basic: Polysport 13â15',         code:'FrD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(6,'13-15') },
+    { id:'frd2',   name:'Fortgeschritten: Polysport 13â15',code:'FrD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
     { id:'fr_wct', name:'World Chase Tag',               code:'FrWCT',time:'18:00', trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids: genKids(8,'9-12')  },
     { id:'fr_ct',  name:'Comp Team',                     code:'FrCT', time:'19:00', trainer:'Chris Harmat',     level:'Team',       kids: genKids(12,'13-15'),isTeam:true },
   ],
   6: [ // Samstag
-    { id:'sa_km58',  name:'KidsMove 5–8 Jahre',           code:'',     time:'12:30', trainer:'Overground Team',  level:'Alle Stufen',kids: genKids(0,'5-8')   },
-    { id:'sa_km912', name:'KidsMove 9–12 Jahre',          code:'',     time:'14:00', trainer:'Overground Team',  level:'Alle Stufen',kids: genKids(3,'9-12')  },
+    { id:'sa_km58',  name:'KidsMove 5â8 Jahre',           code:'',     time:'12:30', trainer:'Overground Team',  level:'Alle Stufen',kids: genKids(0,'5-8')   },
+    { id:'sa_km912', name:'KidsMove 9â12 Jahre',          code:'',     time:'14:00', trainer:'Overground Team',  level:'Alle Stufen',kids: genKids(3,'9-12')  },
     { id:'sa_wct',   name:'World Chase Tag',             code:'SaWCT',time:'13:00', trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids: genKids(6,'9-12')  },
   ],
 };
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // STATE
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 let S = {
   day: null,
   course: null,
@@ -574,8 +574,8 @@ let S = {
   data: {},
   cfg: {
     courses: {}, kids: {}, order: {}, skills: {},
-    trainers: ['Agrena Schuler','Chris Harmat','Diego Heubeck','Julia Menz / Anja Rüfenacht',
-               'Loki Pacheco-Taylor','Lukas Daum','Mathis Rüsch','Overground Team','Robin Simon'],
+    trainers: ['Agrena Schuler','Chris Harmat','Diego Heubeck','Julia Menz / Anja RÃ¼fenacht',
+               'Loki Pacheco-Taylor','Lukas Daum','Mathis RÃ¼sch','Overground Team','Robin Simon'],
     myName: '',
   },
   adminTab: 'day_1',
@@ -584,17 +584,17 @@ let S = {
   coachData: null,
 };
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // PERSIST
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 function persist()    { try { localStorage.setItem('og_sp_v2',  JSON.stringify(S.data)); } catch(_) {} }
 function persistCfg() { try { localStorage.setItem('og_sp_cfg', JSON.stringify(S.cfg));  } catch(_) {} }
 function hydrate()    { try { const d = localStorage.getItem('og_sp_v2');  if (d) S.data = JSON.parse(d); } catch(_) {} }
 function hydrateCfg() { try { const d = localStorage.getItem('og_sp_cfg'); if (d) S.cfg  = JSON.parse(d); } catch(_) {} }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // CONFIG HELPERS
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 function getCoursesForDay(jsDay) {
   const defaults = (COURSES[jsDay] || []).map(c => {
     const ov  = S.cfg.courses?.[c.id] || {};
@@ -614,16 +614,16 @@ function getCourseById(id) {
 }
 function activeData() { return S.coachMode ? S.coachData : S.data; }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // RENDER: FIXED DAYS
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 const DAY_NAMES  = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const DAY_DE     = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 
 function renderDayRow() {
   const row = document.getElementById('days-row');
   row.innerHTML = '';
-  // Show Mon–Sun in week order: 1,2,3,4,5,6,0
+  // Show MonâSun in week order: 1,2,3,4,5,6,0
   const order = [1,2,3,4,5,6,0];
   order.forEach(jsDay => {
     const courses = getCoursesForDay(jsDay);
@@ -637,22 +637,22 @@ function renderDayRow() {
   });
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // RENDER: COURSES (with drag & drop)
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 let dragSrcId = null;
 function renderCourses() {
   const container = document.getElementById('courses-list');
   const label     = document.getElementById('courses-day-label');
   if (S.day === null) {
-    label.textContent = 'Tag wählen';
-    container.innerHTML = '<div class="empty-state"><span class="emoji">📅</span><p>Wähle einen Tag,<br>um die Kurse zu sehen</p></div>';
+    label.textContent = 'Tag wÃ¤hlen';
+    container.innerHTML = '<div class="empty-state"><span class="emoji">ð</span><p>WÃ¤hle einen Tag,<br>um die Kurse zu sehen</p></div>';
     return;
   }
   label.textContent = DAY_DE[S.day];
   const courses = getCoursesForDay(S.day);
   if (!courses.length) {
-    container.innerHTML = '<div class="empty-state"><span class="emoji">😴</span><p>Keine Kurse an diesem Tag</p></div>';
+    container.innerHTML = '<div class="empty-state"><span class="emoji">ð´</span><p>Keine Kurse an diesem Tag</p></div>';
     return;
   }
   container.innerHTML = '';
@@ -667,10 +667,10 @@ function renderCourses() {
     if (!c.kids.length) {
       card.className = `course-card${isTeam?' team-card':''} empty`;
       card.innerHTML = `
-        <span class="drag-handle">⠿</span>
+        <span class="drag-handle">â ¿</span>
         <div class="cc-left">
           <div class="course-name">${c.name}${c.code?`<span class="course-code">${c.code}</span>`:''}</div>
-          <div class="course-meta">${c.time} Uhr · Keine Anmeldungen</div>
+          <div class="course-meta">${c.time} Uhr Â· Keine Anmeldungen</div>
         </div>
         <span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span>`;
     } else {
@@ -678,14 +678,14 @@ function renderCourses() {
       const allDone = done === c.kids.length;
       let badgeCls = '', badgeTxt = `${c.kids.length} Kinder`;
       if (done > 0 && !allDone) { badgeCls='partial'; badgeTxt=`${done}/${c.kids.length} fertig`; }
-      if (allDone)              { badgeCls='done';    badgeTxt='✓ Alle fertig'; }
+      if (allDone)              { badgeCls='done';    badgeTxt='â Alle fertig'; }
       card.className = `course-card${isTeam?' team-card':''}`;
       card.innerHTML = `
-        <span class="drag-handle">⠿</span>
+        <span class="drag-handle">â ¿</span>
         <div class="cc-left">
           <div class="course-name">${c.name}${c.code?`<span class="course-code">${c.code}</span>`:''}</div>
-          <div class="course-meta">${c.time} Uhr · ${c.kids.length} Kinder</div>
-          <div class="trainer-tag">👤 ${c.trainer}</div>
+          <div class="course-meta">${c.time} Uhr Â· ${c.kids.length} Kinder</div>
+          <div class="trainer-tag">ð¤ ${c.trainer}</div>
         </div>
         <div class="cc-right">
           <span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span>
@@ -711,21 +711,21 @@ function reorderCourses(jsDay, fromId, toId) {
   if (fi===-1||ti===-1) return;
   const upd=[...order]; upd.splice(fi,1); upd.splice(ti,0,fromId);
   if (!S.cfg.order) S.cfg.order={};
-  S.cfg.order[jsDay]=upd; persistCfg(); renderCourses(); showToast('↕ Reihenfolge gespeichert');
+  S.cfg.order[jsDay]=upd; persistCfg(); renderCourses(); showToast('â Reihenfolge gespeichert');
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // OPEN COURSE / KID
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 function openCourse(c) {
   S.course = c;
   const isTeam = c.isTeam || isTeamCourse(c.name);
   const lv = isTeam ? 'team' : lvClass(c.level);
   const el = document.getElementById('ch-kids');
   el.className = `course-header${isTeam?' lv-team':''}`;
-  document.getElementById('ch-name').textContent = c.name + (c.code ? ` · ${c.code}` : '');
-  document.getElementById('ch-meta').textContent = `${c.time} Uhr · ${c.kids.length} Kinder`;
-  document.getElementById('ch-trainer').innerHTML = `<span>👤 ${c.trainer}</span><span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span>`;
+  document.getElementById('ch-name').textContent = c.name + (c.code ? ` Â· ${c.code}` : '');
+  document.getElementById('ch-meta').textContent = `${c.time} Uhr Â· ${c.kids.length} Kinder`;
+  document.getElementById('ch-trainer').innerHTML = `<span>ð¤ ${c.trainer}</span><span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span>`;
   const skills = courseSkills(c.name);
   const list   = document.getElementById('kids-list');
   const ad     = activeData();
@@ -759,8 +759,8 @@ function openKid(kid) {
   header.className = `course-header${isTeam?' lv-team':''}`;
   header.innerHTML = `
     <h2>${kid}</h2>
-    <div class="ch-meta">${c.name}${c.code?' · '+c.code:''} · ${c.time} Uhr</div>
-    <div class="ch-trainer"><span>👤 ${c.trainer}</span><span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span></div>`;
+    <div class="ch-meta">${c.name}${c.code?' Â· '+c.code:''} Â· ${c.time} Uhr</div>
+    <div class="ch-trainer"><span>ð¤ ${c.trainer}</span><span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span></div>`;
   const list = document.getElementById('skills-list');
   list.innerHTML = '';
   skills.forEach(sk => {
@@ -768,12 +768,12 @@ function openKid(kid) {
     const val   = saved !== undefined ? saved : (sk.type==='rating' ? 3 : sk.min);
     const block = document.createElement('div');
     block.className = 'skill-block';
-    const typeLabel = sk.type==='time' ? '⏱ Zeit' : sk.type==='count' ? '🔁 Anzahl' : sk.type==='rating' ? '⭐ Bewertung' : '📏 Maß';
+    const typeLabel = sk.type==='time' ? 'â± Zeit' : sk.type==='count' ? 'ð Anzahl' : sk.type==='rating' ? 'â­ Bewertung' : 'ð MaÃ';
     if (sk.type === 'rating') {
       const iv = Math.round(val);
       block.innerHTML = `
         <div class="skill-block-header"><div><div class="skill-title">${sk.label}</div><div class="skill-type-label">${typeLabel}</div></div><div class="value-display" id="v-${sk.id}">${iv}</div></div>
-        <div class="star-row" id="stars-${sk.id}">${[1,2,3,4,5].map(n=>`<span class="star ${n<=iv?'on':''}" onclick="${S.coachMode?'':  `setSta`r('${sk.id}',${n})`}">★</span>`).join('')}</div>
+        <div class="star-row" id="stars-${sk.id}">${[1,2,3,4,5].map(n=>`<span class="star ${n<=iv?'on':''}" onclick="${S.coachMode?'':  `setStar('${sk.id}',${n})`}">â</span>`).join('')}</div>
         <input type="hidden" id="sl-${sk.id}" value="${iv}">`;
     } else {
       block.innerHTML = `
@@ -808,9 +808,9 @@ function updVal(id, v) {
   if (sk) document.getElementById('v-'+id).textContent = fmtVal(sk,v);
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // SAVE KID
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 function saveKid(complete) {
   if (S.coachMode) return;
   const c=S.course, kid=S.kid;
@@ -820,14 +820,14 @@ function saveKid(complete) {
   skills.forEach(sk=>{const el=document.getElementById('sl-'+sk.id);if(el) vals[sk.id]=parseFloat(el.value);});
   S.data[c.id][kid]={skills:vals,notes:document.getElementById('kid-notes').value,completed:complete,savedAt:new Date().toISOString()};
   persist();
-  showToast(complete?`✓ ${kid} abgeschlossen!`:'💾 Gespeichert');
+  showToast(complete?`â ${kid} abgeschlossen!`:'ð¾ Gespeichert');
   setTimeout(()=>showScreen('kids'),400);
   setTimeout(()=>openCourse(c),450);
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // ADMIN PANEL
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 const ADMIN_DAYS = [1,2,3,4,5,6,0];
 const ADMIN_DAY_NAMES = {1:'Mo',2:'Di',3:'Mi',4:'Do',5:'Fr',6:'Sa',0:'So'};
 
@@ -852,7 +852,7 @@ function renderAdminTabs() {
   // Headcoach tab
   const hc = document.createElement('button');
   hc.className='admin-tab'+(S.adminTab==='headcoach'?' active':'');
-  hc.textContent='👑 Headcoach';
+  hc.textContent='ð Headcoach';
   hc.onclick=()=>{ S.adminTab='headcoach'; renderAdminTabs(); renderAdminContent(); };
   bar.appendChild(hc);
 }
@@ -878,12 +878,12 @@ function renderAdminCourses(el, jsDay) {
     wrap.innerHTML = `
       <div class="admin-course${isOpen?' expanded':''}" id="ac-${c.id}">
         <div class="admin-course-row" onclick="toggleAdminCourse('${c.id}')">
-          <span class="admin-drag-handle">⠿</span>
+          <span class="admin-drag-handle">â ¿</span>
           <div class="admin-course-info">
-            <div class="admin-course-name">${c.name}${c.code?` · <span style="color:var(--muted);font-size:11px">${c.code}</span>`:''}</div>
-            <div class="admin-course-sub">⏰ ${c.time} · 👤 ${c.trainer} · 👦 ${c.kids.length} Kinder</div>
+            <div class="admin-course-name">${c.name}${c.code?` Â· <span style="color:var(--muted);font-size:11px">${c.code}</span>`:''}</div>
+            <div class="admin-course-sub">â° ${c.time} Â· ð¤ ${c.trainer} Â· ð¦ ${c.kids.length} Kinder</div>
           </div>
-          <span class="admin-expand-icon">▼</span>
+          <span class="admin-expand-icon">â¼</span>
         </div>
         ${isOpen ? buildAdminCourseBody(c, jsDay) : ''}
       </div>`;
@@ -900,11 +900,11 @@ function renderAdminCourses(el, jsDay) {
 function buildAdminCourseBody(c, jsDay) {
   const kids = c.kids;
   const trainerOpts = (S.cfg.trainers||[]).map(t=>`<option value="${escHtml(t)}" ${c.trainer===t?'selected':''}>${escHtml(t)}</option>`).join('');
-  const kidsRows = kids.map((k,i)=>`<div class="kid-row"><input class="kid-row-input" value="${escHtml(k)}" id="kid-inp-${c.id}-${i}" placeholder="Name"><button class="kid-del-btn" onclick="delKid('${c.id}',${i})">✕</button></div>`).join('');
+  const kidsRows = kids.map((k,i)=>`<div class="kid-row"><input class="kid-row-input" value="${escHtml(k)}" id="kid-inp-${c.id}-${i}" placeholder="Name"><button class="kid-del-btn" onclick="delKid('${c.id}',${i})">â</button></div>`).join('');
   return `<div class="admin-course-body">
     <div class="field-row-2col">
       <div class="field-row"><label class="field-label">Kursname</label><input class="field-input" id="cf-name-${c.id}" value="${escHtml(c.name)}"></div>
-      <div class="field-row"><label class="field-label">Kürzel</label><input class="field-input" id="cf-code-${c.id}" value="${escHtml(c.code||'')}"></div>
+      <div class="field-row"><label class="field-label">KÃ¼rzel</label><input class="field-input" id="cf-code-${c.id}" value="${escHtml(c.code||'')}"></div>
     </div>
     <div class="field-row-2col">
       <div class="field-row"><label class="field-label">Uhrzeit</label><input class="field-input" id="cf-time-${c.id}" value="${escHtml(c.time)}"></div>
@@ -924,8 +924,8 @@ function buildAdminCourseBody(c, jsDay) {
     </div>
     <div class="kids-editor-title">Kinder <span id="kc-${c.id}">${kids.length}</span></div>
     <div id="kids-editor-${c.id}">${kidsRows}</div>
-    <button class="add-kid-btn" onclick="addKid('${c.id}')">＋ Kind hinzufügen</button>
-    <button class="save-course-btn" onclick="saveCourseConfig('${c.id}')">✓ Änderungen speichern</button>
+    <button class="add-kid-btn" onclick="addKid('${c.id}')">ï¼ Kind hinzufÃ¼gen</button>
+    <button class="save-course-btn" onclick="saveCourseConfig('${c.id}')">â Ãnderungen speichern</button>
   </div>`;
 }
 
@@ -955,7 +955,7 @@ function delKid(courseId, idx) {
 }
 function updateKidsEditor(courseId, kids) {
   const c=document.getElementById(`kids-editor-${courseId}`); if(!c) return;
-  c.innerHTML=kids.map((k,i)=>`<div class="kid-row"><input class="kid-row-input" value="${escHtml(k)}" id="kid-inp-${courseId}-${i}" placeholder="Name"><button class="kid-del-btn" onclick="delKid('${courseId}',${i})">✕</button></div>`).join('');
+  c.innerHTML=kids.map((k,i)=>`<div class="kid-row"><input class="kid-row-input" value="${escHtml(k)}" id="kid-inp-${courseId}-${i}" placeholder="Name"><button class="kid-del-btn" onclick="delKid('${courseId}',${i})">â</button></div>`).join('');
   const cnt=document.getElementById(`kc-${courseId}`); if(cnt) cnt.textContent=kids.length;
 }
 function saveCourseConfig(courseId) {
@@ -972,26 +972,26 @@ function saveCourseConfig(courseId) {
   const kids=Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
   if (!S.cfg.kids) S.cfg.kids={};
   S.cfg.kids[courseId]=kids;
-  persistCfg(); showToast('✓ Änderungen gespeichert'); S._adminExpanded=null; renderAdminContent();
+  persistCfg(); showToast('â Ãnderungen gespeichert'); S._adminExpanded=null; renderAdminContent();
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // HEADCOACH PANEL
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 function renderHeadcoachPanel(el) {
   const trainers = S.cfg.trainers || [];
   el.innerHTML = `
     <div class="section-title" style="margin-top:4px">Trainer-Liste</div>
-    <div id="trainer-chips">${trainers.map((t,i)=>`<span class="trainer-chip">${escHtml(t)}<button class="trainer-chip-del" onclick="removeTrainer(${i})">✕</button></span>`).join('')}</div>
+    <div id="trainer-chips">${trainers.map((t,i)=>`<span class="trainer-chip">${escHtml(t)}<button class="trainer-chip-del" onclick="removeTrainer(${i})">â</button></span>`).join('')}</div>
     <div class="kid-row" style="margin-top:12px">
-      <input class="field-input" id="new-trainer-input" placeholder="Neuen Trainer hinzufügen..." style="margin:0">
+      <input class="field-input" id="new-trainer-input" placeholder="Neuen Trainer hinzufÃ¼gen..." style="margin:0">
       <button class="save-course-btn" onclick="addTrainer()" style="width:auto;margin:0;padding:10px 16px;flex-shrink:0">+</button>
     </div>
     <div class="section-title" style="margin-top:20px">Coach-Ansicht laden</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Füge den Teilen-Link eines Trainers ein, um dessen Stand als Headcoach einzusehen.</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">FÃ¼ge den Teilen-Link eines Trainers ein, um dessen Stand als Headcoach einzusehen.</p>
     <textarea class="notes-area" id="coach-link-input" placeholder="https://...#share=..." style="min-height:60px;font-size:12px;font-family:monospace"></textarea>
-    <button class="save-course-btn" style="margin-top:8px" onclick="loadCoachLink()">👁 Coach-Ansicht laden</button>
-    <div class="section-title" style="margin-top:20px">Abschluss-Übersicht</div>
+    <button class="save-course-btn" style="margin-top:8px" onclick="loadCoachLink()">ð Coach-Ansicht laden</button>
+    <div class="section-title" style="margin-top:20px">Abschluss-Ãbersicht</div>
     <div id="completion-overview"></div>`;
   renderCompletionOverview();
 }
@@ -1025,9 +1025,9 @@ function renderCompletionOverview() {
   el.innerHTML = html || '<p style="font-size:13px;color:var(--muted)">Noch keine Daten.</p>';
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // SHARE / COACH VIEW
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 function openSharePanel() {
   document.getElementById('share-name-input').value = S.cfg.myName||'';
   document.getElementById('share-url-preview').style.display='none';
@@ -1047,12 +1047,12 @@ function generateShareLink() {
   const box=document.getElementById('share-url-preview');
   box.textContent=url.slice(0,120)+'...';
   box.style.display='block';
-  navigator.clipboard.writeText(url).then(()=>showToast('🔗 Link kopiert!')).catch(()=>showToast('Link generiert – manuell kopieren'));
+  navigator.clipboard.writeText(url).then(()=>showToast('ð Link kopiert!')).catch(()=>showToast('Link generiert â manuell kopieren'));
 }
 function loadCoachLink() {
   const raw=(document.getElementById('coach-link-input')?.value||'').trim();
   const hash=raw.includes('#share=') ? raw.split('#share=')[1] : raw;
-  if (!hash) { showToast('Bitte Link einfügen'); return; }
+  if (!hash) { showToast('Bitte Link einfÃ¼gen'); return; }
   try {
     const payload=JSON.parse(decodeURIComponent(escape(atob(hash))));
     if (payload.v===2 && payload.data) {
@@ -1060,9 +1060,9 @@ function loadCoachLink() {
       document.getElementById('coach-banner').style.display='flex';
       document.getElementById('cb-trainer').textContent=payload.trainer||'Trainer';
       document.getElementById('cb-time').textContent=new Date(payload.ts).toLocaleString('de-CH');
-      showToast('👁 Coach-Ansicht geladen'); showScreen('week'); renderDayRow(); renderCourses();
+      showToast('ð Coach-Ansicht geladen'); showScreen('week'); renderDayRow(); renderCourses();
     }
-  } catch(e) { showToast('Ungültiger Link'); }
+  } catch(e) { showToast('UngÃ¸ltiger Link'); }
 }
 function clearCoachView() {
   S.coachMode=false; S.coachData=null;
@@ -1083,9 +1083,9 @@ function checkShareLink() {
   } catch(e) {}
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // PRINT / PDF
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 const TEAM_COL='#ef4444';
 const LV_COL={basis:'#3b82f6',mittel:'#f59e0b',fort:'#f97316',alle:'#8b5cf6',team:TEAM_COL};
 const OG_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="44" height="44"><defs><radialGradient id="pg" cx="35%" cy="28%" r="65%"><stop offset="0%" stop-color="#aaa"/><stop offset="45%" stop-color="#555"/><stop offset="100%" stop-color="#111"/></radialGradient><clipPath id="pc"><circle cx="50" cy="50" r="47"/></clipPath></defs><circle cx="50" cy="50" r="47" fill="url(#pg)"/><path d="M 18 52 Q 24 26 50 24 Q 74 22 82 46 Q 86 64 68 74 Q 44 82 22 68 Q 10 58 18 52 Z" fill="#080808" opacity="0.72" clip-path="url(#pc)"/><path d="M 24 36 Q 44 18 68 24 Q 82 30 84 46" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/></svg>`;
@@ -1096,7 +1096,7 @@ function printKlass() {
   const col=isTeam?TEAM_COL:(LV_COL[lvClass(c.level)]||'#888');
   const ad=activeData();
   const win=window.open('','_blank');
-  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OG SkillsPass – ${c.name}</title>
+  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OG Skills-Pass â ${c.name}</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -1133,42 +1133,42 @@ function printKlass() {
     const sCl=kd?.completed?'done':kd?'partial':'open';
     html+=`<div class="page">
   <div class="top-bar">
-    <div class="og-brand">${OG_SVG}<div class="og-wordmark">OG <span>SkillsPass</span></div></div>
+    <div class="og-brand">${OG_SVG}<div class="og-wordmark">OG <span>Skills-Pass</span></div></div>
     <span class="eyebrow">Overground Basel</span>
   </div>
   <div class="divider"></div>
   <div class="kid-name">${kid}</div>
-  <div class="meta">${c.name}${c.code?' · '+c.code:''} · ${c.time} Uhr · 👤 ${c.trainer}</div>
+  <div class="meta">${c.name}${c.code?' Â· '+c.code:''} Â· ${c.time} Uhr Â· ð¤ ${c.trainer}</div>
   <div class="tags"><span class="lv-tag">${isTeam?'Team':c.level}</span><span class="status ${sCl}">${sTx}</span></div>
   <div class="skills-grid">`;
     sk.forEach(s=>{
       const v=kd?.skills?.[s.id];
       let disp;
-      if (v===undefined) disp=`<span class="sk-val" style="color:#ccc">–</span>`;
+      if (v===undefined) disp=`<span class="sk-val" style="color:#ccc">â</span>`;
       else if (s.type==='rating') {
         const n=Math.round(v);
-        disp=`<span class="sk-stars">${'<span class="on">★</span>'.repeat(n)+'<span class="off">★</span>'.repeat(5-n)}</span>`;
+        disp=`<span class="sk-stars">${'<span class="on">â</span>'.repeat(n)+'<span class="off">â</span>'.repeat(5-n)}</span>`;
       } else disp=`<span class="sk-val">${fmtVal(s,v)}</span>`;
       html+=`<div class="sk"><span class="sk-name">${s.label}</span>${disp}</div>`;
     });
     html+=`</div>`;
     if (kd?.notes) html+=`<div class="notes-box"><strong>Notizen:</strong> ${kd.notes}</div>`;
-    html+=`<div class="footer">OG SkillsPass · Overground Basel</div></div>`;
+    html+=`<div class="footer">OG Skills-Pass Â· Overground Basel</div></div>`;
   });
   html+=`</body></html>`;
   win.document.write(html); win.document.close(); setTimeout(()=>win.print(),400);
 }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // HELPERS
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 function escHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function showScreen(name) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-'+name).classList.add('active'); window.scrollTo(0,0); }
 function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
 
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 // INIT
-// ─────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââ
 hydrate();
 hydrateCfg();
 checkShareLink();
