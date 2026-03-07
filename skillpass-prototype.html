@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>OG Skillpass</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --accent: #f5c800;
+    --accent2: #ff5a1f;
+    --text: #f0f0f0;
+    --muted: #777;
+    --green: #4ade80;
+    --border: #2e2e2e;
+    --radius: 14px;
+    --basis: #3b82f6;
+    --mittel: #f59e0b;
+    --fort: #ef4444;
+    --alle: #8b5cf6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .logo span { color: var(--text); }
+  .header-sub { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .sync-badge {
+    background: #0a2a18; border: 1px solid var(--green); color: var(--green);
+    font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; white-space: nowrap;
+  }
+
+  /* SCREENS */
+  .screen { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* WEEK NAV */
+  .week-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px; margin-top: 20px; }
+  .week-nav button {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; transition: background .2s;
+  }
+  .week-nav button:hover { background: var(--accent); color: #000; }
+  .week-nav .week-range { font-size: 14px; color: var(--muted); min-width: 160px; text-align: center; }
+
+  /* DAY GRID */
+  .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 28px; }
+  .day-btn {
+    background: var(--surface2); border: 2px solid var(--border); border-radius: 10px;
+    color: var(--text); padding: 10px 4px; cursor: pointer; text-align: center;
+    transition: all .2s; font-family: 'DM Sans', sans-serif;
+  }
+  .day-btn .day-name { font-size: 10px; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .day-btn .day-num { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; display: block; }
+  .day-btn.active { border-color: var(--accent); background: #2a2200; color: var(--accent); }
+  .day-btn.today .day-num { color: var(--accent2); }
+  .day-btn:hover:not(.active) { border-color: var(--accent); opacity: .8; }
+  .day-btn.has-courses::after { content: '•'; display: block; font-size: 10px; color: var(--green); margin-top: 2px; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+
+  /* COURSE CARD */
+  .course-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: all .2s; position: relative; overflow: hidden;
+  }
+  .course-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border);
+  }
+  .course-card.lv-basis::before    { background: var(--basis); }
+  .course-card.lv-mittel::before   { background: var(--mittel); }
+  .course-card.lv-fort::before     { background: var(--fort); }
+  .course-card.lv-alle::before     { background: var(--alle); }
+  .course-card:hover { border-color: var(--accent); background: var(--surface2); }
+  .course-card.empty { opacity: .4; cursor: default; }
+  .course-card.empty:hover { border-color: var(--border); background: var(--surface); }
+
+  .cc-left { flex: 1; min-width: 0; }
+  .cc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-left: 12px; }
+  .course-name { font-weight: 600; font-size: 15px; }
+  .course-code { font-size: 12px; color: var(--muted); margin-left: 6px; letter-spacing: .5px; }
+  .course-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .trainer-tag { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* LEVEL BADGE */
+  .lv-badge {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+    padding: 3px 8px; border-radius: 20px; white-space: nowrap;
+  }
+  .lv-badge.basis  { background: #0a1a3a; color: var(--basis); border: 1px solid var(--basis); }
+  .lv-badge.mittel { background: #2a1a00; color: var(--mittel); border: 1px solid var(--mittel); }
+  .lv-badge.fort   { background: #2a0a0a; color: var(--fort); border: 1px solid var(--fort); }
+  .lv-badge.alle   { background: #1a0a2a; color: var(--alle); border: 1px solid var(--alle); }
+
+  .course-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .course-badge.done    { background: #0a2a18; border-color: var(--green); color: var(--green); }
+  .course-badge.partial { background: #2a1a00; border-color: var(--accent); color: var(--accent); }
+
+  /* BACK BTN */
+  .back-btn {
+    display: flex; align-items: center; gap: 8px; background: none; border: none;
+    color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 14px;
+    cursor: pointer; padding: 0; margin-bottom: 20px; opacity: .8; transition: opacity .2s;
+  }
+  .back-btn:hover { opacity: 1; }
+
+  /* COURSE HEADER (screen 2 & 3) */
+  .course-header {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 20px; position: relative; overflow: hidden;
+  }
+  .course-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  .course-header.lv-basis::before  { background: var(--basis); }
+  .course-header.lv-mittel::before { background: var(--mittel); }
+  .course-header.lv-fort::before   { background: var(--fort); }
+  .course-header.lv-alle::before   { background: var(--alle); }
+  .course-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; color: var(--accent); }
+  .course-header .ch-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .course-header .ch-trainer { font-size: 12px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 8px; }
+
+  /* KID CARD */
+  .kid-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; margin-bottom: 12px; cursor: pointer; transition: all .2s;
+  }
+  .kid-card:hover { border-color: var(--accent); }
+  .kid-card.completed { border-color: var(--green); }
+  .kid-header { display: flex; align-items: center; justify-content: space-between; }
+  .kid-name { font-weight: 600; font-size: 16px; }
+  .kid-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+  .kid-status.open        { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .kid-status.in-progress { background: #2a1a00; color: var(--accent); border: 1px solid var(--accent); }
+  .kid-status.done        { background: #0a2a18; color: var(--green); border: 1px solid var(--green); }
+
+  .skill-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .skill-chip { font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .skill-chip.filled { background: #1a2a10; color: #86efac; border-color: #4ade8044; }
+
+  /* SKILL BLOCK */
+  .skill-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+  .skill-block-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .skill-title { font-weight: 600; font-size: 15px; }
+  .skill-type-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .value-display { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); line-height: 1; min-width: 80px; text-align: right; }
+
+  /* SLIDER */
+  .slider-wrap { padding: 8px 0; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 6px; background: var(--border); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 0 4px #f5c80022; transition: box-shadow .2s; }
+  input[type=range]:active::-webkit-slider-thumb { box-shadow: 0 0 0 8px #f5c80033; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* STAR RATING */
+  .star-row { display: flex; gap: 6px; align-items: center; padding: 6px 0; }
+  .star { font-size: 32px; cursor: pointer; color: var(--border); transition: color .15s, transform .1s; user-select: none; line-height: 1; }
+  .star.on { color: var(--accent); }
+  .star:hover { transform: scale(1.15); }
+
+  /* BUTTONS */
+  .btn { display: block; width: 100%; padding: 16px; border-radius: var(--radius); border: none; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; text-align: center; letter-spacing: .5px; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #ffd700; }
+  .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-success { background: var(--green); color: #000; }
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+
+  /* NOTES */
+  .notes-area { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 12px; resize: none; min-height: 80px; outline: none; transition: border-color .2s; }
+  .notes-area:focus { border-color: var(--accent); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--green); color: #000; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* PDF BTN */
+  .pdf-btn { position: fixed; bottom: 24px; right: 20px; background: var(--accent); color: #000; border: none; border-radius: 50px; padding: 14px 22px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 20px #f5c80044; display: flex; align-items: center; gap: 8px; z-index: 50; transition: all .2s; }
+  .pdf-btn:hover { background: #ffd700; transform: translateY(-2px); }
+
+  @media print {
+    .header, .back-btn, .btn-row, .pdf-btn { display: none !important; }
+    .screen { display: block !important; padding: 0; }
+    body { background: white; color: black; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">OG <span>Skillpass</span></div>
+    <div class="header-sub">Overground Basel · Coach Tool</div>
+  </div>
+  <div class="sync-badge">✓ Sportsnow sync</div>
+</div>
+
+<!-- SCREEN 1: WOCHE -->
+<div class="screen active" id="screen-week">
+  <div class="week-nav">
+    <button onclick="changeWeek(-1)">‹</button>
+    <div class="week-range" id="week-range-label"></div>
+    <button onclick="changeWeek(1)">›</button>
+  </div>
+  <div class="days-grid" id="days-grid"></div>
+  <div class="section-title" id="courses-day-label">Tag wählen</div>
+  <div id="courses-list"></div>
+</div>
+
+<!-- SCREEN 2: KINDER -->
+<div class="screen" id="screen-kids">
+  <button class="back-btn" onclick="showScreen('week')">← Zurück zu Kursen</button>
+  <div class="course-header" id="ch-kids">
+    <h2 id="ch-name"></h2>
+    <div class="ch-meta" id="ch-meta"></div>
+    <div class="ch-trainer" id="ch-trainer"></div>
+  </div>
+  <div class="section-title">Kinder</div>
+  <div id="kids-list"></div>
+  <button class="pdf-btn" onclick="printKlass()">🖨 Klasse drucken</button>
+</div>
+
+<!-- SCREEN 3: KIND DETAIL -->
+<div class="screen" id="screen-kid">
+  <button class="back-btn" onclick="showScreen('kids')">← Zurück zur Klasse</button>
+  <div class="course-header" id="ch-kid"></div>
+  <div class="section-title">Skills bewerten</div>
+  <div id="skills-list"></div>
+  <div style="margin-bottom:14px">
+    <div class="section-title">Notizen</div>
+    <textarea class="notes-area" id="kid-notes" placeholder="Bemerkungen zum Kind..."></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-outline" onclick="saveKid(false)">💾 Zwischenspeichern</button>
+    <button class="btn btn-success" onclick="saveKid(true)">✓ Abgeschlossen</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// NAME POOLS FOR PLACEHOLDER KINDER
+// ─────────────────────────────────────────────
+const POOL_YOUNG = ['Luca','Mia','Noah','Emma','Ben','Lea','Felix','Anna','Tim','Sara','Max','Lena','Jonas','Clara','Finn'];
+const POOL_MID   = ['Marco','Jana','Niklas','Leonie','Pascal','Alina','Simon','Marlene','Tanja','Patrick','Sophie','Fabian'];
+const POOL_TEEN  = ['Alexander','Valentina','Tobias','Melissa','Raphael','Jasmin','Sandra','David','Laura','Dominik','Selina'];
+const POOL_SN    = ['M.','K.','H.','S.','W.','B.','F.','R.','T.','P.','L.','G.'];
+
+function genKids(n, age) {
+  if (n <= 0) return [];
+  const pool = age === '5-8' ? POOL_YOUNG : age === '13-15' ? POOL_TEEN : POOL_MID;
+  return Array.from({length: n}, (_, i) => pool[i % pool.length] + ' ' + POOL_SN[i % POOL_SN.length]);
+}
+
+// ─────────────────────────────────────────────
+// SKILLS BY COURSE TYPE
+// ─────────────────────────────────────────────
+const SKILLS = {
+  polysport: [
+    { id: 'weitsprung',  label: 'Weitsprung',   type: 'mass',   unit: 'cm', min: 0,   max: 300, step: 5   },
+    { id: 'hochsprung',  label: 'Hochsprung',   type: 'mass',   unit: 'cm', min: 0,   max: 150, step: 5   },
+    { id: 'sprint_20m',  label: '20m Sprint',   type: 'time',   unit: 's',  min: 2.0, max: 8.0, step: 0.1 },
+    { id: 'liegestuetze',label: 'Liegestütze',  type: 'count',  unit: 'Wdh',min: 0,   max: 50,  step: 1   },
+    { id: 'balance_s',   label: 'Balance',      type: 'time',   unit: 's',  min: 0,   max: 60,  step: 1   },
+  ],
+  akrobatik: [
+    { id: 'rolle_vw',    label: 'Rolle vorwärts',  type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'handstand',   label: 'Handstand',        type: 'time',   unit: 's',  min: 0, max: 60, step: 1 },
+    { id: 'rad',         label: 'Rad',              type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'koordination',label: 'Koordination',     type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+  ],
+  parkour: [
+    { id: 'precision',   label: 'Precision Jump', type: 'mass',   unit: 'cm', min: 0,   max: 250, step: 5   },
+    { id: 'balance_pk',  label: 'Balance Beam',   type: 'time',   unit: 's',  min: 0,   max: 60,  step: 1   },
+    { id: 'vault',       label: 'Vault Technik',  type: 'rating', unit: '/5', min: 1,   max: 5,   step: 1   },
+    { id: 'lauf_30m',    label: '30m Lauf',       type: 'time',   unit: 's',  min: 3.0, max: 10.0,step: 0.1 },
+  ],
+  grappling: [
+    { id: 'technik',     label: 'Technik',    type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'kraft',       label: 'Kraft',      type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'ausdauer',    label: 'Ausdauer',   type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'taktik',      label: 'Taktik',     type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+  ],
+  default: [
+    { id: 'technik',     label: 'Technik',      type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'koordination',label: 'Koordination', type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'einsatz',     label: 'Einsatz',      type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id: 'fortschritt', label: 'Fortschritt',  type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+  ],
+};
+
+function courseType(name) {
+  const n = name.toLowerCase();
+  if (n.includes('polysport')) return 'polysport';
+  if (n.includes('akrobatik')) return 'akrobatik';
+  if (n.includes('parkour') || n.includes('freerun')) return 'parkour';
+  if (n.includes('grappling')) return 'grappling';
+  return 'default';
+}
+
+function courseSkills(name) { return SKILLS[courseType(name)]; }
+
+function lvClass(level) {
+  if (!level) return 'alle';
+  const l = level.toLowerCase();
+  if (l === 'basis') return 'basis';
+  if (l === 'mittel') return 'mittel';
+  if (l.includes('fort')) return 'fort';
+  return 'alle';
+}
+
+// ─────────────────────────────────────────────
+// KURSDATEN (Sportsnow Overground Basel, März 2026)
+// MoB1: echte Teilnehmerliste; andere: Sportsnow-Anmeldezahlen
+// ─────────────────────────────────────────────
+const COURSES = {
+  // SONNTAG
+  0: [
+    { id:'so_pk10',    name:'Parkour Einsteiger 10–13J', code:'',      time:'11:30', trainer:'Chris Harmat',              level:'Basis',       kids: genKids(4,  '9-12')  },
+    { id:'so_pk14',    name:'Parkour Einsteiger 14–18J', code:'',      time:'14:00', trainer:'Chris Harmat',              level:'Basis',       kids: genKids(3,  '13-15') },
+    { id:'so_grapp',   name:'Öko-Grappling',             code:'',      time:'14:00', trainer:'Loki Pacheco-Taylor',       level:'Alle Stufen', kids: genKids(0,  '9-12')  },
+  ],
+  // MONTAG
+  1: [
+    { id:'mob1', name:'Basic: Polysport 5–8',          code:'MoB1', time:'15:30', trainer:'Agrena Schuler',   level:'Basis',
+      kids:['Aedan Ferry','Anouk Weber','Caetano Frisoli','Emil Frei','Janosh Weber','Lydia Ros','Naomi Ros','Niccolò Frei','Niklas Adam'] },
+    { id:'mob2', name:'Fortgeschritten: Polysport 5–8', code:'MoB2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',      kids: genKids(3,  '5-8')   },
+    { id:'moc1', name:'Basic: Polysport 9–12',          code:'MoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',       kids: genKids(5,  '9-12')  },
+    { id:'mod1', name:'Basic: Polysport 13–15',         code:'MoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',       kids: genKids(1,  '13-15') },
+    { id:'mod2', name:'Fortgeschritten: Polysport 13–15',code:'MoD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',      kids: genKids(2,  '13-15') },
+    { id:'moc2', name:'Fortgeschritten: Polysport 9–12', code:'MoC2',time:'18:30', trainer:'Lukas Daum',       level:'Mittel',      kids: genKids(12, '9-12')  },
+  ],
+  // DIENSTAG
+  2: [
+    { id:'dib1',  name:'Basic: Polysport 5–8',           code:'DiB1',  time:'16:30', trainer:'Robin Simon',               level:'Basis',       kids: genKids(5,  '5-8')   },
+    { id:'dik1',  name:'Akrobatik',                       code:'DiK1',  time:'16:30', trainer:'Mathis Rüsch',              level:'Basis',       kids: genKids(8,  '9-12')  },
+    { id:'dic1',  name:'Basic: Polysport 9–12',           code:'DiC1',  time:'16:30', trainer:'Lukas Daum',                level:'Basis',       kids: genKids(6,  '9-12')  },
+    { id:'dib2',  name:'Fortgeschritten: Polysport 5–8',  code:'DiB2',  time:'17:30', trainer:'Agrena Schuler',            level:'Mittel',      kids: genKids(4,  '5-8')   },
+    { id:'dic2',  name:'Fortgeschritten: Polysport 9–12', code:'DiC2',  time:'17:30', trainer:'Lukas Daum',                level:'Mittel',      kids: genKids(5,  '9-12')  },
+    { id:'did1',  name:'Basic: Polysport 13–15',          code:'DiD1',  time:'17:30', trainer:'Diego Heubeck',             level:'Basis',       kids: genKids(7,  '13-15') },
+    { id:'did2',  name:'Fortgeschritten: Polysport 13–15',code:'DiD2',  time:'18:30', trainer:'Diego Heubeck',             level:'Mittel',      kids: genKids(5,  '13-15') },
+    { id:'dipm1', name:'Basic: Girls Parkour',            code:'DiPM1', time:'18:30', trainer:'Julia Menz / Anja Rüfenacht',level:'Alle Stufen',kids: genKids(5,  '9-12')  },
+  ],
+  // MITTWOCH
+  3: [
+    { id:'mic1',  name:'Basic: Polysport 9–12',           code:'MiC1',  time:'16:30', trainer:'Lukas Daum',    level:'Basis',       kids: genKids(6,  '9-12')  },
+    { id:'mic2',  name:'Fortgeschritten: Polysport 9–12', code:'MiC2',  time:'17:30', trainer:'Lukas Daum',    level:'Mittel',      kids: genKids(5,  '9-12')  },
+    { id:'mid1',  name:'Basic: Polysport 13–15',          code:'MiD1',  time:'18:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(4,  '13-15') },
+    { id:'mid2',  name:'Fortgeschritten: Polysport 13–15',code:'MiD2',  time:'18:30', trainer:'Diego Heubeck', level:'Mittel',      kids: genKids(3,  '13-15') },
+  ],
+  // DONNERSTAG
+  4: [
+    { id:'dob1',  name:'Basic: Polysport 5–8',            code:'DoB1',  time:'16:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(4,  '5-8')   },
+    { id:'doc1',  name:'Basic: Polysport 9–12',           code:'DoC1',  time:'16:30', trainer:'Lukas Daum',    level:'Basis',       kids: genKids(6,  '9-12')  },
+    { id:'dob2',  name:'Fortgeschritten: Polysport 5–8',  code:'DoB2',  time:'17:30', trainer:'Agrena Schuler',level:'Mittel',      kids: genKids(5,  '5-8')   },
+    { id:'doc2',  name:'Fortgeschritten: Polysport 9–12', code:'DoC2',  time:'17:30', trainer:'Lukas Daum',    level:'Mittel',      kids: genKids(4,  '9-12')  },
+    { id:'dod1',  name:'Basic: Polysport 13–15',          code:'DoD1',  time:'17:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(7,  '13-15') },
+    { id:'dod2',  name:'Fortgeschritten: Polysport 13–15',code:'DoD2',  time:'18:30', trainer:'Diego Heubeck', level:'Mittel',      kids: genKids(3,  '13-15') },
+  ],
+  // FREITAG
+  5: [
+    { id:'fra1',  name:'Basic: Polysport 5–8',            code:'FrA1',  time:'15:30', trainer:'Robin Simon',   level:'Basis',       kids: genKids(8,  '5-8')   },
+    { id:'frc1',  name:'Basic: Polysport 9–12',           code:'FrC1',  time:'15:30', trainer:'Lukas Daum',    level:'Basis',       kids: genKids(6,  '9-12')  },
+    { id:'fra2',  name:'Fortgeschritten: Polysport 5–8',  code:'FrA2',  time:'16:30', trainer:'Agrena Schuler',level:'Mittel',      kids: genKids(5,  '5-8')   },
+    { id:'frc2',  name:'Fortgeschritten: Polysport 9–12', code:'FrC2',  time:'16:30', trainer:'Lukas Daum',    level:'Mittel',      kids: genKids(4,  '9-12')  },
+    { id:'frd1',  name:'Basic: Polysport 13–15',          code:'FrD1',  time:'17:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(6,  '13-15') },
+    { id:'frd2',  name:'Fortgeschritten: Polysport 13–15',code:'FrD2',  time:'17:30', trainer:'Diego Heubeck', level:'Mittel',      kids: genKids(3,  '13-15') },
+  ],
+  // SAMSTAG
+  6: [
+    { id:'sa_km58',  name:'KidsMove 5–8 Jahre',  code:'', time:'12:30', trainer:'Overground Team', level:'Alle Stufen', kids: genKids(0, '5-8')  },
+    { id:'sa_km912', name:'KidsMove 9–12 Jahre', code:'', time:'14:00', trainer:'Overground Team', level:'Alle Stufen', kids: genKids(3, '9-12') },
+  ],
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let S = {
+  weekOffset: 0,
+  day: null,
+  course: null,
+  kid: null,
+  data: {},   // data[courseId][kidName] = { skills:{}, notes:'', completed:false }
+};
+
+// ─────────────────────────────────────────────
+// LOCALSTORAGE
+// ─────────────────────────────────────────────
+function persist() { try { localStorage.setItem('og_sp_v2', JSON.stringify(S.data)); } catch(_) {} }
+function hydrate()  { try { const d = localStorage.getItem('og_sp_v2'); if (d) S.data = JSON.parse(d); } catch(_) {} }
+
+// ─────────────────────────────────────────────
+// WEEK UTILS
+// ─────────────────────────────────────────────
+function getMonday(off = 0) {
+  const d = new Date();
+  const day = d.getDay();
+  d.setDate(d.getDate() - day + (day === 0 ? -6 : 1) + off * 7);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function fmtDate(d) { return d.toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit' }); }
+function changeWeek(dir) { S.weekOffset += dir; S.day = null; renderWeek(); }
+
+// ─────────────────────────────────────────────
+// RENDER WEEK
+// ─────────────────────────────────────────────
+function renderWeek() {
+  const mon = getMonday(S.weekOffset);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  document.getElementById('week-range-label').textContent = `${fmtDate(mon)} – ${fmtDate(sun)}`;
+
+  const DAY_NAMES = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    const jsDay = d.getDay();
+    const courses = COURSES[jsDay] || [];
+    const hasCourses = courses.some(c => c.kids.length > 0);
+    const isToday = d.getTime() === today.getTime();
+    const isSel   = S.day && d.getTime() === S.day.getTime();
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (isToday ? ' today' : '') + (isSel ? ' active' : '') + (hasCourses ? ' has-courses' : '');
+    btn.innerHTML = `<span class="day-name">${DAY_NAMES[i]}</span><span class="day-num">${d.getDate()}</span>`;
+    btn.onclick = () => { S.day = d; renderWeek(); renderCourses(); };
+    grid.appendChild(btn);
+  }
+  renderCourses();
+}
+
+// ─────────────────────────────────────────────
+// RENDER COURSES
+// ─────────────────────────────────────────────
+function renderCourses() {
+  const container = document.getElementById('courses-list');
+  const label     = document.getElementById('courses-day-label');
+
+  if (!S.day) {
+    label.textContent = 'Tag wählen';
+    container.innerHTML = '<div class="empty-state"><span class="emoji">📅</span><p>Wähle einen Tag,<br>um die Kurse zu sehen</p></div>';
+    return;
+  }
+
+  const jsDay = S.day.getDay();
+  const DAY_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  label.textContent = `${DAY_DE[jsDay]}, ${fmtDate(S.day)}`;
+
+  const courses = COURSES[jsDay] || [];
+  if (courses.length === 0) {
+    container.innerHTML = '<div class="empty-state"><span class="emoji">😴</span><p>Keine Kurse an diesem Tag</p></div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  courses.forEach(c => {
+    const card = document.createElement('div');
+    const lv   = lvClass(c.level);
+    const kids = c.kids;
+
+    if (kids.length === 0) {
+      card.className = `course-card lv-${lv} empty`;
+      card.innerHTML = `
+        <div class="cc-left">
+          <div class="course-name">${c.name}${c.code ? `<span class="course-code">${c.code}</span>` : ''}</div>
+          <div class="course-meta">${c.time} Uhr · Keine Anmeldungen</div>
+        </div>
+        <span class="lv-badge ${lv}">${c.level}</span>`;
+      container.appendChild(card);
+      return;
+    }
+
+    const done   = kids.filter(k => S.data[c.id]?.[k]?.completed).length;
+    const hasAny = kids.some(k => S.data[c.id]?.[k]);
+    const allDone = done === kids.length;
+
+    let badgeCls = '', badgeTxt = `${kids.length} Kinder`;
+    if (done > 0 && !allDone) { badgeCls = 'partial'; badgeTxt = `${done}/${kids.length} fertig`; }
+    if (allDone)              { badgeCls = 'done';    badgeTxt = '✓ Alle fertig'; }
+
+    card.className = `course-card lv-${lv}`;
+    card.innerHTML = `
+      <div class="cc-left">
+        <div class="course-name">${c.name}${c.code ? `<span class="course-code">${c.code}</span>` : ''}</div>
+        <div class="course-meta">${c.time} Uhr · ${kids.length} Kinder</div>
+        <div class="trainer-tag">👤 ${c.trainer}</div>
+      </div>
+      <div class="cc-right">
+        <span class="lv-badge ${lv}">${c.level}</span>
+        <span class="course-badge ${badgeCls}">${badgeTxt}</span>
+      </div>`;
+    card.onclick = () => openCourse(c);
+    container.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────
+// OPEN COURSE
+// ─────────────────────────────────────────────
+function openCourse(c) {
+  S.course = c;
+  const lv = lvClass(c.level);
+  document.getElementById('ch-kids').className = `course-header lv-${lv}`;
+  document.getElementById('ch-name').textContent = c.name + (c.code ? ` · ${c.code}` : '');
+  document.getElementById('ch-meta').textContent = `${c.time} Uhr · ${c.kids.length} Kinder · ${fmtDate(S.day)}`;
+  document.getElementById('ch-trainer').innerHTML = `<span>👤 ${c.trainer}</span><span class="lv-badge ${lv}" style="display:inline-block">${c.level}</span>`;
+
+  const skills = courseSkills(c.name);
+  const list   = document.getElementById('kids-list');
+  list.innerHTML = '';
+
+  c.kids.forEach(kid => {
+    const kd  = S.data[c.id]?.[kid];
+    const cnt = kd ? Object.keys(kd.skills || {}).length : 0;
+    let sCls = 'open', sTxt = 'Offen';
+    if (kd?.completed)   { sCls = 'done';        sTxt = 'Fertig';   }
+    else if (cnt > 0)    { sCls = 'in-progress';  sTxt = 'In Arbeit'; }
+
+    const card = document.createElement('div');
+    card.className = 'kid-card' + (kd?.completed ? ' completed' : '');
+    card.innerHTML = `
+      <div class="kid-header">
+        <span class="kid-name">${kid}</span>
+        <span class="kid-status ${sCls}">${sTxt}</span>
+      </div>
+      <div class="skill-chips">
+        ${skills.map(s => `<span class="skill-chip ${kd?.skills?.[s.id] !== undefined ? 'filled' : ''}">${s.label}</span>`).join('')}
+      </div>`;
+    card.onclick = () => openKid(kid);
+    list.appendChild(card);
+  });
+  showScreen('kids');
+}
+
+// ─────────────────────────────────────────────
+// OPEN KID
+// ─────────────────────────────────────────────
+function openKid(kid) {
+  S.kid = kid;
+  const c      = S.course;
+  const kd     = S.data[c.id]?.[kid];
+  const skills = courseSkills(c.name);
+  const lv     = lvClass(c.level);
+
+  const header = document.getElementById('ch-kid');
+  header.className = `course-header lv-${lv}`;
+  header.innerHTML = `
+    <h2>${kid}</h2>
+    <div class="ch-meta">${c.name}${c.code ? ' · ' + c.code : ''} · ${c.time} Uhr · ${fmtDate(S.day)}</div>
+    <div class="ch-trainer"><span>👤 ${c.trainer}</span><span class="lv-badge ${lv}" style="display:inline-block">${c.level}</span></div>`;
+
+  const list = document.getElementById('skills-list');
+  list.innerHTML = '';
+
+  skills.forEach(sk => {
+    const saved = kd?.skills?.[sk.id];
+    const val   = saved !== undefined ? saved : (sk.type === 'rating' ? 3 : sk.min);
+    const block = document.createElement('div');
+    block.className = 'skill-block';
+
+    const typeLabel = sk.type === 'time' ? '⏱ Zeit' : sk.type === 'count' ? '🔁 Anzahl' : sk.type === 'rating' ? '⭐ Bewertung' : '📏 Maß';
+
+    if (sk.type === 'rating') {
+      const intVal = Math.round(val);
+      block.innerHTML = `
+        <div class="skill-block-header">
+          <div><div class="skill-title">${sk.label}</div><div class="skill-type-label">${typeLabel}</div></div>
+          <div class="value-display" id="v-${sk.id}">${intVal}</div>
+        </div>
+        <div class="star-row" id="stars-${sk.id}">
+          ${[1,2,3,4,5].map(n => `<span class="star ${n <= intVal ? 'on' : ''}" onclick="setStar('${sk.id}',${n})">★</span>`).join('')}
+        </div>
+        <input type="hidden" id="sl-${sk.id}" value="${intVal}">`;
+    } else {
+      block.innerHTML = `
+        <div class="skill-block-header">
+          <div><div class="skill-title">${sk.label}</div><div class="skill-type-label">${typeLabel}</div></div>
+          <div class="value-display" id="v-${sk.id}">${fmtVal(sk, val)}</div>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="sl-${sk.id}" min="${sk.min}" max="${sk.max}" step="${sk.step}" value="${val}" oninput="updVal('${sk.id}',this.value)">
+          <div class="slider-labels"><span>${sk.min} ${sk.unit}</span><span>${sk.max} ${sk.unit}</span></div>
+        </div>`;
+    }
+    list.appendChild(block);
+  });
+
+  document.getElementById('kid-notes').value = kd?.notes || '';
+  showScreen('kid');
+}
+
+function setStar(id, n) {
+  document.getElementById('stars-' + id).querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < n));
+  document.getElementById('v-' + id).textContent = n;
+  document.getElementById('sl-' + id).value = n;
+}
+
+function fmtVal(sk, v) {
+  const n = parseFloat(v);
+  if (sk.type === 'time') return n.toFixed(1) + ' ' + sk.unit;
+  return Math.round(n) + ' ' + sk.unit;
+}
+
+function updVal(id, v) {
+  const c  = S.course;
+  const sk = courseSkills(c?.name || '').find(s => s.id === id);
+  if (sk) document.getElementById('v-' + id).textContent = fmtVal(sk, v);
+}
+
+// ─────────────────────────────────────────────
+// SAVE
+// ─────────────────────────────────────────────
+function saveKid(complete) {
+  const c   = S.course;
+  const kid = S.kid;
+  const skills = courseSkills(c.name);
+  if (!S.data[c.id]) S.data[c.id] = {};
+
+  const vals = {};
+  skills.forEach(sk => {
+    const el = document.getElementById('sl-' + sk.id);
+    if (el) vals[sk.id] = parseFloat(el.value);
+  });
+
+  S.data[c.id][kid] = { skills: vals, notes: document.getElementById('kid-notes').value, completed: complete, savedAt: new Date().toISOString() };
+  persist();
+  showToast(complete ? `✓ ${kid} abgeschlossen!` : '💾 Gespeichert');
+  setTimeout(() => showScreen('kids'), 400);
+  setTimeout(() => openCourse(c), 450);
+}
+
+// ─────────────────────────────────────────────
+// PRINT / PDF
+// ─────────────────────────────────────────────
+const LV_COLOR = { basis:'#3b82f6', mittel:'#f59e0b', fort:'#ef4444', alle:'#8b5cf6' };
+
+function printKlass() {
+  const c = S.course;
+  const sk = courseSkills(c.name);
+  const col = LV_COLOR[lvClass(c.level)] || '#888';
+
+  const win = window.open('', '_blank');
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>OG Skillpass – ${c.name}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap');
+  body { font-family:'DM Sans',Arial,sans-serif; margin:0; background:#f5f5f5; }
+  .page { width:210mm; min-height:148mm; padding:14mm 18mm; box-sizing:border-box; page-break-after:always;
+    background:white; border-left:7px solid ${col}; margin:0 auto 10mm; }
+  .top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .eyebrow { font-size:10px; letter-spacing:2px; color:#aaa; text-transform:uppercase; }
+  .og-logo { font-family:'Bebas Neue',sans-serif; font-size:20px; color:#f5c800; letter-spacing:2px; }
+  .og-logo span { color:#111; }
+  h1 { font-family:'Bebas Neue',sans-serif; font-size:34px; margin:4px 0 2px; letter-spacing:1px; }
+  .meta { font-size:12px; color:#666; margin-bottom:8px; }
+  .tags { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+  .lv-tag { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700;
+    border:1.5px solid ${col}; color:${col}; text-transform:uppercase; letter-spacing:.5px; }
+  .status { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+  .status.done    { background:#dcfce7; color:#166534; }
+  .status.partial { background:#fef9c3; color:#713f12; }
+  .status.open    { background:#f1f5f9; color:#475569; }
+  hr { border:none; border-top:1px solid #e5e7eb; margin:10px 0; }
+  .skills { display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; }
+  .sk { display:flex; align-items:center; justify-content:space-between; padding:8px 12px;
+    background:#f8fafc; border-radius:6px; border-left:3px solid ${col}; }
+  .sk-name { font-size:13px; font-weight:600; }
+  .sk-val  { font-family:'Bebas Neue',sans-serif; font-size:22px; }
+  .sk-stars { color:#f5c800; font-size:15px; }
+  .notes { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px;
+    font-size:12px; margin-top:10px; }
+  @media print { body { margin:0; background:white; } .page { page-break-after:always; } }
+</style></head><body>`;
+
+  c.kids.forEach(kid => {
+    const kd  = S.data[c.id]?.[kid];
+    const sTx = kd?.completed ? 'Abgeschlossen' : kd ? 'In Arbeit' : 'Offen';
+    const sCl = kd?.completed ? 'done' : kd ? 'partial' : 'open';
+
+    html += `<div class="page">
+  <div class="top">
+    <span class="eyebrow">OG Skillpass · ${fmtDate(S.day)}</span>
+    <span class="og-logo">OG <span>Skillpass</span></span>
+  </div>
+  <h1>${kid}</h1>
+  <div class="meta">${c.name}${c.code ? ' · ' + c.code : ''} · ${c.time} Uhr · 👤 ${c.trainer}</div>
+  <div class="tags">
+    <span class="lv-tag">${c.level}</span>
+    <span class="status ${sCl}">${sTx}</span>
+  </div>
+  <hr>
+  <div class="skills">`;
+
+    sk.forEach(s => {
+      const v = kd?.skills?.[s.id];
+      let disp = '–';
+      if (v !== undefined) {
+        if (s.type === 'rating') { disp = '<span class="sk-stars">' + '★'.repeat(Math.round(v)) + '☆'.repeat(5 - Math.round(v)) + '</span>'; }
+        else { disp = `<span class="sk-val">${fmtVal(s, v)}</span>`; }
+      } else { disp = `<span class="sk-val" style="color:#ccc">–</span>`; }
+      html += `<div class="sk"><span class="sk-name">${s.label}</span>${disp}</div>`;
+    });
+
+    html += `</div>`;
+    if (kd?.notes) html += `<div class="notes"><strong>Notizen:</strong> ${kd.notes}</div>`;
+    html += `</div>`;
+  });
+
+  html += `</body></html>`;
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 350);
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+hydrate();
+const _today = new Date();
+S.day = new Date(_today.setHours(0, 0, 0, 0));
+renderWeek();
+</script>
+</body>
+</html>
