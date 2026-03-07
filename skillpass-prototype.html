@@ -1,170 +1,159 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>OG Skillpass</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OG SkillsPass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
-
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --accent: #f5c800;
-    --accent2: #ff5a1f;
-    --text: #f0f0f0;
-    --muted: #777;
-    --green: #4ade80;
-    --border: #2e2e2e;
-    --radius: 14px;
-    --basis: #3b82f6;
-    --mittel: #f59e0b;
-    --fort: #ef4444;
-    --alle: #8b5cf6;
+    --bg: #0e0e0e; --surface: #1a1a1a; --surface2: #242424; --surface3: #2e2e2e;
+    --border: #333; --text: #f0f0f0; --muted: #777; --accent: #f5c800;
+    --green: #4ade80; --red: #ef4444; --blue: #3b82f6;
+    --radius: 12px;
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  html, body { height: 100%; background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif; }
+  body { max-width: 480px; margin: 0 auto; min-height: 100vh; }
 
   /* HEADER */
   .header {
-    background: var(--surface);
-    border-bottom: 2px solid var(--accent);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: sticky; top: 0; z-index: 100;
+    background: #0e0e0eee; backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
   }
-  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
-  .logo span { color: var(--text); }
-  .header-sub { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
-  .sync-badge {
-    background: #0a2a18; border: 1px solid var(--green); color: var(--green);
-    font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; white-space: nowrap;
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; line-height: 1; }
+  .logo span { color: var(--accent); }
+  .header-sub { font-size: 11px; color: var(--muted); letter-spacing: .5px; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    width: 36px; height: 36px; border-radius: 8px; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .admin-btn { font-size: 18px; }
+
+  /* COACH BANNER */
+  .coach-banner {
+    background: linear-gradient(135deg, #1a0a30, #0d1a3f);
+    border-bottom: 1px solid #4f46e5;
+    padding: 10px 16px; display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #a78bfa;
+  }
+  .coach-banner strong { color: #c4b5fd; }
+  .coach-banner-close {
+    margin-left: auto; background: none; border: none; color: #a78bfa;
+    cursor: pointer; font-size: 16px; line-height: 1;
   }
 
   /* SCREENS */
-  .screen { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+  .screen { display: none; padding: 16px; min-height: calc(100vh - 57px); }
   .screen.active { display: block; }
 
-  /* WEEK NAV */
-  .week-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px; margin-top: 20px; }
-  .week-nav button {
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-    width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; transition: background .2s;
+  /* DAY BUTTONS */
+  .days-row {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 18px;
   }
-  .week-nav button:hover { background: var(--accent); color: #000; }
-  .week-nav .week-range { font-size: 14px; color: var(--muted); min-width: 160px; text-align: center; }
-
-  /* DAY GRID */
-  .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 28px; }
   .day-btn {
-    background: var(--surface2); border: 2px solid var(--border); border-radius: 10px;
-    color: var(--text); padding: 10px 4px; cursor: pointer; text-align: center;
-    transition: all .2s; font-family: 'DM Sans', sans-serif;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 2px; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; transition: all .2s;
   }
-  .day-btn .day-name { font-size: 10px; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
-  .day-btn .day-num { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; display: block; }
-  .day-btn.active { border-color: var(--accent); background: #2a2200; color: var(--accent); }
-  .day-btn.today .day-num { color: var(--accent2); }
-  .day-btn:hover:not(.active) { border-color: var(--accent); opacity: .8; }
-  .day-btn.has-courses::after { content: '•'; display: block; font-size: 10px; color: var(--green); margin-top: 2px; }
+  .day-btn .day-name { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .5px; }
+  .day-btn .day-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background .2s; }
+  .day-btn.has-courses .day-dot { background: var(--accent); }
+  .day-btn.active { background: #2a2200; border-color: var(--accent); }
+  .day-btn.active .day-name { color: var(--accent); }
 
   /* SECTION TITLE */
   .section-title {
-    font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px;
-    color: var(--muted); text-transform: uppercase; margin-bottom: 12px;
-    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 10px; margin-top: 4px;
   }
 
-  /* COURSE CARD */
+  /* COURSE CARDS */
   .course-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 16px 18px; margin-bottom: 10px; cursor: pointer;
-    display: flex; align-items: center; justify-content: space-between;
-    transition: all .2s; position: relative; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+    border-radius: var(--radius); padding: 14px 14px 14px 12px; margin-bottom: 10px;
+    cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 10px;
+    position: relative;
   }
-  .course-card::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--border);
+  .course-card:hover { border-color: var(--accent); background: #1e1e0d; }
+  .course-card.empty { opacity: .55; cursor: default; }
+  .course-card.team-card { border-left-color: var(--red); background: var(--surface); }
+  .course-card.team-card:hover { background: #1a0606; border-color: var(--red); }
+  .course-card.dragging { opacity: .4; border: 2px dashed var(--accent); }
+  .course-card.drag-over { border-color: var(--accent); background: #1e1e0d; transform: scale(1.01); }
+  .drag-handle {
+    color: var(--muted); font-size: 18px; cursor: grab; flex-shrink: 0;
+    user-select: none; opacity: 0; transition: opacity .2s;
   }
-  .course-card.lv-basis::before    { background: var(--basis); }
-  .course-card.lv-mittel::before   { background: var(--mittel); }
-  .course-card.lv-fort::before     { background: var(--fort); }
-  .course-card.lv-alle::before     { background: var(--alle); }
-  .course-card:hover { border-color: var(--accent); background: var(--surface2); }
-  .course-card.empty { opacity: .4; cursor: default; }
-  .course-card.empty:hover { border-color: var(--border); background: var(--surface); }
-
+  .course-card:hover .drag-handle { opacity: 1; }
+  .drag-handle:active { cursor: grabbing; }
   .cc-left { flex: 1; min-width: 0; }
-  .cc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-left: 12px; }
-  .course-name { font-weight: 600; font-size: 15px; }
-  .course-code { font-size: 12px; color: var(--muted); margin-left: 6px; letter-spacing: .5px; }
+  .cc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+  .course-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .course-code { font-size: 11px; color: var(--muted); margin-left: 6px; font-weight: 400; }
   .course-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
-  .trainer-tag { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .trainer-tag { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-  /* LEVEL BADGE */
+  /* BADGES */
   .lv-badge {
-    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-    padding: 3px 8px; border-radius: 20px; white-space: nowrap;
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .5px; white-space: nowrap;
   }
-  .lv-badge.basis  { background: #0a1a3a; color: var(--basis); border: 1px solid var(--basis); }
-  .lv-badge.mittel { background: #2a1a00; color: var(--mittel); border: 1px solid var(--mittel); }
-  .lv-badge.fort   { background: #2a0a0a; color: var(--fort); border: 1px solid var(--fort); }
-  .lv-badge.alle   { background: #1a0a2a; color: var(--alle); border: 1px solid var(--alle); }
+  .lv-badge.basis { background:#1a2050; color:#93c5fd; border:1px solid #3b82f622; }
+  .lv-badge.mittel { background:#2a1800; color:#fbbf24; border:1px solid #f59e0b22; }
+  .lv-badge.fort  { background:#1a0a00; color:#fb923c; border:1px solid #f9731622; }
+  .lv-badge.alle  { background:#1e1030; color:#c084fc; border:1px solid #a855f722; }
+  .lv-badge.team  { background:#2a0808; color:#f87171; border:1px solid #ef444422; }
+  .course-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px;
+    font-weight: 600; background: var(--surface3); color: var(--muted); white-space: nowrap;
+  }
+  .course-badge.partial { background:#2a2000; color:#fbbf24; }
+  .course-badge.done    { background:#0a2010; color:#4ade80; }
 
-  .course-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--muted); white-space: nowrap; }
-  .course-badge.done    { background: #0a2a18; border-color: var(--green); color: var(--green); }
-  .course-badge.partial { background: #2a1a00; border-color: var(--accent); color: var(--accent); }
+  /* COURSE HEADER */
+  .course-header {
+    border-left: 4px solid var(--accent); padding: 16px; background: var(--surface);
+    border-radius: var(--radius); margin-bottom: 16px;
+  }
+  .course-header.lv-team { border-left-color: var(--red); }
+  .course-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .ch-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .ch-trainer { font-size: 13px; color: var(--muted); margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
   /* BACK BTN */
   .back-btn {
-    display: flex; align-items: center; gap: 8px; background: none; border: none;
-    color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 14px;
-    cursor: pointer; padding: 0; margin-bottom: 20px; opacity: .8; transition: opacity .2s;
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; cursor: pointer; margin-bottom: 14px; display: inline-flex;
+    align-items: center; gap: 6px; transition: all .2s;
   }
-  .back-btn:hover { opacity: 1; }
+  .back-btn:hover { border-color: var(--text); color: var(--text); }
 
-  /* COURSE HEADER (screen 2 & 3) */
-  .course-header {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 16px 18px; margin-bottom: 20px; position: relative; overflow: hidden;
-  }
-  .course-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-  .course-header.lv-basis::before  { background: var(--basis); }
-  .course-header.lv-mittel::before { background: var(--mittel); }
-  .course-header.lv-fort::before   { background: var(--fort); }
-  .course-header.lv-alle::before   { background: var(--alle); }
-  .course-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; color: var(--accent); }
-  .course-header .ch-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .course-header .ch-trainer { font-size: 12px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 8px; }
-
-  /* KID CARD */
+  /* KID CARDS */
   .kid-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 18px; margin-bottom: 12px; cursor: pointer; transition: all .2s;
+    padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all .2s;
   }
-  .kid-card:hover { border-color: var(--accent); }
-  .kid-card.completed { border-color: var(--green); }
-  .kid-header { display: flex; align-items: center; justify-content: space-between; }
-  .kid-name { font-weight: 600; font-size: 16px; }
-  .kid-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
-  .kid-status.open        { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-  .kid-status.in-progress { background: #2a1a00; color: var(--accent); border: 1px solid var(--accent); }
-  .kid-status.done        { background: #0a2a18; color: var(--green); border: 1px solid var(--green); }
-
-  .skill-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-  .skill-chip { font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .kid-card:hover { border-color: var(--accent); background: #1e1e0d; }
+  .kid-card.completed { opacity: .7; border-color: #4ade8044; }
+  .kid-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .kid-name { font-weight: 600; font-size: 15px; }
+  .kid-status { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .kid-status.open        { background: var(--surface3); color: var(--muted); }
+  .kid-status.in-progress { background: #2a2000; color: #fbbf24; }
+  .kid-status.done        { background: #0a2010; color: #4ade80; }
+  .skill-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+  .skill-chip { font-size: 11px; padding: 2px 7px; border-radius: 5px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
   .skill-chip.filled { background: #1a2a10; color: #86efac; border-color: #4ade8044; }
 
   /* SKILL BLOCK */
@@ -176,14 +165,13 @@
 
   /* SLIDER */
   .slider-wrap { padding: 8px 0; }
-  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 6px; background: var(--border); outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 0 4px #f5c80022; transition: box-shadow .2s; }
-  input[type=range]:active::-webkit-slider-thumb { box-shadow: 0 0 0 8px #f5c80033; }
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 6px; background: var(--border); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 0 4px #f5c80022; }
   .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
 
   /* STAR RATING */
   .star-row { display: flex; gap: 6px; align-items: center; padding: 6px 0; }
-  .star { font-size: 32px; cursor: pointer; color: var(--border); transition: color .15s, transform .1s; user-select: none; line-height: 1; }
+  .star { font-size: 32px; cursor: pointer; color: var(--border); transition: color .15s, transform .1s; user-select: none; }
   .star.on { color: var(--accent); }
   .star:hover { transform: scale(1.15); }
 
@@ -201,7 +189,7 @@
   .notes-area:focus { border-color: var(--accent); }
 
   /* TOAST */
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--green); color: #000; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; white-space: nowrap; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--green); color: #000; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; z-index: 9999; transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   /* EMPTY STATE */
@@ -213,8 +201,91 @@
   .pdf-btn { position: fixed; bottom: 24px; right: 20px; background: var(--accent); color: #000; border: none; border-radius: 50px; padding: 14px 22px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 20px #f5c80044; display: flex; align-items: center; gap: 8px; z-index: 50; transition: all .2s; }
   .pdf-btn:hover { background: #ffd700; transform: translateY(-2px); }
 
+  /* ── ADMIN SCREEN ─────────────────────── */
+  .admin-tab-bar { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
+  .admin-tab-bar::-webkit-scrollbar { display: none; }
+  .admin-tab {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+    padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    cursor: pointer; white-space: nowrap; transition: all .2s; flex-shrink: 0;
+  }
+  .admin-tab.active { background: #2a2200; border-color: var(--accent); color: var(--accent); }
+
+  .admin-course-wrap { margin-bottom: 8px; }
+  .admin-course { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color .2s; }
+  .admin-course.expanded { border-color: var(--accent); }
+  .admin-course.admin-dragging { opacity: .4; border: 2px dashed var(--accent); }
+  .admin-course.admin-drag-over { border-color: var(--accent); background: #2a2200; }
+
+  .admin-course-row { display: flex; align-items: center; padding: 13px 14px; gap: 10px; cursor: pointer; }
+  .admin-drag-handle { color: var(--muted); font-size: 18px; cursor: grab; flex-shrink: 0; user-select: none; }
+  .admin-course-info { flex: 1; min-width: 0; }
+  .admin-course-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .admin-course-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .admin-expand-icon { color: var(--muted); font-size: 11px; flex-shrink: 0; transition: transform .2s; }
+  .admin-course.expanded .admin-expand-icon { transform: rotate(180deg); }
+  .admin-course-body { padding: 0 14px 14px; border-top: 1px solid var(--border); }
+
+  .field-row { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+  .field-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .field-input, .field-select {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+    padding: 9px 12px; outline: none; width: 100%; transition: border-color .2s;
+  }
+  .field-input:focus, .field-select:focus { border-color: var(--accent); }
+  .field-select { cursor: pointer; -webkit-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23777' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
+  }
+  .field-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+
+  .kids-editor-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 16px; margin-bottom: 8px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .kids-editor-title span { font-size: 11px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); padding: 2px 7px; border-radius: 10px; }
+  .kid-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .kid-row-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 10px; outline: none; }
+  .kid-row-input:focus { border-color: var(--accent); }
+  .kid-del-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; flex-shrink: 0; transition: all .2s; }
+  .kid-del-btn:hover { border-color: var(--red); color: var(--red); }
+  .add-kid-btn { display: flex; align-items: center; gap: 6px; background: none; border: 1px dashed var(--border); color: var(--muted); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; width: 100%; margin-top: 4px; transition: all .2s; }
+  .add-kid-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .save-course-btn { display: block; width: 100%; margin-top: 14px; padding: 10px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s; }
+  .save-course-btn:hover { background: #ffd700; }
+
+  /* SKILLS EDITOR */
+  .skill-edit-row { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .skill-edit-name-row { display: flex; gap: 8px; align-items: center; }
+  .skill-edit-input { flex: 1; background: var(--surface3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 6px 10px; outline: none; }
+  .skill-edit-input:focus { border-color: var(--accent); }
+  .skill-edit-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+
+  /* HEADCOACH SECTION */
+  .trainer-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; margin: 3px; font-size: 13px; }
+  .trainer-chip-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; }
+  .trainer-chip-del:hover { color: var(--red); }
+
+  /* SHARE MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; }
+  .modal {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px; background: var(--surface); border-radius: 20px 20px 0 0;
+    border: 1px solid var(--border); padding: 24px 20px; z-index: 201;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp { from { transform: translateX(-50%) translateY(100%); } to { transform: translateX(-50%) translateY(0); } }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; }
+  .modal-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+  .share-url-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 11px; color: var(--muted); word-break: break-all; font-family: monospace; margin-bottom: 14px; max-height: 60px; overflow: hidden; }
+
+  /* STATS BARS */
+  .stat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .stat-label { font-size: 13px; flex: 0 0 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-bar-bg { flex: 1; background: var(--surface3); border-radius: 4px; height: 8px; }
+  .stat-bar { height: 8px; border-radius: 4px; background: var(--green); transition: width .4s; }
+  .stat-pct { font-size: 12px; color: var(--muted); flex: 0 0 36px; text-align: right; }
+
   @media print {
-    .header, .back-btn, .btn-row, .pdf-btn { display: none !important; }
+    .header, .back-btn, .btn-row, .pdf-btn, .toast, .coach-banner { display: none !important; }
     .screen { display: block !important; padding: 0; }
     body { background: white; color: black; }
   }
@@ -222,27 +293,50 @@
 </head>
 <body>
 
+<!-- ────────────── HEADER ────────────── -->
 <div class="header">
-  <div>
-    <div class="logo">OG <span>Skillpass</span></div>
-    <div class="header-sub">Overground Basel · Coach Tool</div>
+  <div class="header-left">
+    <svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="og-g" cx="35%" cy="28%" r="65%">
+          <stop offset="0%" stop-color="#aaaaaa"/>
+          <stop offset="45%" stop-color="#555555"/>
+          <stop offset="100%" stop-color="#111111"/>
+        </radialGradient>
+        <clipPath id="og-c"><circle cx="50" cy="50" r="47"/></clipPath>
+      </defs>
+      <circle cx="50" cy="50" r="47" fill="url(#og-g)"/>
+      <path d="M 18 52 Q 24 26 50 24 Q 74 22 82 46 Q 86 64 68 74 Q 44 82 22 68 Q 10 58 18 52 Z"
+            fill="#080808" opacity="0.72" clip-path="url(#og-c)"/>
+      <path d="M 24 36 Q 44 18 68 24 Q 82 30 84 46"
+            fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="logo">OG <span>SkillsPass</span></div>
+      <div class="header-sub">Overground Basel · Coach Tool</div>
+    </div>
   </div>
-  <div class="sync-badge">✓ Sportsnow sync</div>
+  <div class="header-right">
+    <button class="icon-btn" onclick="openSharePanel()" title="Stand teilen">🔗</button>
+    <button class="icon-btn admin-btn" onclick="showAdmin()" title="Kurse & Kinder verwalten">⚙</button>
+  </div>
 </div>
 
-<!-- SCREEN 1: WOCHE -->
+<!-- COACH BANNER -->
+<div class="coach-banner" id="coach-banner" style="display:none">
+  👁 Coach-Ansicht &nbsp;·&nbsp; <strong id="cb-trainer"></strong>
+  &nbsp;·&nbsp; <span id="cb-time" style="font-size:11px"></span>
+  <button class="coach-banner-close" onclick="clearCoachView()">✕</button>
+</div>
+
+<!-- ────────────── SCREEN: WOCHE ────────────── -->
 <div class="screen active" id="screen-week">
-  <div class="week-nav">
-    <button onclick="changeWeek(-1)">‹</button>
-    <div class="week-range" id="week-range-label"></div>
-    <button onclick="changeWeek(1)">›</button>
-  </div>
-  <div class="days-grid" id="days-grid"></div>
+  <div class="days-row" id="days-row"></div>
   <div class="section-title" id="courses-day-label">Tag wählen</div>
   <div id="courses-list"></div>
 </div>
 
-<!-- SCREEN 2: KINDER -->
+<!-- ────────────── SCREEN: KINDER ────────────── -->
 <div class="screen" id="screen-kids">
   <button class="back-btn" onclick="showScreen('week')">← Zurück zu Kursen</button>
   <div class="course-header" id="ch-kids">
@@ -255,7 +349,7 @@
   <button class="pdf-btn" onclick="printKlass()">🖨 Klasse drucken</button>
 </div>
 
-<!-- SCREEN 3: KIND DETAIL -->
+<!-- ────────────── SCREEN: KIND DETAIL ────────────── -->
 <div class="screen" id="screen-kid">
   <button class="back-btn" onclick="showScreen('kids')">← Zurück zur Klasse</button>
   <div class="course-header" id="ch-kid"></div>
@@ -271,141 +365,202 @@
   </div>
 </div>
 
+<!-- ────────────── SCREEN: ADMIN ────────────── -->
+<div class="screen" id="screen-admin">
+  <button class="back-btn" onclick="showScreen('week')" style="margin-bottom:14px">← Zurück</button>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--accent);margin-bottom:14px">Kurse verwalten</div>
+  <div class="admin-tab-bar" id="admin-tab-bar"></div>
+  <div id="admin-content"></div>
+</div>
+
+<!-- ────────────── SHARE MODAL ────────────── -->
+<div class="modal-overlay" id="share-overlay" onclick="closeSharePanel()" style="display:none"></div>
+<div class="modal" id="share-modal" style="display:none">
+  <div class="modal-title">Stand teilen</div>
+  <div class="modal-desc">Generiere einen Link mit deinem aktuellen Bewertungsstand. Der Headcoach öffnet den Link und sieht alle Daten – live als Snapshot.</div>
+  <div class="field-row" style="margin-bottom:14px">
+    <label class="field-label">Dein Name (erscheint beim Headcoach)</label>
+    <input class="field-input" id="share-name-input" placeholder="z.B. Chris Harmat">
+  </div>
+  <div class="share-url-box" id="share-url-preview" style="display:none">Generiere Link...</div>
+  <button class="btn btn-primary" onclick="generateShareLink()" style="margin-bottom:8px">🔗 Link generieren & kopieren</button>
+  <button class="btn btn-outline" onclick="closeSharePanel()">Schliessen</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ─────────────────────────────────────────────
-// NAME POOLS FOR PLACEHOLDER KINDER
+// NAME POOLS
 // ─────────────────────────────────────────────
-const POOL_YOUNG = ['Luca','Mia','Noah','Emma','Ben','Lea','Felix','Anna','Tim','Sara','Max','Lena','Jonas','Clara','Finn'];
-const POOL_MID   = ['Marco','Jana','Niklas','Leonie','Pascal','Alina','Simon','Marlene','Tanja','Patrick','Sophie','Fabian'];
-const POOL_TEEN  = ['Alexander','Valentina','Tobias','Melissa','Raphael','Jasmin','Sandra','David','Laura','Dominik','Selina'];
-const POOL_SN    = ['M.','K.','H.','S.','W.','B.','F.','R.','T.','P.','L.','G.'];
-
+const POOL_Y = ['Luca','Mia','Noah','Emma','Ben','Lea','Felix','Anna','Tim','Sara','Max','Lena','Jonas','Clara','Finn'];
+const POOL_M = ['Marco','Jana','Niklas','Leonie','Pascal','Alina','Simon','Marlene','Tanja','Patrick','Sophie','Fabian'];
+const POOL_T = ['Alexander','Valentina','Tobias','Melissa','Raphael','Jasmin','Sandra','David','Laura','Dominik','Selina'];
+const POOL_S = ['M.','K.','H.','S.','W.','B.','F.','R.','T.','P.','L.','G.'];
 function genKids(n, age) {
   if (n <= 0) return [];
-  const pool = age === '5-8' ? POOL_YOUNG : age === '13-15' ? POOL_TEEN : POOL_MID;
-  return Array.from({length: n}, (_, i) => pool[i % pool.length] + ' ' + POOL_SN[i % POOL_SN.length]);
+  const pool = age === '5-8' ? POOL_Y : age === '13-15' ? POOL_T : POOL_M;
+  return Array.from({length: n}, (_, i) => pool[i % pool.length] + ' ' + POOL_S[i % POOL_S.length]);
 }
 
 // ─────────────────────────────────────────────
-// SKILLS BY COURSE TYPE
+// DEFAULT SKILLS BY COURSE TYPE
 // ─────────────────────────────────────────────
-const SKILLS = {
+const DEFAULT_SKILLS = {
   polysport: [
-    { id: 'weitsprung',  label: 'Weitsprung',   type: 'mass',   unit: 'cm', min: 0,   max: 300, step: 5   },
-    { id: 'hochsprung',  label: 'Hochsprung',   type: 'mass',   unit: 'cm', min: 0,   max: 150, step: 5   },
-    { id: 'sprint_20m',  label: '20m Sprint',   type: 'time',   unit: 's',  min: 2.0, max: 8.0, step: 0.1 },
-    { id: 'liegestuetze',label: 'Liegestütze',  type: 'count',  unit: 'Wdh',min: 0,   max: 50,  step: 1   },
-    { id: 'balance_s',   label: 'Balance',      type: 'time',   unit: 's',  min: 0,   max: 60,  step: 1   },
+    { id:'weitsprung',   label:'Weitsprung',    type:'mass',   unit:'cm', min:0,   max:300, step:5   },
+    { id:'hochsprung',   label:'Hochsprung',    type:'mass',   unit:'cm', min:0,   max:150, step:5   },
+    { id:'sprint_20m',   label:'20m Sprint',    type:'time',   unit:'s',  min:2.0, max:8.0, step:0.1 },
+    { id:'liegestuetze', label:'Liegestütze',   type:'count',  unit:'Wdh',min:0,   max:50,  step:1   },
+    { id:'balance',      label:'Balance',       type:'time',   unit:'s',  min:0,   max:60,  step:1   },
   ],
   akrobatik: [
-    { id: 'rolle_vw',    label: 'Rolle vorwärts',  type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'handstand',   label: 'Handstand',        type: 'time',   unit: 's',  min: 0, max: 60, step: 1 },
-    { id: 'rad',         label: 'Rad',              type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'koordination',label: 'Koordination',     type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id:'rolle_vw',     label:'Rolle vorwärts', type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'handstand',    label:'Handstand',      type:'time',   unit:'s',  min:0, max:60, step:1 },
+    { id:'rad',          label:'Rad',            type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'koordination', label:'Koordination',   type:'rating', unit:'/5', min:1, max:5, step:1 },
   ],
   parkour: [
-    { id: 'precision',   label: 'Precision Jump', type: 'mass',   unit: 'cm', min: 0,   max: 250, step: 5   },
-    { id: 'balance_pk',  label: 'Balance Beam',   type: 'time',   unit: 's',  min: 0,   max: 60,  step: 1   },
-    { id: 'vault',       label: 'Vault Technik',  type: 'rating', unit: '/5', min: 1,   max: 5,   step: 1   },
-    { id: 'lauf_30m',    label: '30m Lauf',       type: 'time',   unit: 's',  min: 3.0, max: 10.0,step: 0.1 },
+    { id:'precision',    label:'Precision Jump', type:'mass',   unit:'cm', min:0,   max:250, step:5   },
+    { id:'balance_pk',   label:'Balance Beam',   type:'time',   unit:'s',  min:0,   max:60,  step:1   },
+    { id:'vault',        label:'Vault Technik',  type:'rating', unit:'/5', min:1,   max:5,   step:1   },
+    { id:'lauf_30m',     label:'30m Lauf',       type:'time',   unit:'s',  min:3.0, max:10.0,step:0.1 },
   ],
   grappling: [
-    { id: 'technik',     label: 'Technik',    type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'kraft',       label: 'Kraft',      type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'ausdauer',    label: 'Ausdauer',   type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'taktik',      label: 'Taktik',     type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id:'technik',      label:'Technik',        type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'kraft',        label:'Kraft',          type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'ausdauer',     label:'Ausdauer',       type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'taktik',       label:'Taktik',         type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
+  ninja: [
+    { id:'precision',    label:'Precision Jump', type:'mass',   unit:'cm', min:0,   max:300, step:5   },
+    { id:'hindernislauf',label:'Hindernislauf',  type:'time',   unit:'s',  min:5.0, max:90.0,step:0.5 },
+    { id:'klettern',     label:'Klettern',       type:'rating', unit:'/5', min:1,   max:5,   step:1   },
+    { id:'balance',      label:'Balance',        type:'time',   unit:'s',  min:0,   max:60,  step:1   },
+    { id:'koordination', label:'Koordination',   type:'rating', unit:'/5', min:1,   max:5,   step:1   },
+  ],
+  team: [
+    { id:'technik',      label:'Technik',        type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'kraft',        label:'Kraft',          type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'ausdauer',     label:'Ausdauer',       type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'teamwork',     label:'Teamwork',       type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'performance',  label:'Performance',    type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
+  wct: [
+    { id:'speed',        label:'Speed',          type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'agility',      label:'Agilität',       type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'taktik',       label:'Taktik',         type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'ausdauer',     label:'Ausdauer',       type:'rating', unit:'/5', min:1, max:5, step:1 },
   ],
   default: [
-    { id: 'technik',     label: 'Technik',      type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'koordination',label: 'Koordination', type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'einsatz',     label: 'Einsatz',      type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
-    { id: 'fortschritt', label: 'Fortschritt',  type: 'rating', unit: '/5', min: 1, max: 5, step: 1 },
+    { id:'technik',      label:'Technik',        type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'koordination', label:'Koordination',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'einsatz',      label:'Einsatz',        type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'fortschritt',  label:'Fortschritt',    type:'rating', unit:'/5', min:1, max:5, step:1 },
   ],
 };
 
 function courseType(name) {
-  const n = name.toLowerCase();
-  if (n.includes('polysport')) return 'polysport';
-  if (n.includes('akrobatik')) return 'akrobatik';
+  const n = (name||'').toLowerCase();
+  if (n.includes('polysport'))                      return 'polysport';
+  if (n.includes('akrobatik'))                      return 'akrobatik';
   if (n.includes('parkour') || n.includes('freerun')) return 'parkour';
-  if (n.includes('grappling')) return 'grappling';
+  if (n.includes('grappling'))                      return 'grappling';
+  if (n.includes('ninja'))                          return 'ninja';
+  if (n.includes('chase tag') || n.includes('wct')) return 'wct';
+  if (n.includes('team') || n.includes('comp'))     return 'team';
   return 'default';
 }
-
-function courseSkills(name) { return SKILLS[courseType(name)]; }
-
+function isTeamCourse(name) {
+  const n = (name||'').toLowerCase();
+  return n.includes('kids team') || n.includes('comp team');
+}
+function courseSkills(name) {
+  // Check custom skills first
+  const type = courseType(name);
+  return (S.cfg.skills && S.cfg.skills[type]) ? S.cfg.skills[type] : (DEFAULT_SKILLS[type] || DEFAULT_SKILLS.default);
+}
 function lvClass(level) {
   if (!level) return 'alle';
   const l = level.toLowerCase();
   if (l === 'basis') return 'basis';
   if (l === 'mittel') return 'mittel';
   if (l.includes('fort')) return 'fort';
+  if (l === 'team' || l === 'comp') return 'team';
   return 'alle';
+}
+function lvBadgeClass(course) {
+  if (isTeamCourse(course.name)) return 'team';
+  return lvClass(course.level);
 }
 
 // ─────────────────────────────────────────────
-// KURSDATEN (Sportsnow Overground Basel, März 2026)
-// MoB1: echte Teilnehmerliste; andere: Sportsnow-Anmeldezahlen
+// KURSDATEN (Overground Basel – Sportsnow)
 // ─────────────────────────────────────────────
 const COURSES = {
-  // SONNTAG
-  0: [
-    { id:'so_pk10',    name:'Parkour Einsteiger 10–13J', code:'',      time:'11:30', trainer:'Chris Harmat',              level:'Basis',       kids: genKids(4,  '9-12')  },
-    { id:'so_pk14',    name:'Parkour Einsteiger 14–18J', code:'',      time:'14:00', trainer:'Chris Harmat',              level:'Basis',       kids: genKids(3,  '13-15') },
-    { id:'so_grapp',   name:'Öko-Grappling',             code:'',      time:'14:00', trainer:'Loki Pacheco-Taylor',       level:'Alle Stufen', kids: genKids(0,  '9-12')  },
+  0: [ // Sonntag
+    { id:'so_pk10',  name:'Parkour Einsteiger 10–13J', code:'',   time:'11:30', trainer:'Chris Harmat',        level:'Basis',      kids: genKids(4,'9-12')  },
+    { id:'so_pk14',  name:'Parkour Einsteiger 14–18J', code:'',   time:'14:00', trainer:'Chris Harmat',        level:'Basis',      kids: genKids(3,'13-15') },
+    { id:'so_grapp', name:'Öko-Grappling',             code:'',   time:'14:00', trainer:'Loki Pacheco-Taylor', level:'Alle Stufen',kids: genKids(0,'9-12')  },
   ],
-  // MONTAG
-  1: [
-    { id:'mob1', name:'Basic: Polysport 5–8',          code:'MoB1', time:'15:30', trainer:'Agrena Schuler',   level:'Basis',
-      kids:['Aedan Ferry','Anouk Weber','Caetano Frisoli','Emil Frei','Janosh Weber','Lydia Ros','Naomi Ros','Niccolò Frei','Niklas Adam'] },
-    { id:'mob2', name:'Fortgeschritten: Polysport 5–8', code:'MoB2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',      kids: genKids(3,  '5-8')   },
-    { id:'moc1', name:'Basic: Polysport 9–12',          code:'MoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',       kids: genKids(5,  '9-12')  },
-    { id:'mod1', name:'Basic: Polysport 13–15',         code:'MoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',       kids: genKids(1,  '13-15') },
-    { id:'mod2', name:'Fortgeschritten: Polysport 13–15',code:'MoD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',      kids: genKids(2,  '13-15') },
-    { id:'moc2', name:'Fortgeschritten: Polysport 9–12', code:'MoC2',time:'18:30', trainer:'Lukas Daum',       level:'Mittel',      kids: genKids(12, '9-12')  },
+  1: [ // Montag
+    { id:'mob1',   name:'Basic: Polysport 5–8',           code:'MoB1', time:'15:30', trainer:'Agrena Schuler',   level:'Basis',      kids:['Aedan Ferry','Anouk Weber','Caetano Frisoli','Emil Frei','Janosh Weber','Lydia Ros','Naomi Ros','Niccolò Frei','Niklas Adam'] },
+    { id:'mob2',   name:'Fortgeschritten: Polysport 5–8', code:'MoB2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(3,'5-8')   },
+    { id:'moc1',   name:'Basic: Polysport 9–12',          code:'MoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(5,'9-12')  },
+    { id:'mo_nj1', name:'Ninja Kidz 6–9J',               code:'MoN1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(6,'5-8')   },
+    { id:'mod1',   name:'Basic: Polysport 13–15',         code:'MoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(1,'13-15') },
+    { id:'mod2',   name:'Fortgeschritten: Polysport 13–15',code:'MoD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(2,'13-15') },
+    { id:'mo_nj2', name:'Ninja Kidz 10–13J',             code:'MoN2', time:'17:30', trainer:'Robin Simon',      level:'Mittel',     kids: genKids(7,'9-12')  },
+    { id:'moc2',   name:'Fortgeschritten: Polysport 9–12',code:'MoC2', time:'18:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(12,'9-12') },
+    { id:'mo_kt',  name:'Kids Team',                     code:'MoKT', time:'18:30', trainer:'Agrena Schuler',   level:'Team',       kids: genKids(8,'9-12'), isTeam:true },
   ],
-  // DIENSTAG
-  2: [
-    { id:'dib1',  name:'Basic: Polysport 5–8',           code:'DiB1',  time:'16:30', trainer:'Robin Simon',               level:'Basis',       kids: genKids(5,  '5-8')   },
-    { id:'dik1',  name:'Akrobatik',                       code:'DiK1',  time:'16:30', trainer:'Mathis Rüsch',              level:'Basis',       kids: genKids(8,  '9-12')  },
-    { id:'dic1',  name:'Basic: Polysport 9–12',           code:'DiC1',  time:'16:30', trainer:'Lukas Daum',                level:'Basis',       kids: genKids(6,  '9-12')  },
-    { id:'dib2',  name:'Fortgeschritten: Polysport 5–8',  code:'DiB2',  time:'17:30', trainer:'Agrena Schuler',            level:'Mittel',      kids: genKids(4,  '5-8')   },
-    { id:'dic2',  name:'Fortgeschritten: Polysport 9–12', code:'DiC2',  time:'17:30', trainer:'Lukas Daum',                level:'Mittel',      kids: genKids(5,  '9-12')  },
-    { id:'did1',  name:'Basic: Polysport 13–15',          code:'DiD1',  time:'17:30', trainer:'Diego Heubeck',             level:'Basis',       kids: genKids(7,  '13-15') },
-    { id:'did2',  name:'Fortgeschritten: Polysport 13–15',code:'DiD2',  time:'18:30', trainer:'Diego Heubeck',             level:'Mittel',      kids: genKids(5,  '13-15') },
-    { id:'dipm1', name:'Basic: Girls Parkour',            code:'DiPM1', time:'18:30', trainer:'Julia Menz / Anja Rüfenacht',level:'Alle Stufen',kids: genKids(5,  '9-12')  },
+  2: [ // Dienstag
+    { id:'dib1',   name:'Basic: Polysport 5–8',           code:'DiB1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(5,'5-8')   },
+    { id:'dik1',   name:'Akrobatik',                      code:'DiK1', time:'16:30', trainer:'Mathis Rüsch',     level:'Basis',      kids: genKids(8,'9-12')  },
+    { id:'dic1',   name:'Basic: Polysport 9–12',          code:'DiC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'di_nj1', name:'Ninja Kidz 6–9J',               code:'DiN1', time:'16:30', trainer:'Chris Harmat',     level:'Basis',      kids: genKids(8,'5-8')   },
+    { id:'dib2',   name:'Fortgeschritten: Polysport 5–8', code:'DiB2', time:'17:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(4,'5-8')   },
+    { id:'dic2',   name:'Fortgeschritten: Polysport 9–12',code:'DiC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(5,'9-12')  },
+    { id:'did1',   name:'Basic: Polysport 13–15',         code:'DiD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(7,'13-15') },
+    { id:'di_nj2', name:'Ninja Kidz 10–13J',             code:'DiN2', time:'17:30', trainer:'Chris Harmat',     level:'Mittel',     kids: genKids(6,'9-12')  },
+    { id:'did2',   name:'Fortgeschritten: Polysport 13–15',code:'DiD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(5,'13-15') },
+    { id:'dipm1',  name:'Basic: Girls Parkour',           code:'DiPM1',time:'18:30', trainer:'Julia Menz / Anja Rüfenacht',level:'Alle Stufen',kids: genKids(5,'9-12') },
+    { id:'di_kt',  name:'Kids Team',                     code:'DiKT', time:'19:00', trainer:'Agrena Schuler',   level:'Team',       kids: genKids(10,'9-12'),isTeam:true },
+    { id:'di_ct',  name:'Comp Team',                     code:'DiCT', time:'20:00', trainer:'Chris Harmat',     level:'Team',       kids: genKids(8,'13-15'),isTeam:true },
   ],
-  // MITTWOCH
-  3: [
-    { id:'mic1',  name:'Basic: Polysport 9–12',           code:'MiC1',  time:'16:30', trainer:'Lukas Daum',    level:'Basis',       kids: genKids(6,  '9-12')  },
-    { id:'mic2',  name:'Fortgeschritten: Polysport 9–12', code:'MiC2',  time:'17:30', trainer:'Lukas Daum',    level:'Mittel',      kids: genKids(5,  '9-12')  },
-    { id:'mid1',  name:'Basic: Polysport 13–15',          code:'MiD1',  time:'18:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(4,  '13-15') },
-    { id:'mid2',  name:'Fortgeschritten: Polysport 13–15',code:'MiD2',  time:'18:30', trainer:'Diego Heubeck', level:'Mittel',      kids: genKids(3,  '13-15') },
+  3: [ // Mittwoch
+    { id:'mic1',   name:'Basic: Polysport 9–12',          code:'MiC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'mic2',   name:'Fortgeschritten: Polysport 9–12',code:'MiC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(5,'9-12')  },
+    { id:'mi_wct', name:'World Chase Tag',               code:'MiWCT',time:'17:30', trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids: genKids(10,'9-12') },
+    { id:'mid1',   name:'Basic: Polysport 13–15',         code:'MiD1', time:'18:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(4,'13-15') },
+    { id:'mid2',   name:'Fortgeschritten: Polysport 13–15',code:'MiD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
   ],
-  // DONNERSTAG
-  4: [
-    { id:'dob1',  name:'Basic: Polysport 5–8',            code:'DoB1',  time:'16:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(4,  '5-8')   },
-    { id:'doc1',  name:'Basic: Polysport 9–12',           code:'DoC1',  time:'16:30', trainer:'Lukas Daum',    level:'Basis',       kids: genKids(6,  '9-12')  },
-    { id:'dob2',  name:'Fortgeschritten: Polysport 5–8',  code:'DoB2',  time:'17:30', trainer:'Agrena Schuler',level:'Mittel',      kids: genKids(5,  '5-8')   },
-    { id:'doc2',  name:'Fortgeschritten: Polysport 9–12', code:'DoC2',  time:'17:30', trainer:'Lukas Daum',    level:'Mittel',      kids: genKids(4,  '9-12')  },
-    { id:'dod1',  name:'Basic: Polysport 13–15',          code:'DoD1',  time:'17:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(7,  '13-15') },
-    { id:'dod2',  name:'Fortgeschritten: Polysport 13–15',code:'DoD2',  time:'18:30', trainer:'Diego Heubeck', level:'Mittel',      kids: genKids(3,  '13-15') },
+  4: [ // Donnerstag
+    { id:'dob1',   name:'Basic: Polysport 5–8',           code:'DoB1', time:'16:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(4,'5-8')   },
+    { id:'doc1',   name:'Basic: Polysport 9–12',          code:'DoC1', time:'16:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'do_nj1', name:'Ninja Kidz 6–9J',               code:'DoN1', time:'16:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(7,'5-8')   },
+    { id:'dob2',   name:'Fortgeschritten: Polysport 5–8', code:'DoB2', time:'17:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(5,'5-8')   },
+    { id:'doc2',   name:'Fortgeschritten: Polysport 9–12',code:'DoC2', time:'17:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(4,'9-12')  },
+    { id:'dod1',   name:'Basic: Polysport 13–15',         code:'DoD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(7,'13-15') },
+    { id:'do_njt', name:'Ninja Teen 14–17J',             code:'DoNT', time:'17:30', trainer:'Chris Harmat',     level:'Mittel',     kids: genKids(5,'13-15') },
+    { id:'dod2',   name:'Fortgeschritten: Polysport 13–15',code:'DoD2',time:'18:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
+    { id:'do_kt',  name:'Kids Team',                     code:'DoKT', time:'18:30', trainer:'Robin Simon',      level:'Team',       kids: genKids(8,'9-12'), isTeam:true },
+    { id:'do_ct',  name:'Comp Team',                     code:'DoCT', time:'19:30', trainer:'Chris Harmat',     level:'Team',       kids: genKids(10,'13-15'),isTeam:true },
   ],
-  // FREITAG
-  5: [
-    { id:'fra1',  name:'Basic: Polysport 5–8',            code:'FrA1',  time:'15:30', trainer:'Robin Simon',   level:'Basis',       kids: genKids(8,  '5-8')   },
-    { id:'frc1',  name:'Basic: Polysport 9–12',           code:'FrC1',  time:'15:30', trainer:'Lukas Daum',    level:'Basis',       kids: genKids(6,  '9-12')  },
-    { id:'fra2',  name:'Fortgeschritten: Polysport 5–8',  code:'FrA2',  time:'16:30', trainer:'Agrena Schuler',level:'Mittel',      kids: genKids(5,  '5-8')   },
-    { id:'frc2',  name:'Fortgeschritten: Polysport 9–12', code:'FrC2',  time:'16:30', trainer:'Lukas Daum',    level:'Mittel',      kids: genKids(4,  '9-12')  },
-    { id:'frd1',  name:'Basic: Polysport 13–15',          code:'FrD1',  time:'17:30', trainer:'Diego Heubeck', level:'Basis',       kids: genKids(6,  '13-15') },
-    { id:'frd2',  name:'Fortgeschritten: Polysport 13–15',code:'FrD2',  time:'17:30', trainer:'Diego Heubeck', level:'Mittel',      kids: genKids(3,  '13-15') },
+  5: [ // Freitag
+    { id:'fra1',   name:'Basic: Polysport 5–8',           code:'FrA1', time:'15:30', trainer:'Robin Simon',      level:'Basis',      kids: genKids(8,'5-8')   },
+    { id:'frc1',   name:'Basic: Polysport 9–12',          code:'FrC1', time:'15:30', trainer:'Lukas Daum',       level:'Basis',      kids: genKids(6,'9-12')  },
+    { id:'fra2',   name:'Fortgeschritten: Polysport 5–8', code:'FrA2', time:'16:30', trainer:'Agrena Schuler',   level:'Mittel',     kids: genKids(5,'5-8')   },
+    { id:'frc2',   name:'Fortgeschritten: Polysport 9–12',code:'FrC2', time:'16:30', trainer:'Lukas Daum',       level:'Mittel',     kids: genKids(4,'9-12')  },
+    { id:'frd1',   name:'Basic: Polysport 13–15',         code:'FrD1', time:'17:30', trainer:'Diego Heubeck',    level:'Basis',      kids: genKids(6,'13-15') },
+    { id:'frd2',   name:'Fortgeschritten: Polysport 13–15',code:'FrD2',time:'17:30', trainer:'Diego Heubeck',    level:'Mittel',     kids: genKids(3,'13-15') },
+    { id:'fr_wct', name:'World Chase Tag',               code:'FrWCT',time:'18:00', trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids: genKids(8,'9-12')  },
+    { id:'fr_ct',  name:'Comp Team',                     code:'FrCT', time:'19:00', trainer:'Chris Harmat',     level:'Team',       kids: genKids(12,'13-15'),isTeam:true },
   ],
-  // SAMSTAG
-  6: [
-    { id:'sa_km58',  name:'KidsMove 5–8 Jahre',  code:'', time:'12:30', trainer:'Overground Team', level:'Alle Stufen', kids: genKids(0, '5-8')  },
-    { id:'sa_km912', name:'KidsMove 9–12 Jahre', code:'', time:'14:00', trainer:'Overground Team', level:'Alle Stufen', kids: genKids(3, '9-12') },
+  6: [ // Samstag
+    { id:'sa_km58',  name:'KidsMove 5–8 Jahre',           code:'',     time:'12:30', trainer:'Overground Team',  level:'Alle Stufen',kids: genKids(0,'5-8')   },
+    { id:'sa_km912', name:'KidsMove 9–12 Jahre',          code:'',     time:'14:00', trainer:'Overground Team',  level:'Alle Stufen',kids: genKids(3,'9-12')  },
+    { id:'sa_wct',   name:'World Chase Tag',             code:'SaWCT',time:'13:00', trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids: genKids(6,'9-12')  },
   ],
 };
 
@@ -413,367 +568,614 @@ const COURSES = {
 // STATE
 // ─────────────────────────────────────────────
 let S = {
-  weekOffset: 0,
   day: null,
   course: null,
   kid: null,
-  data: {},   // data[courseId][kidName] = { skills:{}, notes:'', completed:false }
+  data: {},
+  cfg: {
+    courses: {}, kids: {}, order: {}, skills: {},
+    trainers: ['Agrena Schuler','Chris Harmat','Diego Heubeck','Julia Menz / Anja Rüfenacht',
+               'Loki Pacheco-Taylor','Lukas Daum','Mathis Rüsch','Overground Team','Robin Simon'],
+    myName: '',
+  },
+  adminTab: 'day_1',
+  _adminExpanded: null,
+  coachMode: false,
+  coachData: null,
 };
 
 // ─────────────────────────────────────────────
-// LOCALSTORAGE
+// PERSIST
 // ─────────────────────────────────────────────
-function persist() { try { localStorage.setItem('og_sp_v2', JSON.stringify(S.data)); } catch(_) {} }
-function hydrate()  { try { const d = localStorage.getItem('og_sp_v2'); if (d) S.data = JSON.parse(d); } catch(_) {} }
+function persist()    { try { localStorage.setItem('og_sp_v2',  JSON.stringify(S.data)); } catch(_) {} }
+function persistCfg() { try { localStorage.setItem('og_sp_cfg', JSON.stringify(S.cfg));  } catch(_) {} }
+function hydrate()    { try { const d = localStorage.getItem('og_sp_v2');  if (d) S.data = JSON.parse(d); } catch(_) {} }
+function hydrateCfg() { try { const d = localStorage.getItem('og_sp_cfg'); if (d) S.cfg  = JSON.parse(d); } catch(_) {} }
 
 // ─────────────────────────────────────────────
-// WEEK UTILS
+// CONFIG HELPERS
 // ─────────────────────────────────────────────
-function getMonday(off = 0) {
-  const d = new Date();
-  const day = d.getDay();
-  d.setDate(d.getDate() - day + (day === 0 ? -6 : 1) + off * 7);
-  d.setHours(0,0,0,0);
-  return d;
+function getCoursesForDay(jsDay) {
+  const defaults = (COURSES[jsDay] || []).map(c => {
+    const ov  = S.cfg.courses?.[c.id] || {};
+    const kds = S.cfg.kids?.[c.id] !== undefined ? S.cfg.kids[c.id] : c.kids;
+    return { ...c, ...ov, kids: kds };
+  });
+  const order = S.cfg.order?.[jsDay];
+  if (!order || !order.length) return defaults;
+  const ordered = [];
+  order.forEach(id => { const f = defaults.find(c => c.id === id); if (f) ordered.push(f); });
+  defaults.forEach(c => { if (!order.includes(c.id)) ordered.push(c); });
+  return ordered;
 }
-function fmtDate(d) { return d.toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit' }); }
-function changeWeek(dir) { S.weekOffset += dir; S.day = null; renderWeek(); }
+function getCourseById(id) {
+  for (let d = 0; d <= 6; d++) { const f = getCoursesForDay(d).find(c => c.id === id); if (f) return f; }
+  return null;
+}
+function activeData() { return S.coachMode ? S.coachData : S.data; }
 
 // ─────────────────────────────────────────────
-// RENDER WEEK
+// RENDER: FIXED DAYS
 // ─────────────────────────────────────────────
-function renderWeek() {
-  const mon = getMonday(S.weekOffset);
-  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-  document.getElementById('week-range-label').textContent = `${fmtDate(mon)} – ${fmtDate(sun)}`;
+const DAY_NAMES  = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+const DAY_DE     = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 
-  const DAY_NAMES = ['Mo','Di','Mi','Do','Fr','Sa','So'];
-  const today = new Date(); today.setHours(0,0,0,0);
-  const grid = document.getElementById('days-grid');
-  grid.innerHTML = '';
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(mon); d.setDate(mon.getDate() + i);
-    const jsDay = d.getDay();
-    const courses = COURSES[jsDay] || [];
+function renderDayRow() {
+  const row = document.getElementById('days-row');
+  row.innerHTML = '';
+  // Show Mon–Sun in week order: 1,2,3,4,5,6,0
+  const order = [1,2,3,4,5,6,0];
+  order.forEach(jsDay => {
+    const courses = getCoursesForDay(jsDay);
     const hasCourses = courses.some(c => c.kids.length > 0);
-    const isToday = d.getTime() === today.getTime();
-    const isSel   = S.day && d.getTime() === S.day.getTime();
+    const isSel = S.day === jsDay;
     const btn = document.createElement('button');
-    btn.className = 'day-btn' + (isToday ? ' today' : '') + (isSel ? ' active' : '') + (hasCourses ? ' has-courses' : '');
-    btn.innerHTML = `<span class="day-name">${DAY_NAMES[i]}</span><span class="day-num">${d.getDate()}</span>`;
-    btn.onclick = () => { S.day = d; renderWeek(); renderCourses(); };
-    grid.appendChild(btn);
-  }
-  renderCourses();
-}
-
-// ─────────────────────────────────────────────
-// RENDER COURSES
-// ─────────────────────────────────────────────
-function renderCourses() {
-  const container = document.getElementById('courses-list');
-  const label     = document.getElementById('courses-day-label');
-
-  if (!S.day) {
-    label.textContent = 'Tag wählen';
-    container.innerHTML = '<div class="empty-state"><span class="emoji">📅</span><p>Wähle einen Tag,<br>um die Kurse zu sehen</p></div>';
-    return;
-  }
-
-  const jsDay = S.day.getDay();
-  const DAY_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-  label.textContent = `${DAY_DE[jsDay]}, ${fmtDate(S.day)}`;
-
-  const courses = COURSES[jsDay] || [];
-  if (courses.length === 0) {
-    container.innerHTML = '<div class="empty-state"><span class="emoji">😴</span><p>Keine Kurse an diesem Tag</p></div>';
-    return;
-  }
-
-  container.innerHTML = '';
-  courses.forEach(c => {
-    const card = document.createElement('div');
-    const lv   = lvClass(c.level);
-    const kids = c.kids;
-
-    if (kids.length === 0) {
-      card.className = `course-card lv-${lv} empty`;
-      card.innerHTML = `
-        <div class="cc-left">
-          <div class="course-name">${c.name}${c.code ? `<span class="course-code">${c.code}</span>` : ''}</div>
-          <div class="course-meta">${c.time} Uhr · Keine Anmeldungen</div>
-        </div>
-        <span class="lv-badge ${lv}">${c.level}</span>`;
-      container.appendChild(card);
-      return;
-    }
-
-    const done   = kids.filter(k => S.data[c.id]?.[k]?.completed).length;
-    const hasAny = kids.some(k => S.data[c.id]?.[k]);
-    const allDone = done === kids.length;
-
-    let badgeCls = '', badgeTxt = `${kids.length} Kinder`;
-    if (done > 0 && !allDone) { badgeCls = 'partial'; badgeTxt = `${done}/${kids.length} fertig`; }
-    if (allDone)              { badgeCls = 'done';    badgeTxt = '✓ Alle fertig'; }
-
-    card.className = `course-card lv-${lv}`;
-    card.innerHTML = `
-      <div class="cc-left">
-        <div class="course-name">${c.name}${c.code ? `<span class="course-code">${c.code}</span>` : ''}</div>
-        <div class="course-meta">${c.time} Uhr · ${kids.length} Kinder</div>
-        <div class="trainer-tag">👤 ${c.trainer}</div>
-      </div>
-      <div class="cc-right">
-        <span class="lv-badge ${lv}">${c.level}</span>
-        <span class="course-badge ${badgeCls}">${badgeTxt}</span>
-      </div>`;
-    card.onclick = () => openCourse(c);
-    container.appendChild(card);
+    btn.className = 'day-btn' + (isSel ? ' active' : '') + (hasCourses ? ' has-courses' : '');
+    btn.innerHTML = `<span class="day-name">${DAY_NAMES[jsDay]}</span><span class="day-dot"></span>`;
+    btn.onclick = () => { S.day = jsDay; renderDayRow(); renderCourses(); };
+    row.appendChild(btn);
   });
 }
 
 // ─────────────────────────────────────────────
-// OPEN COURSE
+// RENDER: COURSES (with drag & drop)
+// ─────────────────────────────────────────────
+let dragSrcId = null;
+function renderCourses() {
+  const container = document.getElementById('courses-list');
+  const label     = document.getElementById('courses-day-label');
+  if (S.day === null) {
+    label.textContent = 'Tag wählen';
+    container.innerHTML = '<div class="empty-state"><span class="emoji">📅</span><p>Wähle einen Tag,<br>um die Kurse zu sehen</p></div>';
+    return;
+  }
+  label.textContent = DAY_DE[S.day];
+  const courses = getCoursesForDay(S.day);
+  if (!courses.length) {
+    container.innerHTML = '<div class="empty-state"><span class="emoji">😴</span><p>Keine Kurse an diesem Tag</p></div>';
+    return;
+  }
+  container.innerHTML = '';
+  const ad = activeData();
+  courses.forEach(c => {
+    const isTeam = c.isTeam || isTeamCourse(c.name);
+    const lv  = isTeam ? 'team' : lvClass(c.level);
+    const card = document.createElement('div');
+    card.setAttribute('draggable', !S.coachMode ? 'true' : 'false');
+    card.dataset.courseId = c.id;
+
+    if (!c.kids.length) {
+      card.className = `course-card${isTeam?' team-card':''} empty`;
+      card.innerHTML = `
+        <span class="drag-handle">⠿</span>
+        <div class="cc-left">
+          <div class="course-name">${c.name}${c.code?`<span class="course-code">${c.code}</span>`:''}</div>
+          <div class="course-meta">${c.time} Uhr · Keine Anmeldungen</div>
+        </div>
+        <span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span>`;
+    } else {
+      const done    = c.kids.filter(k => ad[c.id]?.[k]?.completed).length;
+      const allDone = done === c.kids.length;
+      let badgeCls = '', badgeTxt = `${c.kids.length} Kinder`;
+      if (done > 0 && !allDone) { badgeCls='partial'; badgeTxt=`${done}/${c.kids.length} fertig`; }
+      if (allDone)              { badgeCls='done';    badgeTxt='✓ Alle fertig'; }
+      card.className = `course-card${isTeam?' team-card':''}`;
+      card.innerHTML = `
+        <span class="drag-handle">⠿</span>
+        <div class="cc-left">
+          <div class="course-name">${c.name}${c.code?`<span class="course-code">${c.code}</span>`:''}</div>
+          <div class="course-meta">${c.time} Uhr · ${c.kids.length} Kinder</div>
+          <div class="trainer-tag">👤 ${c.trainer}</div>
+        </div>
+        <div class="cc-right">
+          <span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span>
+          <span class="course-badge ${badgeCls}">${badgeTxt}</span>
+        </div>`;
+      card.onclick = e => { if (e.target.closest('.drag-handle')) return; openCourse(c); };
+    }
+
+    if (!S.coachMode) {
+      card.ondragstart = e => { dragSrcId=c.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; };
+      card.ondragend   = () => { card.classList.remove('dragging'); container.querySelectorAll('.course-card').forEach(el=>el.classList.remove('drag-over')); };
+      card.ondragover  = e => { e.preventDefault(); if (c.id!==dragSrcId) card.classList.add('drag-over'); };
+      card.ondragleave = () => card.classList.remove('drag-over');
+      card.ondrop      = e => { e.preventDefault(); card.classList.remove('drag-over'); if (!dragSrcId||dragSrcId===c.id) return; reorderCourses(S.day,dragSrcId,c.id); };
+    }
+    container.appendChild(card);
+  });
+}
+
+function reorderCourses(jsDay, fromId, toId) {
+  let order = S.cfg.order?.[jsDay] || getCoursesForDay(jsDay).map(c=>c.id);
+  const fi=order.indexOf(fromId), ti=order.indexOf(toId);
+  if (fi===-1||ti===-1) return;
+  const upd=[...order]; upd.splice(fi,1); upd.splice(ti,0,fromId);
+  if (!S.cfg.order) S.cfg.order={};
+  S.cfg.order[jsDay]=upd; persistCfg(); renderCourses(); showToast('↕ Reihenfolge gespeichert');
+}
+
+// ─────────────────────────────────────────────
+// OPEN COURSE / KID
 // ─────────────────────────────────────────────
 function openCourse(c) {
   S.course = c;
-  const lv = lvClass(c.level);
-  document.getElementById('ch-kids').className = `course-header lv-${lv}`;
+  const isTeam = c.isTeam || isTeamCourse(c.name);
+  const lv = isTeam ? 'team' : lvClass(c.level);
+  const el = document.getElementById('ch-kids');
+  el.className = `course-header${isTeam?' lv-team':''}`;
   document.getElementById('ch-name').textContent = c.name + (c.code ? ` · ${c.code}` : '');
-  document.getElementById('ch-meta').textContent = `${c.time} Uhr · ${c.kids.length} Kinder · ${fmtDate(S.day)}`;
-  document.getElementById('ch-trainer').innerHTML = `<span>👤 ${c.trainer}</span><span class="lv-badge ${lv}" style="display:inline-block">${c.level}</span>`;
-
+  document.getElementById('ch-meta').textContent = `${c.time} Uhr · ${c.kids.length} Kinder`;
+  document.getElementById('ch-trainer').innerHTML = `<span>👤 ${c.trainer}</span><span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span>`;
   const skills = courseSkills(c.name);
   const list   = document.getElementById('kids-list');
+  const ad     = activeData();
   list.innerHTML = '';
-
   c.kids.forEach(kid => {
-    const kd  = S.data[c.id]?.[kid];
-    const cnt = kd ? Object.keys(kd.skills || {}).length : 0;
-    let sCls = 'open', sTxt = 'Offen';
-    if (kd?.completed)   { sCls = 'done';        sTxt = 'Fertig';   }
-    else if (cnt > 0)    { sCls = 'in-progress';  sTxt = 'In Arbeit'; }
-
+    const kd  = ad[c.id]?.[kid];
+    const cnt = kd ? Object.keys(kd.skills||{}).length : 0;
+    let sCls='open', sTxt='Offen';
+    if (kd?.completed)  { sCls='done';        sTxt='Fertig';    }
+    else if (cnt > 0)   { sCls='in-progress'; sTxt='In Arbeit'; }
     const card = document.createElement('div');
-    card.className = 'kid-card' + (kd?.completed ? ' completed' : '');
+    card.className = 'kid-card' + (kd?.completed?' completed':'');
     card.innerHTML = `
-      <div class="kid-header">
-        <span class="kid-name">${kid}</span>
-        <span class="kid-status ${sCls}">${sTxt}</span>
-      </div>
-      <div class="skill-chips">
-        ${skills.map(s => `<span class="skill-chip ${kd?.skills?.[s.id] !== undefined ? 'filled' : ''}">${s.label}</span>`).join('')}
-      </div>`;
+      <div class="kid-header"><span class="kid-name">${kid}</span><span class="kid-status ${sCls}">${sTxt}</span></div>
+      <div class="skill-chips">${skills.map(s=>`<span class="skill-chip ${kd?.skills?.[s.id]!==undefined?'filled':''}">${s.label}</span>`).join('')}</div>`;
     card.onclick = () => openKid(kid);
     list.appendChild(card);
   });
   showScreen('kids');
 }
 
-// ─────────────────────────────────────────────
-// OPEN KID
-// ─────────────────────────────────────────────
 function openKid(kid) {
   S.kid = kid;
-  const c      = S.course;
-  const kd     = S.data[c.id]?.[kid];
+  const c = S.course;
+  const ad = activeData();
+  const kd = ad[c.id]?.[kid];
   const skills = courseSkills(c.name);
-  const lv     = lvClass(c.level);
-
+  const isTeam = c.isTeam || isTeamCourse(c.name);
+  const lv = isTeam ? 'team' : lvClass(c.level);
   const header = document.getElementById('ch-kid');
-  header.className = `course-header lv-${lv}`;
+  header.className = `course-header${isTeam?' lv-team':''}`;
   header.innerHTML = `
     <h2>${kid}</h2>
-    <div class="ch-meta">${c.name}${c.code ? ' · ' + c.code : ''} · ${c.time} Uhr · ${fmtDate(S.day)}</div>
-    <div class="ch-trainer"><span>👤 ${c.trainer}</span><span class="lv-badge ${lv}" style="display:inline-block">${c.level}</span></div>`;
-
+    <div class="ch-meta">${c.name}${c.code?' · '+c.code:''} · ${c.time} Uhr</div>
+    <div class="ch-trainer"><span>👤 ${c.trainer}</span><span class="lv-badge ${lv}">${isTeam?'Team':c.level}</span></div>`;
   const list = document.getElementById('skills-list');
   list.innerHTML = '';
-
   skills.forEach(sk => {
     const saved = kd?.skills?.[sk.id];
-    const val   = saved !== undefined ? saved : (sk.type === 'rating' ? 3 : sk.min);
+    const val   = saved !== undefined ? saved : (sk.type==='rating' ? 3 : sk.min);
     const block = document.createElement('div');
     block.className = 'skill-block';
-
-    const typeLabel = sk.type === 'time' ? '⏱ Zeit' : sk.type === 'count' ? '🔁 Anzahl' : sk.type === 'rating' ? '⭐ Bewertung' : '📏 Maß';
-
+    const typeLabel = sk.type==='time' ? '⏱ Zeit' : sk.type==='count' ? '🔁 Anzahl' : sk.type==='rating' ? '⭐ Bewertung' : '📏 Maß';
     if (sk.type === 'rating') {
-      const intVal = Math.round(val);
+      const iv = Math.round(val);
       block.innerHTML = `
-        <div class="skill-block-header">
-          <div><div class="skill-title">${sk.label}</div><div class="skill-type-label">${typeLabel}</div></div>
-          <div class="value-display" id="v-${sk.id}">${intVal}</div>
-        </div>
-        <div class="star-row" id="stars-${sk.id}">
-          ${[1,2,3,4,5].map(n => `<span class="star ${n <= intVal ? 'on' : ''}" onclick="setStar('${sk.id}',${n})">★</span>`).join('')}
-        </div>
-        <input type="hidden" id="sl-${sk.id}" value="${intVal}">`;
+        <div class="skill-block-header"><div><div class="skill-title">${sk.label}</div><div class="skill-type-label">${typeLabel}</div></div><div class="value-display" id="v-${sk.id}">${iv}</div></div>
+        <div class="star-row" id="stars-${sk.id}">${[1,2,3,4,5].map(n=>`<span class="star ${n<=iv?'on':''}" onclick="${S.coachMode?'':  `setSta`r('${sk.id}',${n})`}">★</span>`).join('')}</div>
+        <input type="hidden" id="sl-${sk.id}" value="${iv}">`;
     } else {
       block.innerHTML = `
-        <div class="skill-block-header">
-          <div><div class="skill-title">${sk.label}</div><div class="skill-type-label">${typeLabel}</div></div>
-          <div class="value-display" id="v-${sk.id}">${fmtVal(sk, val)}</div>
-        </div>
-        <div class="slider-wrap">
-          <input type="range" id="sl-${sk.id}" min="${sk.min}" max="${sk.max}" step="${sk.step}" value="${val}" oninput="updVal('${sk.id}',this.value)">
-          <div class="slider-labels"><span>${sk.min} ${sk.unit}</span><span>${sk.max} ${sk.unit}</span></div>
-        </div>`;
+        <div class="skill-block-header"><div><div class="skill-title">${sk.label}</div><div class="skill-type-label">${typeLabel}</div></div><div class="value-display" id="v-${sk.id}">${fmtVal(sk,val)}</div></div>
+        <div class="slider-wrap"><input type="range" id="sl-${sk.id}" min="${sk.min}" max="${sk.max}" step="${sk.step}" value="${val}" ${S.coachMode?'disabled':''} oninput="updVal('${sk.id}',this.value)"><div class="slider-labels"><span>${sk.min} ${sk.unit}</span><span>${sk.max} ${sk.unit}</span></div></div>`;
     }
     list.appendChild(block);
   });
-
   document.getElementById('kid-notes').value = kd?.notes || '';
+  if (S.coachMode) {
+    document.getElementById('kid-notes').disabled = true;
+    document.querySelector('#screen-kid .btn-row').style.display = 'none';
+  } else {
+    document.getElementById('kid-notes').disabled = false;
+    document.querySelector('#screen-kid .btn-row').style.display = '';
+  }
   showScreen('kid');
 }
 
 function setStar(id, n) {
-  document.getElementById('stars-' + id).querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < n));
-  document.getElementById('v-' + id).textContent = n;
-  document.getElementById('sl-' + id).value = n;
+  document.getElementById('stars-'+id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));
+  document.getElementById('v-'+id).textContent = n;
+  document.getElementById('sl-'+id).value = n;
 }
-
 function fmtVal(sk, v) {
   const n = parseFloat(v);
-  if (sk.type === 'time') return n.toFixed(1) + ' ' + sk.unit;
-  return Math.round(n) + ' ' + sk.unit;
+  if (sk.type==='time') return n.toFixed(1)+' '+sk.unit;
+  return Math.round(n)+' '+sk.unit;
 }
-
 function updVal(id, v) {
-  const c  = S.course;
-  const sk = courseSkills(c?.name || '').find(s => s.id === id);
-  if (sk) document.getElementById('v-' + id).textContent = fmtVal(sk, v);
+  const sk = courseSkills(S.course?.name||'').find(s=>s.id===id);
+  if (sk) document.getElementById('v-'+id).textContent = fmtVal(sk,v);
 }
 
 // ─────────────────────────────────────────────
-// SAVE
+// SAVE KID
 // ─────────────────────────────────────────────
 function saveKid(complete) {
-  const c   = S.course;
-  const kid = S.kid;
-  const skills = courseSkills(c.name);
-  if (!S.data[c.id]) S.data[c.id] = {};
-
-  const vals = {};
-  skills.forEach(sk => {
-    const el = document.getElementById('sl-' + sk.id);
-    if (el) vals[sk.id] = parseFloat(el.value);
-  });
-
-  S.data[c.id][kid] = { skills: vals, notes: document.getElementById('kid-notes').value, completed: complete, savedAt: new Date().toISOString() };
+  if (S.coachMode) return;
+  const c=S.course, kid=S.kid;
+  const skills=courseSkills(c.name);
+  if (!S.data[c.id]) S.data[c.id]={};
+  const vals={};
+  skills.forEach(sk=>{const el=document.getElementById('sl-'+sk.id);if(el) vals[sk.id]=parseFloat(el.value);});
+  S.data[c.id][kid]={skills:vals,notes:document.getElementById('kid-notes').value,completed:complete,savedAt:new Date().toISOString()};
   persist();
-  showToast(complete ? `✓ ${kid} abgeschlossen!` : '💾 Gespeichert');
-  setTimeout(() => showScreen('kids'), 400);
-  setTimeout(() => openCourse(c), 450);
+  showToast(complete?`✓ ${kid} abgeschlossen!`:'💾 Gespeichert');
+  setTimeout(()=>showScreen('kids'),400);
+  setTimeout(()=>openCourse(c),450);
+}
+
+// ─────────────────────────────────────────────
+// ADMIN PANEL
+// ─────────────────────────────────────────────
+const ADMIN_DAYS = [1,2,3,4,5,6,0];
+const ADMIN_DAY_NAMES = {1:'Mo',2:'Di',3:'Mi',4:'Do',5:'Fr',6:'Sa',0:'So'};
+
+function showAdmin() {
+  renderAdminTabs();
+  renderAdminContent();
+  showScreen('admin');
+}
+
+function renderAdminTabs() {
+  const bar = document.getElementById('admin-tab-bar');
+  bar.innerHTML = '';
+  // Day tabs
+  ADMIN_DAYS.forEach(d => {
+    if (!(COURSES[d]||[]).length) return;
+    const tab = document.createElement('button');
+    tab.className='admin-tab'+(S.adminTab===`day_${d}`?' active':'');
+    tab.textContent = ADMIN_DAY_NAMES[d];
+    tab.onclick = ()=>{ S.adminTab=`day_${d}`; S._adminExpanded=null; renderAdminTabs(); renderAdminContent(); };
+    bar.appendChild(tab);
+  });
+  // Headcoach tab
+  const hc = document.createElement('button');
+  hc.className='admin-tab'+(S.adminTab==='headcoach'?' active':'');
+  hc.textContent='👑 Headcoach';
+  hc.onclick=()=>{ S.adminTab='headcoach'; renderAdminTabs(); renderAdminContent(); };
+  bar.appendChild(hc);
+}
+
+function renderAdminContent() {
+  const el = document.getElementById('admin-content');
+  if (S.adminTab === 'headcoach') {
+    renderHeadcoachPanel(el);
+  } else {
+    const jsDay = parseInt(S.adminTab.split('_')[1]);
+    renderAdminCourses(el, jsDay);
+  }
+}
+
+function renderAdminCourses(el, jsDay) {
+  el.innerHTML = '';
+  const courses = getCoursesForDay(jsDay);
+  let adminDragSrc = null;
+  courses.forEach(c => {
+    const wrap = document.createElement('div');
+    wrap.className = 'admin-course-wrap';
+    const isOpen = S._adminExpanded === c.id;
+    wrap.innerHTML = `
+      <div class="admin-course${isOpen?' expanded':''}" id="ac-${c.id}">
+        <div class="admin-course-row" onclick="toggleAdminCourse('${c.id}')">
+          <span class="admin-drag-handle">⠿</span>
+          <div class="admin-course-info">
+            <div class="admin-course-name">${c.name}${c.code?` · <span style="color:var(--muted);font-size:11px">${c.code}</span>`:''}</div>
+            <div class="admin-course-sub">⏰ ${c.time} · 👤 ${c.trainer} · 👦 ${c.kids.length} Kinder</div>
+          </div>
+          <span class="admin-expand-icon">▼</span>
+        </div>
+        ${isOpen ? buildAdminCourseBody(c, jsDay) : ''}
+      </div>`;
+    wrap.setAttribute('draggable','true');
+    wrap.ondragstart = e=>{ adminDragSrc=c.id; wrap.querySelector('.admin-course').classList.add('admin-dragging'); e.dataTransfer.effectAllowed='move'; e.stopPropagation(); };
+    wrap.ondragend   = e=>{ el.querySelectorAll('.admin-course').forEach(x=>x.classList.remove('admin-dragging','admin-drag-over')); e.stopPropagation(); };
+    wrap.ondragover  = e=>{ e.preventDefault(); if(c.id!==adminDragSrc) wrap.querySelector('.admin-course').classList.add('admin-drag-over'); };
+    wrap.ondragleave = ()=>wrap.querySelector('.admin-course').classList.remove('admin-drag-over');
+    wrap.ondrop      = e=>{ e.preventDefault(); wrap.querySelector('.admin-course').classList.remove('admin-drag-over'); if(!adminDragSrc||adminDragSrc===c.id) return; reorderCourses(jsDay,adminDragSrc,c.id); S._adminExpanded=null; renderAdminContent(); };
+    el.appendChild(wrap);
+  });
+}
+
+function buildAdminCourseBody(c, jsDay) {
+  const kids = c.kids;
+  const trainerOpts = (S.cfg.trainers||[]).map(t=>`<option value="${escHtml(t)}" ${c.trainer===t?'selected':''}>${escHtml(t)}</option>`).join('');
+  const kidsRows = kids.map((k,i)=>`<div class="kid-row"><input class="kid-row-input" value="${escHtml(k)}" id="kid-inp-${c.id}-${i}" placeholder="Name"><button class="kid-del-btn" onclick="delKid('${c.id}',${i})">✕</button></div>`).join('');
+  return `<div class="admin-course-body">
+    <div class="field-row-2col">
+      <div class="field-row"><label class="field-label">Kursname</label><input class="field-input" id="cf-name-${c.id}" value="${escHtml(c.name)}"></div>
+      <div class="field-row"><label class="field-label">Kürzel</label><input class="field-input" id="cf-code-${c.id}" value="${escHtml(c.code||'')}"></div>
+    </div>
+    <div class="field-row-2col">
+      <div class="field-row"><label class="field-label">Uhrzeit</label><input class="field-input" id="cf-time-${c.id}" value="${escHtml(c.time)}"></div>
+      <div class="field-row"><label class="field-label">Stufe</label>
+        <select class="field-select" id="cf-level-${c.id}">
+          ${['Basis','Mittel','Fortgeschritten','Alle Stufen','Team'].map(l=>`<option ${c.level===l?'selected':''}>${l}</option>`).join('')}
+        </select></div>
+    </div>
+    <div class="field-row"><label class="field-label">Trainer / Trainerin</label>
+      <select class="field-select" id="cf-trainer-${c.id}">
+        ${trainerOpts}
+        <option value="__custom__">Anderer...</option>
+      </select>
+    </div>
+    <div class="field-row" id="trainer-custom-row-${c.id}" style="display:none">
+      <input class="field-input" id="cf-trainer-custom-${c.id}" placeholder="Name eingeben...">
+    </div>
+    <div class="kids-editor-title">Kinder <span id="kc-${c.id}">${kids.length}</span></div>
+    <div id="kids-editor-${c.id}">${kidsRows}</div>
+    <button class="add-kid-btn" onclick="addKid('${c.id}')">＋ Kind hinzufügen</button>
+    <button class="save-course-btn" onclick="saveCourseConfig('${c.id}')">✓ Änderungen speichern</button>
+  </div>`;
+}
+
+function toggleAdminCourse(id) {
+  S._adminExpanded = (S._adminExpanded===id)?null:id;
+  renderAdminContent();
+  // Watch for trainer custom select
+  const sel = document.getElementById('cf-trainer-'+id);
+  if (sel) sel.onchange = ()=>{
+    document.getElementById('trainer-custom-row-'+id).style.display = sel.value==='__custom__'?'':'none';
+  };
+}
+
+function addKid(courseId) {
+  const inputs=document.querySelectorAll(`[id^="kid-inp-${courseId}-"]`);
+  const current=Array.from(inputs).map(i=>i.value.trim());
+  current.push('');
+  updateKidsEditor(courseId,current);
+  setTimeout(()=>{ const all=document.querySelectorAll(`[id^="kid-inp-${courseId}-"]`); if(all.length) all[all.length-1].focus(); },50);
+}
+function delKid(courseId, idx) {
+  const c=getCoursesForDay(S.day||1).find(c=>c.id===courseId)||getCourseById(courseId);
+  const inputs=document.querySelectorAll(`[id^="kid-inp-${courseId}-"]`);
+  const current=Array.from(inputs).map(i=>i.value.trim());
+  current.splice(idx,1);
+  updateKidsEditor(courseId,current);
+}
+function updateKidsEditor(courseId, kids) {
+  const c=document.getElementById(`kids-editor-${courseId}`); if(!c) return;
+  c.innerHTML=kids.map((k,i)=>`<div class="kid-row"><input class="kid-row-input" value="${escHtml(k)}" id="kid-inp-${courseId}-${i}" placeholder="Name"><button class="kid-del-btn" onclick="delKid('${courseId}',${i})">✕</button></div>`).join('');
+  const cnt=document.getElementById(`kc-${courseId}`); if(cnt) cnt.textContent=kids.length;
+}
+function saveCourseConfig(courseId) {
+  const name    = document.getElementById(`cf-name-${courseId}`)?.value?.trim();
+  const code    = document.getElementById(`cf-code-${courseId}`)?.value?.trim();
+  const time    = document.getElementById(`cf-time-${courseId}`)?.value?.trim();
+  const level   = document.getElementById(`cf-level-${courseId}`)?.value;
+  const tSel    = document.getElementById(`cf-trainer-${courseId}`);
+  let trainer   = tSel?.value;
+  if (trainer==='__custom__') trainer=document.getElementById(`cf-trainer-custom-${courseId}`)?.value?.trim()||trainer;
+  if (!S.cfg.courses) S.cfg.courses={};
+  S.cfg.courses[courseId]={name,code,time,trainer,level};
+  const inputs=document.querySelectorAll(`[id^="kid-inp-${courseId}-"]`);
+  const kids=Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
+  if (!S.cfg.kids) S.cfg.kids={};
+  S.cfg.kids[courseId]=kids;
+  persistCfg(); showToast('✓ Änderungen gespeichert'); S._adminExpanded=null; renderAdminContent();
+}
+
+// ─────────────────────────────────────────────
+// HEADCOACH PANEL
+// ─────────────────────────────────────────────
+function renderHeadcoachPanel(el) {
+  const trainers = S.cfg.trainers || [];
+  el.innerHTML = `
+    <div class="section-title" style="margin-top:4px">Trainer-Liste</div>
+    <div id="trainer-chips">${trainers.map((t,i)=>`<span class="trainer-chip">${escHtml(t)}<button class="trainer-chip-del" onclick="removeTrainer(${i})">✕</button></span>`).join('')}</div>
+    <div class="kid-row" style="margin-top:12px">
+      <input class="field-input" id="new-trainer-input" placeholder="Neuen Trainer hinzufügen..." style="margin:0">
+      <button class="save-course-btn" onclick="addTrainer()" style="width:auto;margin:0;padding:10px 16px;flex-shrink:0">+</button>
+    </div>
+    <div class="section-title" style="margin-top:20px">Coach-Ansicht laden</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Füge den Teilen-Link eines Trainers ein, um dessen Stand als Headcoach einzusehen.</p>
+    <textarea class="notes-area" id="coach-link-input" placeholder="https://...#share=..." style="min-height:60px;font-size:12px;font-family:monospace"></textarea>
+    <button class="save-course-btn" style="margin-top:8px" onclick="loadCoachLink()">👁 Coach-Ansicht laden</button>
+    <div class="section-title" style="margin-top:20px">Abschluss-Übersicht</div>
+    <div id="completion-overview"></div>`;
+  renderCompletionOverview();
+}
+function addTrainer() {
+  const inp=document.getElementById('new-trainer-input');
+  const name=inp.value.trim(); if(!name) return;
+  if (!S.cfg.trainers) S.cfg.trainers=[];
+  if (!S.cfg.trainers.includes(name)) { S.cfg.trainers.push(name); persistCfg(); }
+  inp.value=''; renderAdminContent();
+}
+function removeTrainer(idx) {
+  S.cfg.trainers.splice(idx,1); persistCfg(); renderAdminContent();
+}
+function renderCompletionOverview() {
+  const el=document.getElementById('completion-overview'); if(!el) return;
+  const ad=activeData(); let html='';
+  [1,2,3,4,5,6,0].forEach(day=>{
+    const courses=getCoursesForDay(day);
+    if(!courses.length) return;
+    courses.forEach(c=>{
+      if(!c.kids.length) return;
+      const done=c.kids.filter(k=>ad[c.id]?.[k]?.completed).length;
+      const pct=Math.round(done/c.kids.length*100);
+      html+=`<div class="stat-row">
+        <div class="stat-label" title="${c.name}">${DAY_NAMES[day]} ${c.time} ${c.name.split(':').pop().trim()}</div>
+        <div class="stat-bar-bg"><div class="stat-bar" style="width:${pct}%"></div></div>
+        <div class="stat-pct">${pct}%</div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html || '<p style="font-size:13px;color:var(--muted)">Noch keine Daten.</p>';
+}
+
+// ─────────────────────────────────────────────
+// SHARE / COACH VIEW
+// ─────────────────────────────────────────────
+function openSharePanel() {
+  document.getElementById('share-name-input').value = S.cfg.myName||'';
+  document.getElementById('share-url-preview').style.display='none';
+  document.getElementById('share-overlay').style.display='block';
+  document.getElementById('share-modal').style.display='block';
+}
+function closeSharePanel() {
+  document.getElementById('share-overlay').style.display='none';
+  document.getElementById('share-modal').style.display='none';
+}
+function generateShareLink() {
+  const name=(document.getElementById('share-name-input').value||'').trim()||'Trainer';
+  S.cfg.myName=name; persistCfg();
+  const payload={v:2,ts:Date.now(),trainer:name,data:S.data};
+  const b64=btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const url=location.origin+location.pathname+'#share='+b64;
+  const box=document.getElementById('share-url-preview');
+  box.textContent=url.slice(0,120)+'...';
+  box.style.display='block';
+  navigator.clipboard.writeText(url).then(()=>showToast('🔗 Link kopiert!')).catch(()=>showToast('Link generiert – manuell kopieren'));
+}
+function loadCoachLink() {
+  const raw=(document.getElementById('coach-link-input')?.value||'').trim();
+  const hash=raw.includes('#share=') ? raw.split('#share=')[1] : raw;
+  if (!hash) { showToast('Bitte Link einfügen'); return; }
+  try {
+    const payload=JSON.parse(decodeURIComponent(escape(atob(hash))));
+    if (payload.v===2 && payload.data) {
+      S.coachMode=true; S.coachData=payload.data;
+      document.getElementById('coach-banner').style.display='flex';
+      document.getElementById('cb-trainer').textContent=payload.trainer||'Trainer';
+      document.getElementById('cb-time').textContent=new Date(payload.ts).toLocaleString('de-CH');
+      showToast('👁 Coach-Ansicht geladen'); showScreen('week'); renderDayRow(); renderCourses();
+    }
+  } catch(e) { showToast('Ungültiger Link'); }
+}
+function clearCoachView() {
+  S.coachMode=false; S.coachData=null;
+  document.getElementById('coach-banner').style.display='none';
+  renderDayRow(); renderCourses();
+}
+function checkShareLink() {
+  const hash=window.location.hash;
+  if (!hash.startsWith('#share=')) return;
+  try {
+    const payload=JSON.parse(decodeURIComponent(escape(atob(hash.slice(7)))));
+    if (payload.v===2 && payload.data) {
+      S.coachMode=true; S.coachData=payload.data;
+      document.getElementById('coach-banner').style.display='flex';
+      document.getElementById('cb-trainer').textContent=payload.trainer||'Trainer';
+      document.getElementById('cb-time').textContent=new Date(payload.ts).toLocaleString('de-CH');
+    }
+  } catch(e) {}
 }
 
 // ─────────────────────────────────────────────
 // PRINT / PDF
 // ─────────────────────────────────────────────
-const LV_COLOR = { basis:'#3b82f6', mittel:'#f59e0b', fort:'#ef4444', alle:'#8b5cf6' };
+const TEAM_COL='#ef4444';
+const LV_COL={basis:'#3b82f6',mittel:'#f59e0b',fort:'#f97316',alle:'#8b5cf6',team:TEAM_COL};
+const OG_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="44" height="44"><defs><radialGradient id="pg" cx="35%" cy="28%" r="65%"><stop offset="0%" stop-color="#aaa"/><stop offset="45%" stop-color="#555"/><stop offset="100%" stop-color="#111"/></radialGradient><clipPath id="pc"><circle cx="50" cy="50" r="47"/></clipPath></defs><circle cx="50" cy="50" r="47" fill="url(#pg)"/><path d="M 18 52 Q 24 26 50 24 Q 74 22 82 46 Q 86 64 68 74 Q 44 82 22 68 Q 10 58 18 52 Z" fill="#080808" opacity="0.72" clip-path="url(#pc)"/><path d="M 24 36 Q 44 18 68 24 Q 82 30 84 46" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/></svg>`;
 
 function printKlass() {
-  const c = S.course;
-  const sk = courseSkills(c.name);
-  const col = LV_COLOR[lvClass(c.level)] || '#888';
-
-  const win = window.open('', '_blank');
-  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>OG Skillpass – ${c.name}</title>
+  const c=S.course, sk=courseSkills(c.name);
+  const isTeam=c.isTeam||isTeamCourse(c.name);
+  const col=isTeam?TEAM_COL:(LV_COL[lvClass(c.level)]||'#888');
+  const ad=activeData();
+  const win=window.open('','_blank');
+  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OG SkillsPass – ${c.name}</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap');
-  body { font-family:'DM Sans',Arial,sans-serif; margin:0; background:#f5f5f5; }
-  .page { width:210mm; min-height:148mm; padding:14mm 18mm; box-sizing:border-box; page-break-after:always;
-    background:white; border-left:7px solid ${col}; margin:0 auto 10mm; }
-  .top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
-  .eyebrow { font-size:10px; letter-spacing:2px; color:#aaa; text-transform:uppercase; }
-  .og-logo { font-family:'Bebas Neue',sans-serif; font-size:20px; color:#f5c800; letter-spacing:2px; }
-  .og-logo span { color:#111; }
-  h1 { font-family:'Bebas Neue',sans-serif; font-size:34px; margin:4px 0 2px; letter-spacing:1px; }
-  .meta { font-size:12px; color:#666; margin-bottom:8px; }
-  .tags { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
-  .lv-tag { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700;
-    border:1.5px solid ${col}; color:${col}; text-transform:uppercase; letter-spacing:.5px; }
-  .status { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; }
-  .status.done    { background:#dcfce7; color:#166534; }
-  .status.partial { background:#fef9c3; color:#713f12; }
-  .status.open    { background:#f1f5f9; color:#475569; }
-  hr { border:none; border-top:1px solid #e5e7eb; margin:10px 0; }
-  .skills { display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; }
-  .sk { display:flex; align-items:center; justify-content:space-between; padding:8px 12px;
-    background:#f8fafc; border-radius:6px; border-left:3px solid ${col}; }
-  .sk-name { font-size:13px; font-weight:600; }
-  .sk-val  { font-family:'Bebas Neue',sans-serif; font-size:22px; }
-  .sk-stars { color:#f5c800; font-size:15px; }
-  .notes { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px;
-    font-size:12px; margin-top:10px; }
-  @media print { body { margin:0; background:white; } .page { page-break-after:always; } }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',Arial,sans-serif;background:#f0f0f0;}
+  .page{width:210mm;min-height:148mm;padding:12mm 14mm;background:white;margin:0 auto 8mm;
+    page-break-after:always;position:relative;overflow:hidden;}
+  .page::before{content:'';position:absolute;top:0;left:0;width:7px;height:100%;background:${col};}
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-left:4px;}
+  .og-brand{display:flex;align-items:center;gap:8px;}
+  .og-wordmark{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:#111;}
+  .og-wordmark span{color:${col};}
+  .eyebrow{font-size:10px;letter-spacing:2px;color:#aaa;text-transform:uppercase;}
+  .divider{height:2px;background:linear-gradient(90deg,${col},transparent);margin:8px 0 10px;}
+  .kid-name{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;color:#111;padding-left:4px;line-height:1;}
+  .meta{font-size:12px;color:#666;padding-left:4px;margin:4px 0 6px;}
+  .tags{display:flex;gap:8px;padding-left:4px;margin-bottom:12px;align-items:center;}
+  .lv-tag{padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;border:2px solid ${col};color:${col};text-transform:uppercase;letter-spacing:.5px;}
+  .status{padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+  .status.done{background:#dcfce7;color:#166534;}.status.partial{background:#fef9c3;color:#713f12;}.status.open{background:#f1f5f9;color:#475569;}
+  .skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-left:4px;}
+  .sk{background:#f8fafc;border-radius:8px;padding:10px 14px;border-left:4px solid ${col};display:flex;align-items:center;justify-content:space-between;}
+  .sk-name{font-size:13px;font-weight:700;color:#111;}
+  .sk-val{font-family:'Bebas Neue',sans-serif;font-size:26px;color:${col};}
+  .sk-stars{font-size:18px;letter-spacing:2px;}
+  .sk-stars .on{color:${col};}.sk-stars .off{color:#ddd;}
+  .notes-box{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;font-size:12px;color:#444;margin-top:10px;padding-left:18px;}
+  .footer{position:absolute;bottom:10mm;right:14mm;font-size:10px;color:#ccc;letter-spacing:1px;}
+  @media print{body{background:white;}.page{margin:0;page-break-after:always;}}
 </style></head><body>`;
 
-  c.kids.forEach(kid => {
-    const kd  = S.data[c.id]?.[kid];
-    const sTx = kd?.completed ? 'Abgeschlossen' : kd ? 'In Arbeit' : 'Offen';
-    const sCl = kd?.completed ? 'done' : kd ? 'partial' : 'open';
-
-    html += `<div class="page">
-  <div class="top">
-    <span class="eyebrow">OG Skillpass · ${fmtDate(S.day)}</span>
-    <span class="og-logo">OG <span>Skillpass</span></span>
+  c.kids.forEach(kid=>{
+    const kd=ad[c.id]?.[kid];
+    const sTx=kd?.completed?'Abgeschlossen':kd?'In Arbeit':'Offen';
+    const sCl=kd?.completed?'done':kd?'partial':'open';
+    html+=`<div class="page">
+  <div class="top-bar">
+    <div class="og-brand">${OG_SVG}<div class="og-wordmark">OG <span>SkillsPass</span></div></div>
+    <span class="eyebrow">Overground Basel</span>
   </div>
-  <h1>${kid}</h1>
-  <div class="meta">${c.name}${c.code ? ' · ' + c.code : ''} · ${c.time} Uhr · 👤 ${c.trainer}</div>
-  <div class="tags">
-    <span class="lv-tag">${c.level}</span>
-    <span class="status ${sCl}">${sTx}</span>
-  </div>
-  <hr>
-  <div class="skills">`;
-
-    sk.forEach(s => {
-      const v = kd?.skills?.[s.id];
-      let disp = '–';
-      if (v !== undefined) {
-        if (s.type === 'rating') { disp = '<span class="sk-stars">' + '★'.repeat(Math.round(v)) + '☆'.repeat(5 - Math.round(v)) + '</span>'; }
-        else { disp = `<span class="sk-val">${fmtVal(s, v)}</span>`; }
-      } else { disp = `<span class="sk-val" style="color:#ccc">–</span>`; }
-      html += `<div class="sk"><span class="sk-name">${s.label}</span>${disp}</div>`;
+  <div class="divider"></div>
+  <div class="kid-name">${kid}</div>
+  <div class="meta">${c.name}${c.code?' · '+c.code:''} · ${c.time} Uhr · 👤 ${c.trainer}</div>
+  <div class="tags"><span class="lv-tag">${isTeam?'Team':c.level}</span><span class="status ${sCl}">${sTx}</span></div>
+  <div class="skills-grid">`;
+    sk.forEach(s=>{
+      const v=kd?.skills?.[s.id];
+      let disp;
+      if (v===undefined) disp=`<span class="sk-val" style="color:#ccc">–</span>`;
+      else if (s.type==='rating') {
+        const n=Math.round(v);
+        disp=`<span class="sk-stars">${'<span class="on">★</span>'.repeat(n)+'<span class="off">★</span>'.repeat(5-n)}</span>`;
+      } else disp=`<span class="sk-val">${fmtVal(s,v)}</span>`;
+      html+=`<div class="sk"><span class="sk-name">${s.label}</span>${disp}</div>`;
     });
-
-    html += `</div>`;
-    if (kd?.notes) html += `<div class="notes"><strong>Notizen:</strong> ${kd.notes}</div>`;
-    html += `</div>`;
+    html+=`</div>`;
+    if (kd?.notes) html+=`<div class="notes-box"><strong>Notizen:</strong> ${kd.notes}</div>`;
+    html+=`<div class="footer">OG SkillsPass · Overground Basel</div></div>`;
   });
-
-  html += `</body></html>`;
-  win.document.write(html);
-  win.document.close();
-  setTimeout(() => win.print(), 350);
+  html+=`</body></html>`;
+  win.document.write(html); win.document.close(); setTimeout(()=>win.print(),400);
 }
 
 // ─────────────────────────────────────────────
-// NAVIGATION
+// HELPERS
 // ─────────────────────────────────────────────
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
+function escHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showScreen(name) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-'+name).classList.add('active'); window.scrollTo(0,0); }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
 
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 hydrate();
-const _today = new Date();
-S.day = new Date(_today.setHours(0, 0, 0, 0));
-renderWeek();
+hydrateCfg();
+checkShareLink();
+// Set default day to today
+S.day = new Date().getDay();
+renderDayRow();
+renderCourses();
 </script>
 </body>
 </html>
