@@ -743,7 +743,7 @@ function escStr(s) {
 const POOL_Y = ['Luca','Mia','Noah','Emma','Ben','Lea','Felix','Anna','Tim','Sara','Max','Lena','Jonas','Clara','Finn'];
 const POOL_M = ['Marco','Jana','Niklas','Leonie','Pascal','Alina','Simon','Marlene','Tanja','Patrick','Sophie','Fabian'];
 const POOL_T = ['Alexander','Valentina','Tobias','Melissa','Raphael','Jasmin','Sandra','David','Laura','Dominik','Selina'];
-const POOL_S = ['M.','K.','H.','S.','W.','B.','F.','R.','T.','P.','L.','G.'];
+const POOL_S = ['M','K','H','S','W','B','F','R','T','P','L','G'];
 function genKids(n, age) {
   if (n <= 0) return [];
   const pool = age === '5-8' ? POOL_Y : age === '13-15' ? POOL_T : POOL_M;
@@ -996,16 +996,36 @@ function fixCoursesFromFirebase(raw) {
 
 function fixAppdataFromFirebase(raw) {
   if (!raw) return { data: {}, customSkills: {}, skillOverrides: {} };
-  // data[courseId][kid][skillId] – innerste Ebene ist ein flaches Objekt (kein Array)
-  // customSkills[courseId] ist ein Array
-  const data = raw.data || {};
+  // data[courseId][kid][skillId] – all three key levels may be fbKey()-encoded,
+  // so decode them with fbDecode() on the way in.
+  const rawData = raw.data || {};
+  const data = {};
+  for (const encCid of Object.keys(rawData)) {
+    const cid = fbDecode(encCid);
+    data[cid] = {};
+    const kids = rawData[encCid] || {};
+    for (const encKid of Object.keys(kids)) {
+      const kid = fbDecode(encKid);
+      data[cid][kid] = {};
+      const skills = kids[encKid] || {};
+      for (const encSid of Object.keys(skills)) {
+        data[cid][kid][fbDecode(encSid)] = skills[encSid];
+      }
+    }
+  }
   const customSkills = {};
   if (raw.customSkills) {
     for (const cid of Object.keys(raw.customSkills)) {
-      customSkills[cid] = firebaseToArray(raw.customSkills[cid]);
+      customSkills[fbDecode(cid)] = firebaseToArray(raw.customSkills[cid]);
     }
   }
-  return { data, customSkills, skillOverrides: raw.skillOverrides || {} };
+  const skillOverrides = {};
+  if (raw.skillOverrides) {
+    for (const cid of Object.keys(raw.skillOverrides)) {
+      skillOverrides[fbDecode(cid)] = raw.skillOverrides[cid];
+    }
+  }
+  return { data, customSkills, skillOverrides };
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1107,6 +1127,29 @@ function fbKey(s) {
     .replace(/\./g, '%2E').replace(/#/g, '%23').replace(/\$/g, '%24')
     .replace(/\[/g, '%5B').replace(/\]/g, '%5D').replace(/\//g, '%2F');
 }
+// Reverse of fbKey: decode %2E → . etc. when reading keys back from Firebase
+function fbDecode(s) {
+  return String(s)
+    .replace(/%2E/gi, '.').replace(/%23/gi, '#').replace(/%24/gi, '$')
+    .replace(/%5B/gi, '[').replace(/%5D/gi, ']').replace(/%2F/gi, '/');
+}
+// Re-encode all keys in S.data before a full .set() write so Firebase never
+// sees forbidden characters (periods etc.) in kid names or skill IDs.
+function encodeDataKeys(data) {
+  const out = {};
+  for (const cid of Object.keys(data)) {
+    const encCid = fbKey(cid);
+    out[encCid] = {};
+    for (const kid of Object.keys(data[cid])) {
+      const encKid = fbKey(kid);
+      out[encCid][encKid] = {};
+      for (const sid of Object.keys(data[cid][kid])) {
+        out[encCid][encKid][fbKey(sid)] = data[cid][kid][sid];
+      }
+    }
+  }
+  return out;
+}
 
 // ── Granular score writes: only the changed value is written to Firebase,
 //    so two coaches entering different kids simultaneously never overwrite each other. ──
@@ -1130,8 +1173,8 @@ function flushScoreWrites() {
     .catch(e => {
       console.warn('Granular score write fehlgeschlagen, fallback auf full persist:', e);
       setSyncStatus('error');
-      // Fallback: full payload write
-      const payload = { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides };
+      // Fallback: full payload write (encode keys so periods in kid names don't fail)
+      const payload = { data: encodeDataKeys(S.data), customSkills: S.customSkills, skillOverrides: S.skillOverrides };
       _db.ref(FB_PATH_DATA).set(payload).catch(() => {});
     })
     .finally(() => { setTimeout(() => { _suppressRemoteData = false; }, 800); });
@@ -1147,8 +1190,14 @@ function persist() {
     setSyncStatus('syncing');
     clearTimeout(_persistDataTimer);
     _persistDataTimer = setTimeout(() => {
+      // Encode S.data keys so Firebase-forbidden chars (e.g. '.' in kid names) never reach RTDB
+      const fbPayload = {
+        data: encodeDataKeys(S.data),
+        customSkills: S.customSkills,
+        skillOverrides: S.skillOverrides
+      };
       _suppressRemoteData = true;
-      _db.ref(FB_PATH_DATA).set(payload)
+      _db.ref(FB_PATH_DATA).set(fbPayload)
         .then(() => setSyncStatus('live'))
         .catch(e => { console.warn('Firebase full persist fehlgeschlagen:', e); setSyncStatus('error'); })
         .finally(() => { setTimeout(() => { _suppressRemoteData = false; }, 1200); });
