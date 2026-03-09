@@ -595,7 +595,39 @@
   .diploma-sm .diploma-stamp-og     { font-size: 11pt; }
   .diploma-sm .diploma-sig-line     { font-size: 7pt; width: 120px; }
 
-  /* EXTRA SMALL: 16+ skills */
+  /* ── KOMPETENZRASTER DIPLOMA PAGE ──────────────────────── */
+  .diploma-komp-title {
+    font-size: 8pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2px; color: #999; text-align: center;
+    margin-bottom: 4px;
+  }
+  .diploma-komp-subtitle {
+    font-size: 7pt; color: #bbb; text-align: center;
+    margin-bottom: 10px; letter-spacing: 1px;
+  }
+  .diploma-komp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+  }
+  .diploma-komp-cat {
+    font-size: 6.5pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: #f5c800;
+    margin: 8px 0 3px;
+    grid-column: 1 / -1;
+  }
+  .diploma-komp-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 2.5px 0; border-bottom: 1px solid #f5f5f5;
+    font-size: 7.5pt; color: #333;
+    break-inside: avoid;
+  }
+  .diploma-komp-label { flex: 1; padding-right: 4px; }
+  .diploma-komp-stars { display: flex; gap: 1px; flex-shrink: 0; }
+  .diploma-komp-star  { font-size: 8pt; color: #ddd; }
+  .diploma-komp-star.filled { color: #f5c800; }
+
+    /* EXTRA SMALL: 16+ skills */
   .diploma-xs .diploma-inner        { padding: 2px 10px; }
   .diploma-xs .diploma-top          { margin-bottom: 2px; }
   .diploma-xs .diploma-logo         { font-size: 16pt; letter-spacing: 2px; }
@@ -912,9 +944,66 @@ const DEFAULT_SKILLS = {
     { id:'einsatz',      label:'Einsatz',      type:'rating', unit:'/5', min:1, max:5, step:1 },
     { id:'fortschritt',  label:'Fortschritt',  type:'rating', unit:'/5', min:1, max:5, step:1 },
   ],
+  level1: [
+    // ── SPORT SKILLS ──────────────────────────────────────
+    // NINJA
+    { id:'dismount',     label:'Dismount',              section:'skills', category:'Ninja',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'schlange',     label:'Schlange',              section:'skills', category:'Ninja',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'wall',         label:'Wall',                  section:'skills', category:'Ninja',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'mikados',      label:'Mikados',               section:'skills', category:'Ninja',            type:'time',   unit:'s',   min:0, max:120, step:1   },
+    { id:'ringe',        label:'Ringe',                 section:'skills', category:'Ninja',            type:'count',  unit:'Wdh', min:0, max:30,  step:1   },
+    // KRAFT
+    { id:'standweit',    label:'Standweitsprung',       section:'skills', category:'Kraft',            type:'mass',   unit:'cm',  min:0, max:300, step:5   },
+    { id:'faultier',     label:'Faultier krabbeln',     section:'skills', category:'Kraft',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'klimmzuege',   label:'Klimmzüge',             section:'skills', category:'Kraft',            type:'count',  unit:'Wdh', min:0, max:30,  step:1   },
+    { id:'haengen',      label:'Hängen',                section:'skills', category:'Kraft',            type:'time',   unit:'s',   min:0, max:120, step:1   },
+    // CHASE TAG
+    { id:'pkrot',        label:'Parkour rot (1–10)',    section:'skills', category:'Chase Tag',        type:'time',   unit:'s',   min:0, max:120, step:1   },
+    // TRICKING FLOOR
+    { id:'strecksprung', label:'Trampolin Strecksprung',section:'skills', category:'Tricking Floor',   type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    // PARKOUR
+    { id:'balancestange',label:'Balancestange',         section:'skills', category:'Parkour',          type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'prezi',        label:'Prezi',                 section:'skills', category:'Parkour',          type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'armsprung',    label:'Armsprung',             section:'skills', category:'Parkour',          type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'speedparkour', label:'Speedparkour',          section:'skills', category:'Parkour',          type:'time',   unit:'s',   min:0, max:120, step:1   },
+    // TRAMPOLIN
+    { id:'easy_combo',   label:'Easy Combo',            section:'skills', category:'Trampolin',        type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    // ── KOMPETENZRASTER (Ich kann…) ───────────────────────
+    // ORGANISATIONSRAHMEN
+    { id:'k_reihe',      label:'…mich in einer Reihe aufstellen',          section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_zuschauen',  label:'…bei Übungen aufmerksam zuschauen',        section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_anfeuern',   label:'…mein Team anfeuern und motivieren',       section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_regeln',     label:'…mich an Regeln halten',                   section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_aufwaerm',   label:'Eine Aufwärmübung vorzeigen',              section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_koordin',    label:'Eine koordinative Übung vorzeigen',        section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // NINJA WARRIOR
+    { id:'k_nj_hang',    label:'…sicher ein Hindernis durchhangeln',       section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_nj_schwung', label:'…meinen Schwung kontrollieren',            section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_nj_landen',  label:'…sicher abspringen und sicher landen',    section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_nj_dism',    label:'…einen Dismount von einer Stange',         section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_nj_tech',    label:'…spezifische Ninjatechniken',              section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // TRICKING FLOOR
+    { id:'k_tr_spr',     label:'…beidbeinig ins Trampolin springen',       section:'komp', category:'Tricking Floor',    type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // WORLD CHASE TAG
+    { id:'k_wct_tech',   label:'…Grundtechniken im WorldChaseTag',         section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_wct_reg',    label:'…Spielregeln halten und verstehen',        section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_wct_abk',    label:'…Hindernisse abkürzen',                   section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_wct_safe',   label:'…Sicherheitsregeln erklären',             section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // PARKOUR
+    { id:'k_pk_prezi',   label:'…einen Prezisprung',                      section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_pk_steep',   label:'…einen SteepStep',                        section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_pk_lauf',    label:'…mir einen einfachen Parkourlauf merken', section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_pk_rolle',   label:'…die Parkourrolle',                       section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_pk_climb',   label:'…einen einfachen ClimbUp',                section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // TRAMPOLIN & AIRBAG
+    { id:'k_tb_safe',    label:'…Sicherheitsregeln erklären und umsetzen',section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_tb_stop',    label:'…den Sicherheitsstop am Trampolin',       section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'k_tb_airbag',  label:'…richtig im Airbag landen / abrollen',   section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
 };
 function courseType(name) {
   const n = (name||'').toLowerCase();
+  if (n.includes('level 1')||n.includes('level1'))    return 'level1';
   if (n.includes('polysport'))                        return 'polysport';
   if (n.includes('akrobatik'))                        return 'akrobatik';
   if (n.includes('parkour')||n.includes('freerun'))   return 'parkour';
@@ -2030,34 +2119,43 @@ function buildDiplomaView(day) {
   const dateStr = new Date().toLocaleDateString('de-CH', {day:'2-digit', month:'2-digit', year:'numeric'});
 
   courses.forEach(course => {
-    const skills = getCourseSkills(course);
-    const lvStyle = lvDiplomaStyle(course.level);
-    // Pick density class so the card always fits on one A4 page
-    const n = skills.length;
-    const density = n <= 7 ? '' : n <= 11 ? ' diploma-md' : n <= 15 ? ' diploma-sm' : ' diploma-xs';
+    const allSkills   = getCourseSkills(course);
+    const sportSkills = allSkills.filter(s => s.section !== 'komp');
+    const kompSkills  = allSkills.filter(s => s.section === 'komp');
+    const hasKomp     = kompSkills.length > 0;
+    const lvStyle     = lvDiplomaStyle(course.level);
+
+    // Density for sport-skills page (without komp)
+    const ns = sportSkills.length;
+    const density = ns <= 7 ? '' : ns <= 11 ? ' diploma-md' : ns <= 15 ? ' diploma-sm' : ' diploma-xs';
 
     course.kids.forEach(kid => {
+      // ── PAGE 1: Sport Skills ──────────────────────────────
       const card = document.createElement('div');
       card.className = 'diploma-card' + density;
 
-      // Build skills HTML
-      let skillsHtml = skills.map(skill => {
+      // Build sport skills HTML (grouped by category if present)
+      let lastCat = null;
+      let skillsHtml = sportSkills.map(skill => {
         const val = getVal(course.id, kid, skill.id, skill);
+        let catHeader = '';
+        if (skill.category && skill.category !== lastCat) {
+          lastCat = skill.category;
+          catHeader = `<div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#f5c800;margin:6px 0 2px;grid-column:1/-1">${skill.category}</div>`;
+        }
+        let valHtml;
         if (skill.type === 'rating') {
           let stars = '';
-          for (let v = skill.min; v <= skill.max; v += skill.step) {
+          for (let v = skill.min; v <= skill.max; v += skill.step)
             stars += `<span class="diploma-star${v <= val ? ' filled' : ''}">★</span>`;
-          }
-          return `<div class="diploma-skill-row">
-            <span class="diploma-skill-label">${skill.label}</span>
-            <span class="diploma-skill-dots"></span>
-            <span class="diploma-skill-val"><span class="diploma-rating-stars">${stars}</span></span>
-          </div>`;
+          valHtml = `<span class="diploma-skill-val"><span class="diploma-rating-stars">${stars}</span></span>`;
+        } else {
+          valHtml = `<span class="diploma-skill-val">${formatVal(val, skill)}</span>`;
         }
-        return `<div class="diploma-skill-row">
+        return catHeader + `<div class="diploma-skill-row">
           <span class="diploma-skill-label">${skill.label}</span>
           <span class="diploma-skill-dots"></span>
-          <span class="diploma-skill-val">${formatVal(val, skill)}</span>
+          ${valHtml}
         </div>`;
       }).join('');
 
@@ -2113,9 +2211,78 @@ function buildDiplomaView(day) {
         </div>`;
 
       dv.appendChild(card);
+
+      // ── PAGE 2: Kompetenzraster (only if this course has komp skills) ─
+      if (!hasKomp) return;
+
+      // Group komp skills by category
+      const kompByCat = {};
+      kompSkills.forEach(s => {
+        const cat = s.category || 'Allgemein';
+        if (!kompByCat[cat]) kompByCat[cat] = [];
+        kompByCat[cat].push(s);
+      });
+
+      let kompHtml = '';
+      for (const [cat, catSkills] of Object.entries(kompByCat)) {
+        kompHtml += `<div class="diploma-komp-cat">${cat}</div>`;
+        catSkills.forEach(skill => {
+          const val = getVal(course.id, kid, skill.id, skill);
+          let stars = '';
+          for (let v = 1; v <= 5; v++)
+            stars += `<span class="diploma-komp-star${v <= val ? ' filled' : ''}">★</span>`;
+          kompHtml += `<div class="diploma-komp-row">
+            <span class="diploma-komp-label">${skill.label}</span>
+            <span class="diploma-komp-stars">${stars}</span>
+          </div>`;
+        });
+      }
+
+      const card2 = document.createElement('div');
+      card2.className = 'diploma-card';
+      card2.innerHTML = `
+        <div class="diploma-frame"></div>
+        <div class="diploma-corner tl"></div>
+        <div class="diploma-corner tr"></div>
+        <div class="diploma-corner bl"></div>
+        <div class="diploma-corner br"></div>
+        <div class="diploma-inner">
+          <div class="diploma-top">
+            <div class="diploma-logo-row ${window.OG_LOGO_SRC ? 'has-img' : ''}">
+              ${window.OG_LOGO_SRC
+                ? `<img class="diploma-og-logo-img" src="${window.OG_LOGO_SRC}" alt="OG Logo" />`
+                : `<div class="diploma-logo">OG <span>SKILLS</span>-PASS</div>`}
+            </div>
+          </div>
+
+          <div class="diploma-komp-title">Kompetenzraster</div>
+          <div class="diploma-komp-subtitle">Ich kann…</div>
+
+          <div class="diploma-kid-name" style="font-size:20pt;margin:2px 0 8px;padding-bottom:6px">${kid}</div>
+
+          <div class="diploma-komp-grid">
+            ${kompHtml}
+          </div>
+
+          <div class="diploma-footer" style="margin-top:auto">
+            <div class="diploma-sig-block">
+              <div class="diploma-sig-line">COACH</div>
+            </div>
+            <div class="diploma-stamp">
+              <div class="diploma-stamp-og">OG</div>
+              <div class="diploma-stamp-sub">Basel</div>
+            </div>
+            <div class="diploma-sig-block">
+              <div class="diploma-sig-line">DATUM</div>
+            </div>
+          </div>
+        </div>`;
+
+      dv.appendChild(card2);
     });
   });
 }
+
 
 function lvDiplomaStyle(level) {
   const s = (level||'').toLowerCase();
