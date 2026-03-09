@@ -452,6 +452,8 @@
   .diploma-card {
     page-break-after: always;
     break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
     width: 100%;
     /* Full A4 with @page margin:0 — card IS the page */
     height: 297mm;
@@ -467,15 +469,15 @@
   }
   .diploma-card:last-child { page-break-after: avoid; break-after: auto; }
 
-  /* Outer gold border frame */
+  /* Outer gold border frame — flush with card/page edges */
   .diploma-frame {
-    position: absolute; inset: 12px;
+    position: absolute; inset: 0;
     border: 3px solid #f5c800;
     pointer-events: none;
   }
   .diploma-frame::before {
     content: '';
-    position: absolute; inset: 5px;
+    position: absolute; inset: 6px;
     border: 1px solid #f5c80066;
   }
   /* Corner ornaments */
@@ -485,10 +487,10 @@
     border-color: #f5c800;
     border-style: solid;
   }
-  .diploma-corner.tl { top: 8px; left: 8px; border-width: 4px 0 0 4px; }
-  .diploma-corner.tr { top: 8px; right: 8px; border-width: 4px 4px 0 0; }
-  .diploma-corner.bl { bottom: 8px; left: 8px; border-width: 0 0 4px 4px; }
-  .diploma-corner.br { bottom: 8px; right: 8px; border-width: 0 4px 4px 0; }
+  .diploma-corner.tl { top: 3px; left: 3px; border-width: 4px 0 0 4px; }
+  .diploma-corner.tr { top: 3px; right: 3px; border-width: 4px 4px 0 0; }
+  .diploma-corner.bl { bottom: 3px; left: 3px; border-width: 0 0 4px 4px; }
+  .diploma-corner.br { bottom: 3px; right: 3px; border-width: 0 4px 4px 0; }
 
   .diploma-inner {
     position: relative; z-index: 1;
@@ -805,6 +807,9 @@
   <div class="print-btn-row no-print">
     <button class="btn btn-done" onclick="window.print()">🖨️ Alle Kids drucken</button>
     <button class="btn btn-secondary" onclick="showHome()">← Anderen Kurs wählen</button>
+    <div style="margin-top:10px;padding:10px 12px;background:#1a1a1a;border:1px solid #333;border-radius:10px;font-size:11px;color:#888;line-height:1.5">
+      💡 <strong style="color:#f5c800">Drucktipp:</strong> Im Chrome-Druckdialog unter <em>Weitere Einstellungen</em> die Option <em>Kopf- und Fusszeilen</em> deaktivieren — dann verschwinden URL und Datum, und der Goldrahmen geht bis zum Blattrand.
+    </div>
   </div>
 </div>
 
@@ -2539,6 +2544,7 @@ function buildDiplomaView(day) {
             ${skillsHtml}
           </div>
 
+          ${!hasKomp ? `
           <div class="diploma-footer">
             <div class="diploma-sig-block">
               <div class="diploma-sig-line">${coachEmoji ? `<span style="font-size:1.3em">${coachEmoji}</span> ` : ""}COACH</div>
@@ -2548,9 +2554,9 @@ function buildDiplomaView(day) {
               <div class="diploma-stamp-sub">Basel</div>
             </div>
             <div class="diploma-sig-block">
-              <div class="diploma-sig-line">DATUM</div>
+              <div class="diploma-sig-line">UNTERSCHRIFT</div>
             </div>
-          </div>
+          </div>` : ''}
         </div>`;
 
       dv.appendChild(card);
@@ -2616,7 +2622,7 @@ function buildDiplomaView(day) {
               <div class="diploma-stamp-sub">Basel</div>
             </div>
             <div class="diploma-sig-block">
-              <div class="diploma-sig-line">DATUM</div>
+              <div class="diploma-sig-line">UNTERSCHRIFT</div>
             </div>
           </div>
         </div>`;
