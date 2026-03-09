@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>OG Skills-Pass · Aufgaben</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f5c800">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OG Skills-Pass">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
@@ -98,7 +104,12 @@
     background: var(--surface); border: 1px solid var(--border);
     border-left: 4px solid var(--accent); transition: border-color .2s;
   }
-  .course-row.team-row { border-left-color: var(--red); }
+  /* Level-based left border colors — always consistent across days */
+  .course-row.lv-basis   { border-left-color: #3b82f6; }  /* blue   – Basis */
+  .course-row.lv-mittel  { border-left-color: #f59e0b; }  /* amber  – Mittel */
+  .course-row.lv-fort    { border-left-color: #f97316; }  /* orange – Fortgeschritten */
+  .course-row.lv-team    { border-left-color: var(--red); } /* red  – Team / Comp */
+  .course-row.lv-alle    { border-left-color: #a855f7; }  /* purple – Alle Stufen */
   .course-row.sortable-ghost { opacity: 0.3; }
 
   .drag-handle {
@@ -241,8 +252,18 @@
   .course-banner-title { font-weight: 700; font-size: 15px; flex: 1; }
   .course-banner-sub { font-size: 12px; color: var(--muted); }
 
-  /* Task grid */
-  .tasks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  /* Task grid — groups */
+  .tasks-grid { display: block; margin-bottom: 12px; }
+  .task-group-header {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--muted); margin: 18px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .task-group-header::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .task-group-header:first-child { margin-top: 4px; }
+  .task-group-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .task-tile {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 14px 12px;
@@ -1189,6 +1210,14 @@ function lvBadgeClass(l) {
   if (s.includes('fort')) return 'fort'; if (s==='team'||s==='comp') return 'team';
   return 'alle';
 }
+function lvRowClass(l) {
+  const s = (l||'').toLowerCase();
+  if (s==='basis')          return 'lv-basis';
+  if (s==='mittel')         return 'lv-mittel';
+  if (s.includes('fort'))   return 'lv-fort';
+  if (s==='team'||s==='comp') return 'lv-team';
+  return 'lv-alle';
+}
 
 // ─────────────────────────────────────────────────────────
 // DEFAULT COURSES DATA
@@ -1727,7 +1756,12 @@ function getCourses(day) { return (S.courses[day] || []); }
 // SKILL HELPERS
 // ─────────────────────────────────────────────────────────
 function getCourseSkills(course) {
-  const type = courseType(course.name);
+  // Determine skill set: course.level "Fortgeschritten" always → level2 skills,
+  // regardless of course name. Name-based detection is used as fallback.
+  const lvl = (course.level || '').toLowerCase();
+  let type = courseType(course.name);
+  if (lvl.includes('fort') && type !== 'level2') type = 'level2';
+  if (lvl === 'basis' && type === 'default')      type = 'level1';
   const base = DEFAULT_SKILLS[type] || DEFAULT_SKILLS.default;
   const custom = S.customSkills[course.id] || [];
   const overrides = S.skillOverrides[course.id] || {};
@@ -1900,7 +1934,7 @@ function renderHome() {
 
   courses.forEach(c => {
     const row = document.createElement('div');
-    row.className = 'course-row' + (c.isTeam ? ' team-row' : '');
+    row.className = 'course-row ' + lvRowClass(c.level);
     row.dataset.id = c.id;
 
     const handle = document.createElement('span');
@@ -2233,33 +2267,60 @@ function renderOverview() {
   const grid = document.getElementById('tasks-grid');
   grid.innerHTML = '';
 
+  // Group skills by category (preserving order of first appearance)
+  const groups = [];
+  const groupMap = {};
   skills.forEach((skill, idx) => {
-    const done = isSkillDone(course, skill);
-    const tile = document.createElement('div');
-    tile.className = 'task-tile' + (done ? ' done' : '');
-    tile.innerHTML = `
-      ${done ? '<span class="task-tile-check">✓</span>' : ''}
-      <div class="task-tile-num">Aufgabe ${idx+1}</div>
-      <div class="task-tile-name">${skill.label}</div>
-      <div class="task-tile-unit">${skill.unit}</div>
-      <button class="task-tile-edit" title="Bearbeiten">✎</button>`;
-    // Separate click targets: edit button vs. tile body
-    tile.onclick = (e) => {
-      if (e.target.classList.contains('task-tile-edit')) {
-        e.stopPropagation();
-        openTaskModal(idx);
-      } else {
-        openTask(idx);
-      }
-    };
-    grid.appendChild(tile);
+    const cat = skill.category || 'Aufgaben';
+    if (!groupMap[cat]) { groupMap[cat] = []; groups.push(cat); }
+    groupMap[cat].push({ skill, idx });
   });
 
+  // Render each group with a header
+  groups.forEach(cat => {
+    const header = document.createElement('div');
+    header.className = 'task-group-header';
+    header.textContent = cat;
+    grid.appendChild(header);
+
+    const tileRow = document.createElement('div');
+    tileRow.className = 'task-group-tiles';
+
+    groupMap[cat].forEach(({ skill, idx }) => {
+      const done = isSkillDone(course, skill);
+      const tile = document.createElement('div');
+      tile.className = 'task-tile' + (done ? ' done' : '');
+      tile.innerHTML = `
+        ${done ? '<span class="task-tile-check">✓</span>' : ''}
+        <div class="task-tile-num">${idx+1}</div>
+        <div class="task-tile-name">${skill.label}</div>
+        <div class="task-tile-unit">${skill.unit}</div>
+        <button class="task-tile-edit" title="Bearbeiten">✎</button>`;
+      tile.onclick = (e) => {
+        if (e.target.classList.contains('task-tile-edit')) {
+          e.stopPropagation();
+          openTaskModal(idx);
+        } else {
+          openTask(idx);
+        }
+      };
+      tileRow.appendChild(tile);
+    });
+
+    grid.appendChild(tileRow);
+  });
+
+  // Custom tasks without category also shown grouped
   const addTile = document.createElement('div');
   addTile.className = 'add-task-tile';
   addTile.innerHTML = `<span class="plus">＋</span><span>Aufgabe hinzufügen</span>`;
   addTile.onclick = () => openTaskModal(null);
-  grid.appendChild(addTile);
+  // Wrap add tile in a group-tiles row so it stays in the grid layout
+  const addRow = document.createElement('div');
+  addRow.className = 'task-group-tiles';
+  addRow.style.marginTop = '14px';
+  addRow.appendChild(addTile);
+  grid.appendChild(addRow);
 }
 
 // ─────────────────────────────────────────────────────────
@@ -2719,6 +2780,16 @@ setupRealtimeSync();
     if (txt) txt.style.display = 'none';
   }
 })();
+</script>
+<script>
+// ── SERVICE WORKER REGISTRATION (PWA) ─────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('[PWA] SW registered, scope:', reg.scope))
+      .catch(err => console.warn('[PWA] SW registration failed:', err));
+  });
+}
 </script>
 </body>
 </html>
