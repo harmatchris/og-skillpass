@@ -414,13 +414,17 @@
     page-break-after: always;
     break-after: page;
     width: 100%;
-    min-height: 260mm;
-    padding: 28px 32px 28px;
+    /* Exact A4 height minus @page margins (8mm top + 8mm bottom = 16mm) */
+    height: 281mm;
+    max-height: 281mm;
+    padding: 20px 28px;
     position: relative;
     background: #fff;
     display: flex; flex-direction: column;
     color: #111;
     font-family: 'DM Sans', 'Arial', sans-serif;
+    overflow: hidden;
+    box-sizing: border-box;
   }
   .diploma-card:last-child { page-break-after: avoid; break-after: auto; }
 
@@ -535,15 +539,96 @@
     padding: 4px 12px; border-radius: 20px; font-size: 9pt; font-weight: 800;
     text-transform: uppercase; letter-spacing: 1px;
   }
+  /* OG logo image — dark band because the OG logo is designed for dark backgrounds */
+  .diploma-logo-row.has-img {
+    background: #111;
+    border-radius: 6px;
+    padding: 10px 20px;
+    margin-bottom: 4px;
+  }
+  .diploma-og-logo-img {
+    height: 40px; width: auto; max-width: 240px;
+    object-fit: contain; display: block; margin: 0 auto;
+  }
+  .diploma-md .diploma-og-logo-img { height: 34px; }
+  .diploma-sm .diploma-og-logo-img, .diploma-xs .diploma-og-logo-img { height: 28px; }
+
+  /* ── DIPLOMA DENSITY VARIANTS ─────────────────────────────
+     Automatically applied based on number of skills per course.
+     Ensures every diploma fits exactly on one A4 page.
+  ────────────────────────────────────────────────────────── */
+
+  /* MEDIUM: 8–11 skills */
+  .diploma-md .diploma-inner        { padding: 6px 14px; }
+  .diploma-md .diploma-top          { margin-bottom: 8px; }
+  .diploma-md .diploma-logo         { font-size: 22pt; }
+  .diploma-md .diploma-stars        { font-size: 11pt; }
+  .diploma-md .diploma-hr           { margin: 7px 0; }
+  .diploma-md .diploma-hr-thin      { margin: 7px 0; }
+  .diploma-md .diploma-kid-name     { font-size: 24pt; margin: 4px 0 3px; padding-bottom: 6px; }
+  .diploma-md .diploma-course-info  { margin-top: 6px; }
+  .diploma-md .diploma-skills-section { margin: 8px 0; }
+  .diploma-md .diploma-skill-row    { padding: 4px 0; }
+  .diploma-md .diploma-skill-label  { font-size: 9.5pt; }
+  .diploma-md .diploma-skill-val    { font-size: 11pt; }
+  .diploma-md .diploma-footer       { margin-top: 8px; padding-top: 8px; }
+
+  /* SMALL: 12–15 skills */
+  .diploma-sm .diploma-inner        { padding: 4px 12px; }
+  .diploma-sm .diploma-top          { margin-bottom: 5px; }
+  .diploma-sm .diploma-logo         { font-size: 19pt; }
+  .diploma-sm .diploma-stars        { font-size: 10pt; }
+  .diploma-sm .diploma-hr           { margin: 5px 0; border-top-width: 1.5px; }
+  .diploma-sm .diploma-hr-thin      { margin: 5px 0; }
+  .diploma-sm .diploma-kid-name     { font-size: 20pt; margin: 3px 0 2px; padding-bottom: 5px; border-bottom-width: 2px; }
+  .diploma-sm .diploma-cert-text    { font-size: 8pt; margin-bottom: 3px; }
+  .diploma-sm .diploma-course-info  { margin-top: 4px; }
+  .diploma-sm .diploma-course-name  { font-size: 10pt; }
+  .diploma-sm .diploma-meta-row     { font-size: 8pt; margin-top: 2px; }
+  .diploma-sm .diploma-skills-section { margin: 5px 0; }
+  .diploma-sm .diploma-skills-title { font-size: 7pt; margin-bottom: 4px; }
+  .diploma-sm .diploma-skill-row    { padding: 3px 0; }
+  .diploma-sm .diploma-skill-label  { font-size: 8.5pt; }
+  .diploma-sm .diploma-skill-val    { font-size: 9.5pt; min-width: 50px; }
+  .diploma-sm .diploma-footer       { margin-top: 6px; padding-top: 6px; }
+  .diploma-sm .diploma-stamp        { width: 56px; height: 56px; }
+  .diploma-sm .diploma-stamp-og     { font-size: 11pt; }
+  .diploma-sm .diploma-sig-line     { font-size: 7pt; width: 120px; }
+
+  /* EXTRA SMALL: 16+ skills */
+  .diploma-xs .diploma-inner        { padding: 2px 10px; }
+  .diploma-xs .diploma-top          { margin-bottom: 2px; }
+  .diploma-xs .diploma-logo         { font-size: 16pt; letter-spacing: 2px; }
+  .diploma-xs .diploma-stars        { font-size: 9pt; letter-spacing: 1px; }
+  .diploma-xs .diploma-hr           { margin: 4px 0; border-top-width: 1.5px; }
+  .diploma-xs .diploma-hr-thin      { margin: 4px 0; }
+  .diploma-xs .diploma-kid-name     { font-size: 16pt; margin: 2px 0 1px; padding-bottom: 4px; border-bottom-width: 2px; }
+  .diploma-xs .diploma-cert-text    { font-size: 7pt; margin-bottom: 1px; }
+  .diploma-xs .diploma-course-info  { margin-top: 2px; }
+  .diploma-xs .diploma-course-name  { font-size: 9pt; }
+  .diploma-xs .diploma-meta-row     { font-size: 7.5pt; margin-top: 1px; }
+  .diploma-xs .diploma-skills-section { margin: 3px 0; }
+  .diploma-xs .diploma-skills-title { font-size: 6.5pt; margin-bottom: 2px; }
+  .diploma-xs .diploma-skill-row    { padding: 2px 0; }
+  .diploma-xs .diploma-skill-label  { font-size: 7.5pt; }
+  .diploma-xs .diploma-skill-val    { font-size: 8.5pt; min-width: 45px; }
+  .diploma-xs .diploma-footer       { margin-top: 4px; padding-top: 4px; }
+  .diploma-xs .diploma-stamp        { width: 48px; height: 48px; }
+  .diploma-xs .diploma-stamp-og     { font-size: 9pt; }
+  .diploma-xs .diploma-stamp-sub    { font-size: 4.5pt; }
+  .diploma-xs .diploma-sig-line     { font-size: 6.5pt; width: 100px; }
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <div class="header">
-  <div>
-    <div class="logo">OG <span>SKILLS</span>-PASS</div>
-    <div class="header-sub">Aufgaben-Modus</div>
+  <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickOGLogo()" title="OG Logo hochladen (einmalig)">
+    <img id="header-logo-img" style="height:28px;width:auto;object-fit:contain;display:none" alt="OG Logo" />
+    <div id="header-logo-text">
+      <div class="logo">OG <span>SKILLS</span>-PASS</div>
+      <div class="header-sub">Aufgaben-Modus · Logo tippen zum Hochladen</div>
+    </div>
   </div>
   <div class="header-right" style="align-items:center;">
     <div class="sync-badge no-print" id="sync-badge" title="Firebase Sync-Status">
@@ -916,6 +1001,30 @@ const DEFAULT_COURSES = {
   ],
 };
 const DAY_NAMES = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+// ─────────────────────────────────────────────────────────
+// OG LOGO (stored in localStorage as base64, loaded once at startup)
+// ─────────────────────────────────────────────────────────
+window.OG_LOGO_SRC = localStorage.getItem('og_logo_b64') || '';
+
+function pickOGLogo() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/png,image/jpeg,image/svg+xml,image/webp';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      window.OG_LOGO_SRC = ev.target.result;
+      localStorage.setItem('og_logo_b64', ev.target.result);
+      // Update header logo display
+      const hdr = document.getElementById('header-logo-img');
+      if (hdr) { hdr.src = ev.target.result; hdr.style.display = 'block'; }
+      document.getElementById('header-logo-text').style.display = 'none';
+    };
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
 
 // ─────────────────────────────────────────────────────────
 // STATE
@@ -1923,10 +2032,13 @@ function buildDiplomaView(day) {
   courses.forEach(course => {
     const skills = getCourseSkills(course);
     const lvStyle = lvDiplomaStyle(course.level);
+    // Pick density class so the card always fits on one A4 page
+    const n = skills.length;
+    const density = n <= 7 ? '' : n <= 11 ? ' diploma-md' : n <= 15 ? ' diploma-sm' : ' diploma-xs';
 
     course.kids.forEach(kid => {
       const card = document.createElement('div');
-      card.className = 'diploma-card';
+      card.className = 'diploma-card' + density;
 
       // Build skills HTML
       let skillsHtml = skills.map(skill => {
@@ -1957,8 +2069,10 @@ function buildDiplomaView(day) {
         <div class="diploma-corner br"></div>
         <div class="diploma-inner">
           <div class="diploma-top">
-            <div class="diploma-logo-row">
-              <div class="diploma-logo">OG <span>SKILLS</span>-PASS</div>
+            <div class="diploma-logo-row ${window.OG_LOGO_SRC ? 'has-img' : ''}">
+              ${window.OG_LOGO_SRC
+                ? `<img class="diploma-og-logo-img" src="${window.OG_LOGO_SRC}" alt="OG Logo" />`
+                : `<div class="diploma-logo">OG <span>SKILLS</span>-PASS</div>`}
             </div>
             <div class="diploma-stars">★ ★ ★ ★ ★</div>
           </div>
@@ -2045,6 +2159,16 @@ renderHome();
 // Firebase initialisieren und Echtzeit-Sync starten
 initFirebase();
 setupRealtimeSync();
+
+// Apply saved OG logo to header on startup
+(function() {
+  if (window.OG_LOGO_SRC) {
+    const img = document.getElementById('header-logo-img');
+    const txt = document.getElementById('header-logo-text');
+    if (img) { img.src = window.OG_LOGO_SRC; img.style.display = 'block'; }
+    if (txt) txt.style.display = 'none';
+  }
+})();
 </script>
 </body>
 </html>
