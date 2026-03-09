@@ -380,12 +380,14 @@
   @media print {
     @page { size: A4 portrait; margin: 8mm 12mm; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    /* Reset height constraints so multi-kid content flows across pages */
+    html, body { height: auto !important; min-height: 0 !important; overflow: visible !important; }
     body { background: #fff; color: #000; max-width: 100%; }
     .header, .no-print { display: none !important; }
-    .screen { display: none !important; }
+    .screen { display: none !important; min-height: 0 !important; height: 0 !important; }
     .print-view { display: block !important; }
-    .print-kid-card { page-break-after: always; padding: 20px; }
-    .print-kid-card:last-child { page-break-after: avoid; }
+    .print-kid-card { page-break-after: always; break-after: page; padding: 20px; page-break-inside: avoid; break-inside: avoid; }
+    .print-kid-card:last-child { page-break-after: avoid; break-after: auto; }
     .print-og-logo { font-family: 'Bebas Neue', sans-serif; font-size: 16pt; letter-spacing: 2px; color: #f5c800; }
     .print-kid-name { font-size: 20pt; font-weight: 700; margin: 4px 0 2px; }
     .print-course-info { font-size: 10pt; color: #666; margin-bottom: 16px; }
@@ -409,6 +411,7 @@
   /* ── DIPLOMA CARD STYLES ── */
   .diploma-card {
     page-break-after: always;
+    break-after: page;
     width: 100%;
     min-height: 260mm;
     padding: 28px 32px 28px;
@@ -418,7 +421,7 @@
     color: #111;
     font-family: 'DM Sans', 'Arial', sans-serif;
   }
-  .diploma-card:last-child { page-break-after: avoid; }
+  .diploma-card:last-child { page-break-after: avoid; break-after: auto; }
 
   /* Outer gold border frame */
   .diploma-frame {
@@ -1008,7 +1011,9 @@ function fixAppdataFromFirebase(raw) {
 // ─────────────────────────────────────────────────────────
 // REALTIME SYNC SETUP
 // ─────────────────────────────────────────────────────────
-let _suppressRemoteUpdate = false; // Verhindert Echo-Updates
+// Separate suppress flags per data path (prevents one write from blocking the other)
+let _suppressRemoteData    = false;
+let _suppressRemoteCourses = false;
 
 function setupRealtimeSync() {
   if (!_fbActive || !_db) return;
@@ -1024,11 +1029,10 @@ function setupRealtimeSync() {
 
   // Kursdaten synchronisieren
   _db.ref(FB_PATH_COURSES).on('value', snap => {
-    if (_suppressRemoteUpdate) return;
+    if (_suppressRemoteCourses) return;
     const raw = snap.val();
     if (raw !== null) {
       S.courses = fixCoursesFromFirebase(raw);
-      // Lokaler Fallback aktualisieren
       try { localStorage.setItem('og_sp_courses_v2', JSON.stringify(S.courses)); } catch(_) {}
       refreshCurrentView();
     }
@@ -1036,14 +1040,13 @@ function setupRealtimeSync() {
 
   // App-Daten synchronisieren (Scores, Skills, Overrides)
   _db.ref(FB_PATH_DATA).on('value', snap => {
-    if (_suppressRemoteUpdate) return;
+    if (_suppressRemoteData) return;
     const raw = snap.val();
     if (raw !== null) {
       const fixed = fixAppdataFromFirebase(raw);
       S.data = fixed.data;
       S.customSkills = fixed.customSkills;
       S.skillOverrides = fixed.skillOverrides;
-      // Lokaler Fallback aktualisieren
       try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify({
         data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides
       })); } catch(_) {}
@@ -1059,28 +1062,55 @@ function refreshCurrentView() {
   const activeScreen = document.querySelector('.screen.active');
   if (!activeScreen) return;
   const id = activeScreen.id;
-  if (id === 'screen-home')         renderHome();
+  if (id === 'screen-home')          renderHome();
   else if (id === 'screen-overview') renderOverview();
-  // Do NOT re-render screen-task from remote Firebase updates —
-  // this would destroy the slider/rating DOM while the user is actively entering values.
-  // Instead, when the user navigates away from screen-task, the latest S.data is used.
+  else if (id === 'screen-task')     softUpdateTaskView(); // partial update — no DOM rebuild
+}
+
+// Soft-update screen-task: only refresh displayed values + rating/slider state,
+// WITHOUT rebuilding the DOM (so active interactions are never interrupted).
+function softUpdateTaskView() {
+  const course = S.course;
+  if (!course || S.taskIdx === undefined || S.taskIdx === null) return;
+  const skills = getCourseSkills(course);
+  const skill  = skills[S.taskIdx];
+  if (!skill) return;
+  (course.kids || []).forEach(kid => {
+    const val = getVal(course.id, kid, skill.id, skill);
+    // Update the numeric display label
+    const dvEl = document.getElementById(`dv-${encodeId(kid)}-${encodeId(skill.id)}`);
+    if (dvEl) dvEl.textContent = skill.type === 'rating' ? val + skill.unit : formatVal(val, skill);
+    if (skill.type === 'rating') {
+      // Re-highlight the correct rating button (if not the one being touched)
+      const dvParent = dvEl ? dvEl.closest('.kid-row') : null;
+      if (dvParent) dvParent.querySelectorAll('.rating-star').forEach(b => b.classList.toggle('active', +b.textContent === val));
+    } else {
+      // Move slider to correct position only if it's not actively focused
+      const slEl = document.getElementById(`sl-${encodeId(kid)}-${encodeId(skill.id)}`);
+      if (slEl && document.activeElement !== slEl) slEl.value = val;
+    }
+  });
 }
 
 // ─────────────────────────────────────────────────────────
 // PERSIST / HYDRATE
 // ─────────────────────────────────────────────────────────
+let _persistDataTimer = null;
 function persist() {
   const payload = { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides };
   // 1. Immer zuerst lokal speichern (auch offline verfügbar)
   try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(payload)); } catch(_) {}
-  // 2. Wenn Firebase aktiv: auch in die Cloud schreiben
+  // 2. Wenn Firebase aktiv: debounced write (reduces writes during slider dragging)
   if (_fbActive && _db) {
-    _suppressRemoteUpdate = true;
     setSyncStatus('syncing');
-    _db.ref(FB_PATH_DATA).set(payload)
-      .then(() => { setSyncStatus('live'); })
-      .catch(e => { console.warn('Firebase write (data) fehlgeschlagen:', e); setSyncStatus('error'); })
-      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 1500); });
+    clearTimeout(_persistDataTimer);
+    _persistDataTimer = setTimeout(() => {
+      _suppressRemoteData = true;
+      _db.ref(FB_PATH_DATA).set(payload)
+        .then(() => { setSyncStatus('live'); })
+        .catch(e => { console.warn('Firebase write (data) fehlgeschlagen:', e); setSyncStatus('error'); })
+        .finally(() => { setTimeout(() => { _suppressRemoteData = false; }, 1200); });
+    }, 400); // wait 400 ms of inactivity before writing to Firebase
   }
 }
 function persistCourses() {
@@ -1088,12 +1118,12 @@ function persistCourses() {
   try { localStorage.setItem('og_sp_courses_v2', JSON.stringify(S.courses)); } catch(_) {}
   // 2. Wenn Firebase aktiv: auch in die Cloud schreiben
   if (_fbActive && _db) {
-    _suppressRemoteUpdate = true;
+    _suppressRemoteCourses = true;
     setSyncStatus('syncing');
     _db.ref(FB_PATH_COURSES).set(S.courses)
       .then(() => { setSyncStatus('live'); })
       .catch(e => { console.warn('Firebase write (courses) fehlgeschlagen:', e); setSyncStatus('error'); })
-      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 1500); });
+      .finally(() => { setTimeout(() => { _suppressRemoteCourses = false; }, 1200); });
   }
 }
 function hydrate() {
@@ -1542,7 +1572,7 @@ function renderTaskInput() {
       let starsHtml = '';
       for (let v = skill.min; v <= skill.max; v += skill.step)
         starsHtml += `<button class="rating-star${val===v?' active':''}"
-          onclick="rateKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',${v},this.closest('.kid-row'))">${v}</button>`;
+          onclick="rateKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',${v},this)">${v}</button>`;
       row.innerHTML = `
         <div class="kid-row-top">
           <span class="kid-name">${kid}</span>
@@ -1556,6 +1586,7 @@ function renderTaskInput() {
           <span class="kid-value-display" id="dv-${encodeId(kid)}-${encodeId(skill.id)}">${formatVal(val,skill)}</span>
         </div>
         <input type="range" class="kid-slider"
+          id="sl-${encodeId(kid)}-${encodeId(skill.id)}"
           min="${skill.min}" max="${skill.max}" step="${skill.step}" value="${val}"
           oninput="slideKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',this)"
           onchange="slideKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',this)">`;
@@ -1574,8 +1605,10 @@ function slideKid(courseId, kid, skillId, input) {
     if (skill) el.textContent = formatVal(val, skill);
   }
 }
-function rateKid(courseId, kid, skillId, val, row) {
+function rateKid(courseId, kid, skillId, val, btn) {
   setVal(courseId, kid, skillId, val);
+  // btn may be the button element itself or already the .kid-row; resolve to .kid-row safely
+  const row = btn ? (btn.classList && btn.classList.contains('kid-row') ? btn : (btn.closest ? btn.closest('.kid-row') : null)) : null;
   if (row) row.querySelectorAll('.rating-star').forEach(b => b.classList.toggle('active', +b.textContent===val));
   const skills = getCourseSkills(S.course);
   const skill = skills.find(s=>s.id===skillId);
