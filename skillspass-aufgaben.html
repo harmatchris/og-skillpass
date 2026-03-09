@@ -35,7 +35,8 @@
     position: sticky; top: 0; z-index: 100;
     background: #0e0e0eee; backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
-    padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: nowrap; gap: 8px;
   }
   .logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; line-height: 1; }
   .logo span { color: var(--accent); }
@@ -744,25 +745,23 @@
 
 <!-- HEADER -->
 <div class="header">
-  <div style="display:flex;align-items:center;gap:8px;">
-    <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickOGLogo()" title="Logo tippen zum Hochladen / Wechseln">
-      <img id="header-logo-img" style="height:28px;width:auto;object-fit:contain;display:none" alt="OG Logo" />
-      <div id="header-logo-text">
+  <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+    <div style="display:flex;align-items:center;gap:10px;cursor:pointer;min-width:0" onclick="pickOGLogo()" title="Logo tippen zum Hochladen / Wechseln">
+      <img id="header-logo-img" style="height:28px;width:auto;object-fit:contain;display:none;flex-shrink:0" alt="OG Logo" />
+      <div id="header-logo-text" style="min-width:0">
         <div class="logo">OG <span>SKILLS</span>-PASS</div>
         <div class="header-sub">Aufgaben-Modus · Logo tippen zum Hochladen</div>
       </div>
     </div>
-    <button id="remove-logo-btn" onclick="removeOGLogo()" title="Logo entfernen (Titel wiederherstellen)"
+    <button id="remove-logo-btn" onclick="removeOGLogo()" title="Logo entfernen"
       style="display:none;background:none;border:1px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:10px;cursor:pointer;color:var(--muted);flex-shrink:0;padding:0;line-height:1">✕</button>
   </div>
-  </div>
-  <div class="header-right" style="align-items:center;">
+  <div class="header-right" style="align-items:center;flex-shrink:0;">
     <div class="sync-badge no-print" id="sync-badge" title="Firebase Sync-Status">
       <div class="sync-dot" id="sync-dot"></div>
       <span id="sync-label">Lokal</span>
     </div>
-    <button class="coach-emoji-btn no-print" id="coach-emoji-btn" onclick="toggleEmojiPicker(event)" title="Coach-Emoji wählen (Gag 😄)">🏃</button>
-    <button class="icon-btn no-print" onclick="window.print()" title="Drucken">🖨️</button>
+    <button class="coach-emoji-btn no-print" id="coach-emoji-btn" onclick="toggleEmojiPicker(event)" title="Coach-Emoji wählen 😄">🏃</button>
   </div>
 </div>
 
