@@ -271,6 +271,7 @@
   .kid-slider {
     width: 100%; -webkit-appearance: none; appearance: none;
     height: 6px; border-radius: 3px; background: var(--surface3); outline: none; cursor: pointer;
+    touch-action: none;
   }
   .kid-slider::-webkit-slider-thumb {
     -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
@@ -720,6 +721,20 @@
 
 <script>
 // ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+// Escapes a string for safe embedding inside a JS single-quoted string
+// in an HTML attribute (e.g. onclick="fn('...')").
+function escStr(s) {
+  return String(s)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
+
+// ─────────────────────────────────────────────────────────
 // NAME POOLS
 // ─────────────────────────────────────────────────────────
 const POOL_Y = ['Luca','Mia','Noah','Emma','Ben','Lea','Felix','Anna','Tim','Sara','Max','Lena','Jonas','Clara','Finn'];
@@ -1044,10 +1059,11 @@ function refreshCurrentView() {
   const activeScreen = document.querySelector('.screen.active');
   if (!activeScreen) return;
   const id = activeScreen.id;
-  if (id === 'screen-home')     renderHome();
-  else if (id === 'screen-course')   renderCourseView();
-  else if (id === 'screen-task')     { if (S.course) renderTaskView(S.course); }
-  else if (id === 'screen-diploma')  { if (S.day !== null) buildDiplomaView(S.day); }
+  if (id === 'screen-home')         renderHome();
+  else if (id === 'screen-overview') renderOverview();
+  // Do NOT re-render screen-task from remote Firebase updates —
+  // this would destroy the slider/rating DOM while the user is actively entering values.
+  // Instead, when the user navigates away from screen-task, the latest S.data is used.
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1064,7 +1080,7 @@ function persist() {
     _db.ref(FB_PATH_DATA).set(payload)
       .then(() => { setSyncStatus('live'); })
       .catch(e => { console.warn('Firebase write (data) fehlgeschlagen:', e); setSyncStatus('error'); })
-      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 300); });
+      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 1500); });
   }
 }
 function persistCourses() {
@@ -1077,7 +1093,7 @@ function persistCourses() {
     _db.ref(FB_PATH_COURSES).set(S.courses)
       .then(() => { setSyncStatus('live'); })
       .catch(e => { console.warn('Firebase write (courses) fehlgeschlagen:', e); setSyncStatus('error'); })
-      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 300); });
+      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 1500); });
   }
 }
 function hydrate() {
@@ -1490,7 +1506,7 @@ function renderOverview() {
   const addTile = document.createElement('div');
   addTile.className = 'add-task-tile';
   addTile.innerHTML = `<span class="plus">＋</span><span>Aufgabe hinzufügen</span>`;
-  addTile.onclick = openTaskModal;
+  addTile.onclick = () => openTaskModal(null);
   grid.appendChild(addTile);
 }
 
@@ -1526,22 +1542,23 @@ function renderTaskInput() {
       let starsHtml = '';
       for (let v = skill.min; v <= skill.max; v += skill.step)
         starsHtml += `<button class="rating-star${val===v?' active':''}"
-          onclick="rateKid('${course.id}','${kid}','${skill.id}',${v},this.parentElement.parentElement)">${v}</button>`;
+          onclick="rateKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',${v},this.closest('.kid-row'))">${v}</button>`;
       row.innerHTML = `
         <div class="kid-row-top">
           <span class="kid-name">${kid}</span>
-          <span class="kid-value-display" id="dv-${encodeId(kid)}-${skill.id}">${val}${skill.unit}</span>
+          <span class="kid-value-display" id="dv-${encodeId(kid)}-${encodeId(skill.id)}">${val}${skill.unit}</span>
         </div>
         <div class="rating-row">${starsHtml}</div>`;
     } else {
       row.innerHTML = `
         <div class="kid-row-top">
           <span class="kid-name">${kid}</span>
-          <span class="kid-value-display" id="dv-${encodeId(kid)}-${skill.id}">${formatVal(val,skill)}</span>
+          <span class="kid-value-display" id="dv-${encodeId(kid)}-${encodeId(skill.id)}">${formatVal(val,skill)}</span>
         </div>
         <input type="range" class="kid-slider"
           min="${skill.min}" max="${skill.max}" step="${skill.step}" value="${val}"
-          oninput="slideKid('${course.id}','${kid}','${skill.id}',this)">`;
+          oninput="slideKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',this)"
+          onchange="slideKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',this)">`;
     }
     list.appendChild(row);
   });
@@ -1550,7 +1567,7 @@ function renderTaskInput() {
 function slideKid(courseId, kid, skillId, input) {
   const val = parseFloat(input.value);
   setVal(courseId, kid, skillId, val);
-  const el = document.getElementById(`dv-${encodeId(kid)}-${skillId}`);
+  const el = document.getElementById(`dv-${encodeId(kid)}-${encodeId(skillId)}`);
   if (el) {
     const skills = getCourseSkills(S.course);
     const skill = skills.find(s => s.id === skillId);
@@ -1559,10 +1576,10 @@ function slideKid(courseId, kid, skillId, input) {
 }
 function rateKid(courseId, kid, skillId, val, row) {
   setVal(courseId, kid, skillId, val);
-  row.querySelectorAll('.rating-star').forEach(b => b.classList.toggle('active', +b.textContent===val));
+  if (row) row.querySelectorAll('.rating-star').forEach(b => b.classList.toggle('active', +b.textContent===val));
   const skills = getCourseSkills(S.course);
   const skill = skills.find(s=>s.id===skillId);
-  const el = document.getElementById(`dv-${encodeId(kid)}-${skillId}`);
+  const el = document.getElementById(`dv-${encodeId(kid)}-${encodeId(skillId)}`);
   if (el&&skill) el.textContent = val+skill.unit;
 }
 function saveAndBack() { buildPrintView(); showOverview(); }
@@ -1572,6 +1589,8 @@ function saveAndBack() { buildPrintView(); showOverview(); }
 // ─────────────────────────────────────────────────────────
 let selectedType = 'count';
 function openTaskModal(skillIdx = null) {
+  // Guard: if called with an Event object (e.g. from onclick without arrow function), treat as new
+  if (skillIdx instanceof Event || (skillIdx !== null && typeof skillIdx !== 'number')) skillIdx = null;
   S._editingSkillIdx = skillIdx;
   const isEdit = skillIdx !== null;
 
@@ -1627,10 +1646,11 @@ function addCustomTask() {
   const step  = parseFloat(document.getElementById('new-task-step').value) || 1;
   const cid   = S.course.id;
 
-  if (S._editingSkillIdx !== null) {
+  if (S._editingSkillIdx !== null && typeof S._editingSkillIdx === 'number') {
     // EDIT MODE — save as override (works for both default and custom skills)
     const skills = getCourseSkills(S.course);
     const existing = skills[S._editingSkillIdx];
+    if (!existing) { console.warn('Skill nicht gefunden für Index', S._editingSkillIdx); return; }
     if (!S.skillOverrides[cid]) S.skillOverrides[cid] = {};
     S.skillOverrides[cid][existing.id] = { label: name, type: selectedType, unit, min, max, step };
   } else {
