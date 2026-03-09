@@ -455,7 +455,7 @@
     /* Full A4 with @page margin:0 — card IS the page */
     height: 297mm;
     max-height: 297mm;
-    padding: 14mm 14mm;
+    padding: 10mm 12mm;
     position: relative;
     background: #fff;
     display: flex; flex-direction: column;
@@ -496,101 +496,101 @@
     transform-origin: top center;
   }
 
-  .diploma-top { text-align: center; margin-bottom: 14px; }
+  .diploma-top { text-align: center; margin-bottom: 10px; }
   .diploma-logo-row {
     display: flex; align-items: center; justify-content: center; gap: 10px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .diploma-logo {
     font-family: 'Bebas Neue', 'Impact', sans-serif;
-    font-size: 26pt; letter-spacing: 4px; color: #111; line-height: 1;
+    font-size: 22pt; letter-spacing: 3px; color: #111; line-height: 1;
   }
   .diploma-logo span { color: #f5c800; }
-  .diploma-stars { color: #f5c800; font-size: 14pt; letter-spacing: 3px; }
-  .diploma-hr { border: none; border-top: 2px solid #f5c800; margin: 10px 0; }
-  .diploma-hr-thin { border: none; border-top: 1px solid #ddd; margin: 10px 0; }
+  .diploma-stars { color: #f5c800; font-size: 11pt; letter-spacing: 2px; }
+  .diploma-hr { border: none; border-top: 2px solid #f5c800; margin: 7px 0; }
+  .diploma-hr-thin { border: none; border-top: 1px solid #ddd; margin: 7px 0; }
 
   .diploma-cert-text {
-    text-align: center; font-size: 9pt; color: #555;
-    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+    text-align: center; font-size: 8pt; color: #555;
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;
   }
   .diploma-kid-name {
     text-align: center;
-    font-size: 30pt; font-weight: 900; color: #111;
+    font-size: 24pt; font-weight: 900; color: #111;
     letter-spacing: 1px; line-height: 1.1;
-    margin: 6px 0 4px;
-    border-bottom: 3px solid #f5c800;
-    padding-bottom: 8px;
+    margin: 4px 0 3px;
+    border-bottom: 2.5px solid #f5c800;
+    padding-bottom: 6px;
   }
   .diploma-course-info {
-    text-align: center; margin-top: 8px;
+    text-align: center; margin-top: 6px;
   }
   .diploma-course-name {
-    font-size: 12pt; font-weight: 700; color: #111;
+    font-size: 10pt; font-weight: 700; color: #111;
   }
   .diploma-meta-row {
-    font-size: 9pt; color: #555; margin-top: 3px; letter-spacing: .5px;
+    font-size: 8pt; color: #555; margin-top: 2px; letter-spacing: .5px;
   }
 
   /* Skills table */
-  .diploma-skills-section { margin: 14px 0; flex: 1; }
+  .diploma-skills-section { margin: 10px 0; flex: 1; }
   .diploma-skills-title {
-    font-size: 8pt; text-transform: uppercase; letter-spacing: 2px;
-    color: #999; margin-bottom: 8px;
+    font-size: 7pt; text-transform: uppercase; letter-spacing: 2px;
+    color: #999; margin-bottom: 5px;
   }
   .diploma-skill-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 0; border-bottom: 1px solid #f0f0f0;
+    padding: 4px 0; border-bottom: 1px solid #f0f0f0;
   }
   .diploma-skill-row:last-child { border-bottom: none; }
-  .diploma-skill-label { font-size: 11pt; color: #333; }
+  .diploma-skill-label { font-size: 9pt; color: #333; }
   .diploma-skill-dots {
     flex: 1; border-bottom: 1px dotted #ccc;
-    margin: 0 8px; position: relative; top: 3px; min-width: 20px;
+    margin: 0 6px; position: relative; top: 3px; min-width: 10px;
   }
   .diploma-skill-val {
-    font-size: 13pt; font-weight: 800; color: #111; min-width: 60px; text-align: right;
+    font-size: 10pt; font-weight: 800; color: #111; min-width: 52px; text-align: right;
   }
 
   /* Rating stars */
-  .diploma-rating-stars { display: flex; gap: 2px; }
-  .diploma-star { font-size: 12pt; color: #ddd; }
+  .diploma-rating-stars { display: flex; gap: 1px; justify-content: flex-end; }
+  .diploma-star { font-size: 10pt; color: #ddd; line-height: 1; }
   .diploma-star.filled { color: #f5c800; }
 
   /* Footer */
   .diploma-footer {
     display: flex; justify-content: space-between; align-items: flex-end;
-    margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee;
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;
   }
   .diploma-sig-block { text-align: center; }
-  .diploma-sig-line { width: 140px; border-top: 1.5px solid #333; padding-top: 4px; font-size: 8pt; color: #666; letter-spacing: 1px; }
+  .diploma-sig-line { width: 120px; border-top: 1.5px solid #333; padding-top: 3px; font-size: 7.5pt; color: #666; letter-spacing: 1px; }
   .diploma-stamp {
-    width: 70px; height: 70px; border-radius: 50%;
-    border: 3px solid #f5c800; display: flex; align-items: center; justify-content: center;
+    width: 60px; height: 60px; border-radius: 50%;
+    border: 2.5px solid #f5c800; display: flex; align-items: center; justify-content: center;
     flex-direction: column; text-align: center;
   }
-  .diploma-stamp-og { font-family: 'Bebas Neue','Impact',sans-serif; font-size: 13pt; color: #f5c800; line-height:1; }
-  .diploma-stamp-sub { font-size: 5.5pt; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+  .diploma-stamp-og { font-family: 'Bebas Neue','Impact',sans-serif; font-size: 12pt; color: #f5c800; line-height:1; }
+  .diploma-stamp-sub { font-size: 5pt; color: #888; letter-spacing: 1px; text-transform: uppercase; }
   .diploma-badge-row {
     display: flex; gap: 6px; align-items: center; justify-content: flex-end;
   }
   .diploma-lv-badge {
-    padding: 4px 12px; border-radius: 20px; font-size: 9pt; font-weight: 800;
+    padding: 3px 10px; border-radius: 20px; font-size: 8pt; font-weight: 800;
     text-transform: uppercase; letter-spacing: 1px;
   }
   /* OG logo image — dark band because the OG logo is designed for dark backgrounds */
   .diploma-logo-row.has-img {
     background: #111;
-    border-radius: 6px;
-    padding: 10px 20px;
-    margin-bottom: 4px;
+    border-radius: 5px;
+    padding: 7px 18px;
+    margin-bottom: 3px;
   }
   .diploma-og-logo-img {
-    height: 40px; width: auto; max-width: 240px;
+    height: 34px; width: auto; max-width: 200px;
     object-fit: contain; display: block; margin: 0 auto;
   }
-  .diploma-md .diploma-og-logo-img { height: 34px; }
-  .diploma-sm .diploma-og-logo-img, .diploma-xs .diploma-og-logo-img { height: 28px; }
+  .diploma-md .diploma-og-logo-img { height: 28px; }
+  .diploma-sm .diploma-og-logo-img, .diploma-xs .diploma-og-logo-img { height: 22px; }
 
   /* ── DIPLOMA DENSITY VARIANTS ─────────────────────────────
      Automatically applied based on number of skills per course.
@@ -598,113 +598,181 @@
   ────────────────────────────────────────────────────────── */
 
   /* MEDIUM: 8–11 skills */
-  .diploma-md .diploma-top          { margin-bottom: 6px; }
-  .diploma-md .diploma-logo         { font-size: 22pt; }
-  .diploma-md .diploma-stars        { font-size: 11pt; }
-  .diploma-md .diploma-hr           { margin: 6px 0; }
-  .diploma-md .diploma-hr-thin      { margin: 6px 0; }
-  .diploma-md .diploma-kid-name     { font-size: 24pt; margin: 4px 0 3px; padding-bottom: 5px; }
-  .diploma-md .diploma-course-info  { margin-top: 6px; }
-  .diploma-md .diploma-skills-section { margin: 7px 0; }
-  .diploma-md .diploma-skill-row    { padding: 4px 0; }
-  .diploma-md .diploma-skill-label  { font-size: 9.5pt; }
-  .diploma-md .diploma-skill-val    { font-size: 11pt; }
-  .diploma-md .diploma-footer       { margin-top: 8px; padding-top: 8px; }
+  .diploma-md .diploma-top          { margin-bottom: 5px; }
+  .diploma-md .diploma-logo         { font-size: 19pt; }
+  .diploma-md .diploma-stars        { font-size: 10pt; }
+  .diploma-md .diploma-hr           { margin: 5px 0; }
+  .diploma-md .diploma-hr-thin      { margin: 5px 0; }
+  .diploma-md .diploma-kid-name     { font-size: 20pt; margin: 3px 0 2px; padding-bottom: 4px; }
+  .diploma-md .diploma-course-info  { margin-top: 4px; }
+  .diploma-md .diploma-course-name  { font-size: 9.5pt; }
+  .diploma-md .diploma-meta-row     { font-size: 7.5pt; }
+  .diploma-md .diploma-skills-section { margin: 5px 0; }
+  .diploma-md .diploma-skill-row    { padding: 3px 0; }
+  .diploma-md .diploma-skill-label  { font-size: 8pt; }
+  .diploma-md .diploma-skill-val    { font-size: 9pt; }
+  .diploma-md .diploma-star         { font-size: 9pt; }
+  .diploma-md .diploma-footer       { margin-top: 6px; padding-top: 6px; }
 
   /* SMALL: 12–15 skills */
-  .diploma-sm .diploma-top          { margin-bottom: 4px; }
-  .diploma-sm .diploma-logo         { font-size: 19pt; }
-  .diploma-sm .diploma-stars        { font-size: 10pt; }
-  .diploma-sm .diploma-hr           { margin: 4px 0; border-top-width: 1.5px; }
-  .diploma-sm .diploma-hr-thin      { margin: 4px 0; }
-  .diploma-sm .diploma-kid-name     { font-size: 20pt; margin: 3px 0 2px; padding-bottom: 4px; border-bottom-width: 2px; }
-  .diploma-sm .diploma-cert-text    { font-size: 8pt; margin-bottom: 2px; }
-  .diploma-sm .diploma-course-info  { margin-top: 4px; }
-  .diploma-sm .diploma-course-name  { font-size: 10pt; }
-  .diploma-sm .diploma-meta-row     { font-size: 8pt; margin-top: 2px; }
-  .diploma-sm .diploma-skills-section { margin: 4px 0; }
-  .diploma-sm .diploma-skills-title { font-size: 7pt; margin-bottom: 3px; }
-  .diploma-sm .diploma-skill-row    { padding: 3px 0; }
-  .diploma-sm .diploma-skill-label  { font-size: 8.5pt; }
-  .diploma-sm .diploma-skill-val    { font-size: 9.5pt; min-width: 50px; }
-  .diploma-sm .diploma-footer       { margin-top: 5px; padding-top: 5px; }
-  .diploma-sm .diploma-stamp        { width: 56px; height: 56px; }
-  .diploma-sm .diploma-stamp-og     { font-size: 11pt; }
-  .diploma-sm .diploma-sig-line     { font-size: 7pt; width: 120px; }
+  .diploma-sm .diploma-top          { margin-bottom: 3px; }
+  .diploma-sm .diploma-logo         { font-size: 16pt; }
+  .diploma-sm .diploma-stars        { font-size: 9pt; }
+  .diploma-sm .diploma-hr           { margin: 3px 0; border-top-width: 1.5px; }
+  .diploma-sm .diploma-hr-thin      { margin: 3px 0; }
+  .diploma-sm .diploma-kid-name     { font-size: 17pt; margin: 2px 0 2px; padding-bottom: 3px; border-bottom-width: 2px; }
+  .diploma-sm .diploma-cert-text    { font-size: 7pt; margin-bottom: 1px; }
+  .diploma-sm .diploma-course-info  { margin-top: 3px; }
+  .diploma-sm .diploma-course-name  { font-size: 8.5pt; }
+  .diploma-sm .diploma-meta-row     { font-size: 7pt; margin-top: 1px; }
+  .diploma-sm .diploma-skills-section { margin: 3px 0; }
+  .diploma-sm .diploma-skills-title { font-size: 6.5pt; margin-bottom: 2px; }
+  .diploma-sm .diploma-skill-row    { padding: 2px 0; }
+  .diploma-sm .diploma-skill-label  { font-size: 7.5pt; }
+  .diploma-sm .diploma-skill-val    { font-size: 8pt; min-width: 44px; }
+  .diploma-sm .diploma-star         { font-size: 8pt; }
+  .diploma-sm .diploma-footer       { margin-top: 4px; padding-top: 4px; }
+  .diploma-sm .diploma-stamp        { width: 50px; height: 50px; }
+  .diploma-sm .diploma-stamp-og     { font-size: 10pt; }
+  .diploma-sm .diploma-sig-line     { font-size: 6.5pt; width: 105px; }
 
   /* EXTRA SMALL: 16+ skills */
-  .diploma-xs .diploma-top          { margin-bottom: 2px; }
-  .diploma-xs .diploma-logo         { font-size: 16pt; letter-spacing: 2px; }
-  .diploma-xs .diploma-stars        { font-size: 9pt; letter-spacing: 1px; }
-  .diploma-xs .diploma-hr           { margin: 3px 0; border-top-width: 1.5px; }
-  .diploma-xs .diploma-hr-thin      { margin: 3px 0; }
-  .diploma-xs .diploma-kid-name     { font-size: 16pt; margin: 2px 0 1px; padding-bottom: 3px; border-bottom-width: 2px; }
-  .diploma-xs .diploma-cert-text    { font-size: 7pt; margin-bottom: 1px; }
-  .diploma-xs .diploma-course-info  { margin-top: 2px; }
-  .diploma-xs .diploma-course-name  { font-size: 9pt; }
-  .diploma-xs .diploma-meta-row     { font-size: 7.5pt; margin-top: 1px; }
-  .diploma-xs .diploma-skills-section { margin: 2px 0; }
-  .diploma-xs .diploma-skills-title { font-size: 6.5pt; margin-bottom: 2px; }
-  .diploma-xs .diploma-skill-row    { padding: 1.5px 0; }
-  .diploma-xs .diploma-skill-label  { font-size: 7.5pt; }
-  .diploma-xs .diploma-skill-val    { font-size: 8.5pt; min-width: 45px; }
-  .diploma-xs .diploma-footer       { margin-top: 3px; padding-top: 3px; }
-  .diploma-xs .diploma-stamp        { width: 46px; height: 46px; }
-  .diploma-xs .diploma-stamp-og     { font-size: 9pt; }
-  .diploma-xs .diploma-stamp-sub    { font-size: 4.5pt; }
-  .diploma-xs .diploma-sig-line     { font-size: 6.5pt; width: 100px; }
+  .diploma-xs .diploma-top          { margin-bottom: 1px; }
+  .diploma-xs .diploma-logo         { font-size: 13pt; letter-spacing: 2px; }
+  .diploma-xs .diploma-stars        { font-size: 8pt; letter-spacing: 1px; }
+  .diploma-xs .diploma-hr           { margin: 2px 0; border-top-width: 1px; }
+  .diploma-xs .diploma-hr-thin      { margin: 2px 0; }
+  .diploma-xs .diploma-kid-name     { font-size: 14pt; margin: 1px 0 1px; padding-bottom: 2px; border-bottom-width: 1.5px; }
+  .diploma-xs .diploma-cert-text    { font-size: 6pt; margin-bottom: 0; }
+  .diploma-xs .diploma-course-info  { margin-top: 1px; }
+  .diploma-xs .diploma-course-name  { font-size: 7.5pt; }
+  .diploma-xs .diploma-meta-row     { font-size: 6.5pt; margin-top: 0; }
+  .diploma-xs .diploma-skills-section { margin: 1px 0; }
+  .diploma-xs .diploma-skills-title { font-size: 5.5pt; margin-bottom: 1px; }
+  .diploma-xs .diploma-skill-row    { padding: 1px 0; }
+  .diploma-xs .diploma-skill-label  { font-size: 6.5pt; }
+  .diploma-xs .diploma-skill-val    { font-size: 7pt; min-width: 38px; }
+  .diploma-xs .diploma-star         { font-size: 7pt; }
+  .diploma-xs .diploma-footer       { margin-top: 2px; padding-top: 2px; }
+  .diploma-xs .diploma-stamp        { width: 40px; height: 40px; }
+  .diploma-xs .diploma-stamp-og     { font-size: 8pt; }
+  .diploma-xs .diploma-stamp-sub    { font-size: 4pt; }
+  .diploma-xs .diploma-sig-line     { font-size: 5.5pt; width: 88px; }
+  .diploma-xs .diploma-sig-line .coach-emoji { font-size: 9pt; }
 
   /* ── KOMPETENZRASTER DIPLOMA PAGE ──────────────────────── */
   .diploma-komp-title {
-    font-size: 8pt; font-weight: 700; text-transform: uppercase;
+    font-size: 7pt; font-weight: 700; text-transform: uppercase;
     letter-spacing: 2px; color: #999; text-align: center;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
   .diploma-komp-subtitle {
-    font-size: 7pt; color: #bbb; text-align: center;
-    margin-bottom: 8px; letter-spacing: 1px;
+    font-size: 6pt; color: #bbb; text-align: center;
+    margin-bottom: 5px; letter-spacing: 1px;
   }
   .diploma-komp-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0 18px;
+    gap: 0 14px;
     flex: 1;
   }
   .diploma-komp-cat {
-    font-size: 6.5pt; font-weight: 700; text-transform: uppercase;
+    font-size: 5.5pt; font-weight: 700; text-transform: uppercase;
     letter-spacing: 1.5px; color: #f5c800;
-    margin: 6px 0 2px;
+    margin: 4px 0 1px;
     grid-column: 1 / -1;
   }
   .diploma-komp-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 2px 0; border-bottom: 1px solid #f5f5f5;
-    font-size: 7.5pt; color: #333;
+    padding: 1.5px 0; border-bottom: 1px solid #f5f5f5;
+    font-size: 6.5pt; color: #333;
     break-inside: avoid;
   }
-  .diploma-komp-label { flex: 1; padding-right: 4px; }
+  .diploma-komp-label { flex: 1; padding-right: 3px; }
   .diploma-komp-stars { display: flex; gap: 1px; flex-shrink: 0; }
-  .diploma-komp-star  { font-size: 8pt; color: #ddd; }
+  .diploma-komp-star  { font-size: 7pt; color: #ddd; line-height: 1; }
   .diploma-komp-star.filled { color: #f5c800; }
+
+  /* ── COACH EMOJI PICKER ──────────────────────────────────── */
+  .coach-emoji-btn {
+    background: none; border: 1.5px solid var(--border);
+    border-radius: var(--radius); width: 36px; height: 36px;
+    font-size: 18px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    transition: border-color .15s, background .15s;
+    position: relative;
+  }
+  .coach-emoji-btn:hover { border-color: var(--accent); background: var(--surface2); }
+  .emoji-picker-panel {
+    display: none; position: fixed; z-index: 9999;
+    background: var(--surface1); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 12px; box-shadow: 0 8px 32px #0006;
+    flex-direction: column; gap: 8px; width: 240px;
+  }
+  .emoji-picker-panel.open { display: flex; }
+  .emoji-picker-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--muted); margin-bottom: 2px;
+  }
+  .emoji-picker-grid {
+    display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px;
+  }
+  .emoji-opt {
+    font-size: 20px; background: none; border: none; border-radius: 6px;
+    cursor: pointer; padding: 3px; text-align: center; line-height: 1.4;
+    transition: background .1s;
+  }
+  .emoji-opt:hover { background: var(--surface3); }
+  .emoji-opt.selected { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+  .emoji-picker-custom {
+    display: flex; gap: 6px; margin-top: 2px;
+  }
+  .emoji-picker-custom input {
+    flex: 1; background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 4px 8px; font-size: 16px;
+    color: var(--text); outline: none;
+  }
+  .emoji-picker-custom input:focus { border-color: var(--accent); }
+  .emoji-picker-custom button {
+    background: var(--accent); color: #000; border: none;
+    border-radius: var(--radius); padding: 4px 10px; font-size: 11px;
+    font-weight: 700; cursor: pointer;
+  }
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <div class="header">
-  <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickOGLogo()" title="OG Logo hochladen (einmalig)">
-    <img id="header-logo-img" style="height:28px;width:auto;object-fit:contain;display:none" alt="OG Logo" />
-    <div id="header-logo-text">
-      <div class="logo">OG <span>SKILLS</span>-PASS</div>
-      <div class="header-sub">Aufgaben-Modus · Logo tippen zum Hochladen</div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickOGLogo()" title="Logo tippen zum Hochladen / Wechseln">
+      <img id="header-logo-img" style="height:28px;width:auto;object-fit:contain;display:none" alt="OG Logo" />
+      <div id="header-logo-text">
+        <div class="logo">OG <span>SKILLS</span>-PASS</div>
+        <div class="header-sub">Aufgaben-Modus · Logo tippen zum Hochladen</div>
+      </div>
     </div>
+    <button id="remove-logo-btn" onclick="removeOGLogo()" title="Logo entfernen (Titel wiederherstellen)"
+      style="display:none;background:none;border:1px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:10px;cursor:pointer;color:var(--muted);flex-shrink:0;padding:0;line-height:1">✕</button>
+  </div>
   </div>
   <div class="header-right" style="align-items:center;">
     <div class="sync-badge no-print" id="sync-badge" title="Firebase Sync-Status">
       <div class="sync-dot" id="sync-dot"></div>
       <span id="sync-label">Lokal</span>
     </div>
+    <button class="coach-emoji-btn no-print" id="coach-emoji-btn" onclick="toggleEmojiPicker(event)" title="Coach-Emoji wählen (Gag 😄)">🏃</button>
     <button class="icon-btn no-print" onclick="window.print()" title="Drucken">🖨️</button>
+  </div>
+</div>
+
+<!-- EMOJI PICKER PANEL -->
+<div class="emoji-picker-panel no-print" id="emoji-picker-panel">
+  <div class="emoji-picker-title">Dein Coach-Emoji</div>
+  <div class="emoji-picker-grid" id="emoji-picker-grid"></div>
+  <div class="emoji-picker-custom">
+    <input type="text" id="emoji-custom-input" maxlength="4" placeholder="✍️" />
+    <button onclick="applyCustomEmoji()">OK</button>
   </div>
 </div>
 
@@ -1194,6 +1262,81 @@ const DAY_NAMES = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 // ─────────────────────────────────────────────────────────
 window.OG_LOGO_SRC = localStorage.getItem('og_logo_b64') || '';
 
+// ─────────────────────────────────────────────────────────
+// COACH EMOJI PICKER
+// ─────────────────────────────────────────────────────────
+const COACH_EMOJIS = ['🏃','🤸','💪','🔥','⚡','🎯','🏆','🥇','🦁','🐉','🦅','🦊',
+  '🥷','🦸','👊','🌟','🏅','🎪','🤺','🏋️','🧗','🛹','🤼','🚀','😎','🤩','😤','🫡',
+  '🧠','👾','🐻','🦖','🦄','🌊','🎭','🎲','🃏','💥','🌶️','🍕'];
+
+let _emojiPickerOpen = false;
+
+// Load saved emoji or use default
+(function initCoachEmoji() {
+  const saved = localStorage.getItem('coachEmoji');
+  if (saved) {
+    const btn = document.getElementById('coach-emoji-btn');
+    if (btn) btn.textContent = saved;
+  }
+  // Build grid once
+  const grid = document.getElementById('emoji-picker-grid');
+  if (!grid) return;
+  const saved2 = localStorage.getItem('coachEmoji') || '🏃';
+  COACH_EMOJIS.forEach(em => {
+    const b = document.createElement('button');
+    b.className = 'emoji-opt' + (em === saved2 ? ' selected' : '');
+    b.textContent = em;
+    b.onclick = () => setCoachEmoji(em);
+    grid.appendChild(b);
+  });
+})();
+
+function toggleEmojiPicker(e) {
+  e.stopPropagation();
+  const panel = document.getElementById('emoji-picker-panel');
+  const btn   = document.getElementById('coach-emoji-btn');
+  const rect  = btn.getBoundingClientRect();
+  if (_emojiPickerOpen) {
+    panel.classList.remove('open');
+    _emojiPickerOpen = false;
+    return;
+  }
+  // Position below the button, right-aligned
+  panel.style.top  = (rect.bottom + 6) + 'px';
+  panel.style.right = (window.innerWidth - rect.right) + 'px';
+  panel.style.left = 'auto';
+  panel.classList.add('open');
+  _emojiPickerOpen = true;
+}
+
+function setCoachEmoji(em) {
+  localStorage.setItem('coachEmoji', em);
+  document.getElementById('coach-emoji-btn').textContent = em;
+  // Update selected state in grid
+  document.querySelectorAll('.emoji-opt').forEach(b => {
+    b.classList.toggle('selected', b.textContent === em);
+  });
+  document.getElementById('emoji-picker-panel').classList.remove('open');
+  _emojiPickerOpen = false;
+}
+
+function applyCustomEmoji() {
+  const val = document.getElementById('emoji-custom-input').value.trim();
+  if (!val) return;
+  // Take first grapheme cluster (max ~2 chars for emoji with skin tones)
+  const em = [...val][0] || val;
+  setCoachEmoji(em);
+  document.getElementById('emoji-custom-input').value = '';
+}
+
+// Close picker on outside click
+document.addEventListener('click', () => {
+  if (_emojiPickerOpen) {
+    document.getElementById('emoji-picker-panel').classList.remove('open');
+    _emojiPickerOpen = false;
+  }
+});
+
 function pickOGLogo() {
   const inp = document.createElement('input');
   inp.type = 'file'; inp.accept = 'image/png,image/jpeg,image/svg+xml,image/webp';
@@ -1203,15 +1346,37 @@ function pickOGLogo() {
     r.onload = ev => {
       window.OG_LOGO_SRC = ev.target.result;
       localStorage.setItem('og_logo_b64', ev.target.result);
-      // Update header logo display
       const hdr = document.getElementById('header-logo-img');
       if (hdr) { hdr.src = ev.target.result; hdr.style.display = 'block'; }
       document.getElementById('header-logo-text').style.display = 'none';
+      const rb = document.getElementById('remove-logo-btn');
+      if (rb) rb.style.display = 'flex';
     };
     r.readAsDataURL(f);
   };
   inp.click();
 }
+
+function removeOGLogo() {
+  window.OG_LOGO_SRC = '';
+  localStorage.removeItem('og_logo_b64');
+  const hdr = document.getElementById('header-logo-img');
+  if (hdr) { hdr.src = ''; hdr.style.display = 'none'; }
+  document.getElementById('header-logo-text').style.display = '';
+  const rb = document.getElementById('remove-logo-btn');
+  if (rb) rb.style.display = 'none';
+}
+
+// Show remove button on load if logo already saved
+(function initLogoBtn() {
+  if (window.OG_LOGO_SRC) {
+    const hdr = document.getElementById('header-logo-img');
+    if (hdr) { hdr.src = window.OG_LOGO_SRC; hdr.style.display = 'block'; }
+    document.getElementById('header-logo-text').style.display = 'none';
+    const rb = document.getElementById('remove-logo-btn');
+    if (rb) rb.style.display = 'flex';
+  }
+})();
 
 // ─────────────────────────────────────────────────────────
 // STATE
@@ -2293,6 +2458,7 @@ function buildDiplomaView(day) {
   const courses = getCourses(day);
   const dayName = DAY_NAMES[day] + 'tag';
   const dateStr = new Date().toLocaleDateString('de-CH', {day:'2-digit', month:'2-digit', year:'numeric'});
+  const coachEmoji = localStorage.getItem('coachEmoji') || '';
 
   courses.forEach(course => {
     const allSkills   = getCourseSkills(course);
@@ -2376,7 +2542,7 @@ function buildDiplomaView(day) {
 
           <div class="diploma-footer">
             <div class="diploma-sig-block">
-              <div class="diploma-sig-line">COACH</div>
+              <div class="diploma-sig-line">${coachEmoji ? `<span style="font-size:1.3em">${coachEmoji}</span> ` : ""}COACH</div>
             </div>
             <div class="diploma-stamp">
               <div class="diploma-stamp-og">OG</div>
@@ -2444,7 +2610,7 @@ function buildDiplomaView(day) {
 
           <div class="diploma-footer" style="margin-top:auto">
             <div class="diploma-sig-block">
-              <div class="diploma-sig-line">COACH</div>
+              <div class="diploma-sig-line">${coachEmoji ? `<span style="font-size:1.3em">${coachEmoji}</span> ` : ""}COACH</div>
             </div>
             <div class="diploma-stamp">
               <div class="diploma-stamp-og">OG</div>
