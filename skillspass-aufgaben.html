@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OG Skills-Pass · Aufgaben</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+  <!-- ══════════════════════════════════════════════════════
+       FIREBASE – Realtime Database (compat SDK v9)
+       So richtest du Firebase ein:
+       1. Gehe zu https://console.firebase.google.com
+       2. Erstelle ein neues Projekt (z.B. "og-skillspass")
+       3. Klicke auf "Realtime Database" → Datenbank erstellen
+       4. Wähle Testmodus (30 Tage offen) für den Start
+       5. Gehe zu Projekteinstellungen → Deine Apps → Web-App hinzufügen
+       6. Kopiere deine firebaseConfig-Werte unten ein
+       ══════════════════════════════════════════════════════ -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0e0e; --surface: #1a1a1a; --surface2: #242424; --surface3: #2e2e2e;
+    --border: #333; --text: #f0f0f0; --muted: #777; --accent: #f5c800;
+    --green: #4ade80; --red: #ef4444; --blue: #3b82f6;
+    --radius: 12px;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+  body { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: #0e0e0eee; backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; line-height: 1; }
+  .logo span { color: var(--accent); }
+  .header-sub { font-size: 11px; color: var(--muted); letter-spacing: .5px; margin-top: 1px; }
+  .header-right { display: flex; gap: 8px; }
+  .icon-btn {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    width: 36px; height: 36px; border-radius: 8px; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* SYNC STATUS */
+  .sync-badge {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 600; letter-spacing: .5px;
+    padding: 4px 8px; border-radius: 20px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); transition: all .3s;
+  }
+  .sync-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--muted);
+    transition: background .3s;
+  }
+  .sync-badge.syncing .sync-dot { background: #f59e0b; animation: pulse-sync .8s infinite; }
+  .sync-badge.live .sync-dot { background: var(--green); }
+  .sync-badge.error .sync-dot { background: var(--red); }
+  .sync-badge.live { border-color: #2d5a3d; color: var(--green); }
+  .sync-badge.error { border-color: #5a2d2d; color: var(--red); }
+  @keyframes pulse-sync { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* SCREENS */
+  .screen { display: none; padding: 16px; min-height: calc(100vh - 57px); }
+  .screen.active { display: block; }
+
+  /* DAY BUTTONS */
+  .days-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 18px; }
+  .day-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 2px; cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; transition: all .2s;
+  }
+  .day-btn .day-name { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .5px; }
+  .day-btn .day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .day-btn.has-courses .day-dot { background: var(--accent); }
+  .day-btn.active { background: #2a2200; border-color: var(--accent); }
+  .day-btn.active .day-name { color: var(--accent); }
+
+  .section-title {
+    font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 10px; margin-top: 4px;
+  }
+
+  /* COURSE ROW (wrapper for drag-handle + card + action buttons) */
+  .course-row {
+    display: flex; align-items: stretch; margin-bottom: 10px;
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); transition: border-color .2s;
+  }
+  .course-row.team-row { border-left-color: var(--red); }
+  .course-row.sortable-ghost { opacity: 0.3; }
+
+  .drag-handle {
+    display: flex; align-items: center; padding: 0 10px 0 8px;
+    color: var(--muted); font-size: 18px; cursor: grab; user-select: none;
+    flex-shrink: 0; letter-spacing: -2px;
+  }
+  .drag-handle:active { cursor: grabbing; color: var(--accent); }
+
+  .course-card-body {
+    flex: 1; padding: 14px 10px 14px 0; cursor: pointer; min-width: 0;
+  }
+  .course-card-body:hover .course-name { color: var(--accent); }
+
+  .course-name { font-weight: 600; font-size: 14px; transition: color .15s; }
+  .course-meta { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lv-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .5px; float: right; margin-top: 2px;
+  }
+  .lv-badge.basis  { background:#1a2050; color:#93c5fd; border:1px solid #3b82f622; }
+  .lv-badge.mittel { background:#2a1800; color:#fbbf24; border:1px solid #f59e0b22; }
+  .lv-badge.fort   { background:#1a0a00; color:#fb923c; border:1px solid #f9731622; }
+  .lv-badge.alle   { background:#1e1030; color:#c084fc; border:1px solid #a855f722; }
+  .lv-badge.team   { background:#2a0808; color:#f87171; border:1px solid #ef444422; }
+
+  /* COURSE PROGRESS */
+  .course-progress-wrap { margin-top: 8px; }
+  .course-progress-bar { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+  .course-progress-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
+  .course-pct-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .course-pct-text { font-size: 11px; color: var(--muted); }
+  .course-state-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .course-state-badge.idle { display: none; }
+  .course-state-badge.wip  { background: #1c2a10; color: #86efac; border: 1px solid #22c55e44; }
+  .course-state-badge.done { background: #052e16; color: var(--green); border: 1px solid var(--green); }
+
+  /* DAY SUMMARY CARD */
+  .day-summary-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: var(--radius); padding: 16px 16px 14px; margin-top: 14px; margin-bottom: 30px;
+  }
+  .day-summary-label {
+    font-size: 10px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .day-summary-label::before { content: '👁'; font-size: 13px; }
+  .day-summary-main { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .day-summary-pct {
+    font-family: 'Bebas Neue', sans-serif; font-size: 44px; letter-spacing: 1px;
+    line-height: 1; min-width: 72px; color: var(--accent);
+  }
+  .day-summary-right { flex: 1; }
+  .day-summary-bar-wrap {
+    background: var(--surface3); border-radius: 4px; height: 8px; overflow: hidden; margin-bottom: 6px;
+  }
+  .day-summary-bar-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width .6s ease; }
+  .day-summary-stats { font-size: 12px; color: var(--muted); }
+  .day-courses-grid { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .day-course-row { display: flex; align-items: center; gap: 8px; }
+  .day-course-time { font-size: 11px; color: var(--muted); width: 36px; flex-shrink: 0; }
+  .day-course-name { font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .day-course-mini-bar { width: 60px; height: 4px; background: var(--surface3); border-radius: 2px; flex-shrink: 0; overflow: hidden; }
+  .day-course-mini-fill { height: 100%; border-radius: 2px; transition: width .4s; }
+  .day-course-pct-txt { font-size: 11px; font-weight: 700; min-width: 32px; text-align: right; flex-shrink: 0; }
+
+  .course-acts {
+    display: flex; flex-direction: column; border-left: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .course-act-btn {
+    flex: 1; padding: 0 14px; background: none; border: none;
+    cursor: pointer; font-size: 15px; color: var(--muted);
+    transition: all .15s; display: flex; align-items: center; justify-content: center;
+  }
+  .course-act-btn:hover { background: var(--surface2); color: var(--text); }
+  .course-act-btn.del:hover { background: #1a0606; color: var(--red); }
+  .course-act-btn + .course-act-btn { border-top: 1px solid var(--border); }
+
+  /* ADD COURSE BUTTON */
+  .add-course-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 13px; border-radius: var(--radius);
+    background: var(--surface2); border: 1px dashed var(--border);
+    color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600; transition: all .2s; margin-top: 4px;
+  }
+  .add-course-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── TASK OVERVIEW SCREEN ── */
+  .course-banner { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .back-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 22px; padding: 4px; line-height: 1; flex-shrink: 0;
+  }
+  .back-btn:hover { color: var(--text); }
+  .course-banner-title { font-weight: 700; font-size: 15px; flex: 1; }
+  .course-banner-sub { font-size: 12px; color: var(--muted); }
+
+  /* Task grid */
+  .tasks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .task-tile {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 12px;
+    cursor: pointer; transition: all .2s; position: relative;
+    min-height: 90px; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .task-tile:hover { border-color: var(--accent); background: #1e1e0d; }
+  .task-tile.done { border-color: var(--green); }
+  .task-tile.done .task-tile-name { color: var(--green); }
+  .task-tile.active-tile { border-color: var(--accent); background: #2a2200; }
+  .task-tile-num { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .task-tile-name { font-weight: 700; font-size: 15px; margin-top: 4px; line-height: 1.2; }
+  .task-tile-unit { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .task-tile-check { position: absolute; top: 10px; right: 10px; color: var(--green); font-size: 16px; }
+  .task-tile-edit {
+    position: absolute; bottom: 8px; right: 8px;
+    background: var(--surface3); border: none; color: var(--muted);
+    width: 24px; height: 24px; border-radius: 6px; font-size: 12px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .15s, color .15s;
+  }
+  .task-tile:hover .task-tile-edit { opacity: 1; }
+  .task-tile-edit:hover { color: var(--accent); }
+  .add-task-tile {
+    background: var(--surface2); border: 1px dashed var(--border);
+    border-radius: var(--radius); padding: 14px 12px;
+    cursor: pointer; transition: all .2s;
+    min-height: 90px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px;
+    color: var(--muted); font-size: 13px; font-weight: 600;
+  }
+  .add-task-tile:hover { border-color: var(--accent); color: var(--accent); }
+  .add-task-tile .plus { font-size: 28px; line-height: 1; }
+
+  /* Buttons */
+  .print-btn-row { margin-top: 8px; padding-bottom: 30px; }
+  .btn {
+    width: 100%; padding: 14px; border-radius: var(--radius); border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all .2s; display: block;
+  }
+  .btn-done { background: var(--green); color: #000; margin-top: 10px; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); margin-top: 10px; }
+  .btn-secondary:hover { border-color: var(--accent); }
+
+  /* ── TASK INPUT SCREEN ── */
+  .task-header {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 16px; text-align: center;
+  }
+  .task-progress { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .task-name-big { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .task-unit-lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* KID ROWS */
+  .kid-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+  }
+  .kid-row-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .kid-name { font-weight: 600; font-size: 14px; }
+  .kid-value-display {
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    color: var(--accent); letter-spacing: 1px; min-width: 52px; text-align: right;
+  }
+  .kid-slider {
+    width: 100%; -webkit-appearance: none; appearance: none;
+    height: 6px; border-radius: 3px; background: var(--surface3); outline: none; cursor: pointer;
+  }
+  .kid-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; box-shadow: 0 0 0 3px #f5c80033;
+  }
+  .kid-slider::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: none;
+  }
+  .rating-row { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .rating-star {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); cursor: pointer; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s; color: var(--muted);
+  }
+  .rating-star.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  .task-input-nav { display: flex; gap: 10px; margin-top: 20px; padding-bottom: 30px; }
+  .btn-half {
+    flex: 1; padding: 14px; border-radius: var(--radius); border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-back { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-back:hover { border-color: var(--accent); }
+  .btn-save { background: var(--accent); color: #000; }
+  .btn-save:hover { background: #ffd700; }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: #000b; z-index: 200;
+    align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px 16px 0 0; padding: 24px 20px 40px;
+    width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-weight: 700; font-size: 17px; margin-bottom: 18px; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .modal-input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
+    transition: border-color .2s;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
+    cursor: pointer; appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23777' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 36px;
+  }
+  .modal-select:focus { border-color: var(--accent); }
+  .modal-row2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .modal-row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-cancel { flex: 1; padding: 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; }
+  .modal-add { flex: 2; padding: 13px; border-radius: 10px; border: none; background: var(--accent); color: #000; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; }
+  .modal-delete-btn { flex: 2; padding: 13px; border-radius: 10px; border: none; background: var(--red); color: #fff; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; }
+
+  /* TASK TYPE BUTTONS */
+  .modal-type-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .type-btn {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--muted); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    transition: all .15s;
+  }
+  .type-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  /* KIDS CHIPS */
+  .kids-chips-container {
+    min-height: 44px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; display: flex; flex-wrap: wrap; gap: 6px;
+    align-items: center; cursor: text; transition: border-color .2s;
+  }
+  .kids-chips-container:focus-within { border-color: var(--accent); }
+  .kid-chip {
+    display: flex; align-items: center; gap: 5px; padding: 4px 10px 4px 10px;
+    background: var(--surface3); border-radius: 20px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border);
+  }
+  .kid-chip-remove {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 14px; padding: 0; line-height: 1; transition: color .15s;
+  }
+  .kid-chip-remove:hover { color: var(--red); }
+  .kids-input {
+    background: none; border: none; color: var(--text); outline: none;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; min-width: 120px; flex: 1;
+  }
+
+  /* ── DELETE PASSWORD MODAL ── */
+  .pw-modal-icon { font-size: 40px; text-align: center; margin-bottom: 12px; }
+  .pw-modal-msg { font-size: 14px; color: var(--muted); margin-bottom: 18px; text-align: center; }
+  .pw-modal-name { color: var(--text); font-weight: 600; }
+
+  /* PRINT */
+  @media print {
+    @page { size: A4 portrait; margin: 8mm 12mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; color: #000; max-width: 100%; }
+    .header, .no-print { display: none !important; }
+    .screen { display: none !important; }
+    .print-view { display: block !important; }
+    .print-kid-card { page-break-after: always; padding: 20px; }
+    .print-kid-card:last-child { page-break-after: avoid; }
+    .print-og-logo { font-family: 'Bebas Neue', sans-serif; font-size: 16pt; letter-spacing: 2px; color: #f5c800; }
+    .print-kid-name { font-size: 20pt; font-weight: 700; margin: 4px 0 2px; }
+    .print-course-info { font-size: 10pt; color: #666; margin-bottom: 16px; }
+    .print-skill-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #eee; }
+    .print-skill-label { font-size: 12pt; color: #333; }
+    .print-skill-val { font-size: 15pt; font-weight: 700; color: #000; }
+    .print-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 2px solid #f5c800; padding-bottom: 12px; }
+  }
+  @media screen { .print-view { display: none; } }
+  @media screen { #diploma-view { display: none; } }
+
+  /* ── PRINT: DIPLOMATA MODE ── */
+  @media print {
+    body.printing-diplomas #print-view { display: none !important; }
+    body.printing-diplomas .header, body.printing-diplomas .no-print { display: none !important; }
+    body.printing-diplomas .screen { display: none !important; }
+    body.printing-diplomas #diploma-view { display: block !important; }
+    body:not(.printing-diplomas) #diploma-view { display: none !important; }
+  }
+
+  /* ── DIPLOMA CARD STYLES ── */
+  .diploma-card {
+    page-break-after: always;
+    width: 100%;
+    min-height: 260mm;
+    padding: 28px 32px 28px;
+    position: relative;
+    background: #fff;
+    display: flex; flex-direction: column;
+    color: #111;
+    font-family: 'DM Sans', 'Arial', sans-serif;
+  }
+  .diploma-card:last-child { page-break-after: avoid; }
+
+  /* Outer gold border frame */
+  .diploma-frame {
+    position: absolute; inset: 12px;
+    border: 3px solid #f5c800;
+    pointer-events: none;
+  }
+  .diploma-frame::before {
+    content: '';
+    position: absolute; inset: 5px;
+    border: 1px solid #f5c80066;
+  }
+  /* Corner ornaments */
+  .diploma-corner {
+    position: absolute;
+    width: 32px; height: 32px;
+    border-color: #f5c800;
+    border-style: solid;
+  }
+  .diploma-corner.tl { top: 8px; left: 8px; border-width: 4px 0 0 4px; }
+  .diploma-corner.tr { top: 8px; right: 8px; border-width: 4px 4px 0 0; }
+  .diploma-corner.bl { bottom: 8px; left: 8px; border-width: 0 0 4px 4px; }
+  .diploma-corner.br { bottom: 8px; right: 8px; border-width: 0 4px 4px 0; }
+
+  .diploma-inner {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    flex: 1; padding: 10px 16px;
+  }
+
+  .diploma-top { text-align: center; margin-bottom: 14px; }
+  .diploma-logo-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 6px;
+  }
+  .diploma-logo {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-size: 26pt; letter-spacing: 4px; color: #111; line-height: 1;
+  }
+  .diploma-logo span { color: #f5c800; }
+  .diploma-stars { color: #f5c800; font-size: 14pt; letter-spacing: 3px; }
+  .diploma-hr { border: none; border-top: 2px solid #f5c800; margin: 10px 0; }
+  .diploma-hr-thin { border: none; border-top: 1px solid #ddd; margin: 10px 0; }
+
+  .diploma-cert-text {
+    text-align: center; font-size: 9pt; color: #555;
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .diploma-kid-name {
+    text-align: center;
+    font-size: 30pt; font-weight: 900; color: #111;
+    letter-spacing: 1px; line-height: 1.1;
+    margin: 6px 0 4px;
+    border-bottom: 3px solid #f5c800;
+    padding-bottom: 8px;
+  }
+  .diploma-course-info {
+    text-align: center; margin-top: 8px;
+  }
+  .diploma-course-name {
+    font-size: 12pt; font-weight: 700; color: #111;
+  }
+  .diploma-meta-row {
+    font-size: 9pt; color: #555; margin-top: 3px; letter-spacing: .5px;
+  }
+
+  /* Skills table */
+  .diploma-skills-section { margin: 14px 0; flex: 1; }
+  .diploma-skills-title {
+    font-size: 8pt; text-transform: uppercase; letter-spacing: 2px;
+    color: #999; margin-bottom: 8px;
+  }
+  .diploma-skill-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid #f0f0f0;
+  }
+  .diploma-skill-row:last-child { border-bottom: none; }
+  .diploma-skill-label { font-size: 11pt; color: #333; }
+  .diploma-skill-dots {
+    flex: 1; border-bottom: 1px dotted #ccc;
+    margin: 0 8px; position: relative; top: 3px; min-width: 20px;
+  }
+  .diploma-skill-val {
+    font-size: 13pt; font-weight: 800; color: #111; min-width: 60px; text-align: right;
+  }
+
+  /* Rating stars */
+  .diploma-rating-stars { display: flex; gap: 2px; }
+  .diploma-star { font-size: 12pt; color: #ddd; }
+  .diploma-star.filled { color: #f5c800; }
+
+  /* Footer */
+  .diploma-footer {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee;
+  }
+  .diploma-sig-block { text-align: center; }
+  .diploma-sig-line { width: 140px; border-top: 1.5px solid #333; padding-top: 4px; font-size: 8pt; color: #666; letter-spacing: 1px; }
+  .diploma-stamp {
+    width: 70px; height: 70px; border-radius: 50%;
+    border: 3px solid #f5c800; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; text-align: center;
+  }
+  .diploma-stamp-og { font-family: 'Bebas Neue','Impact',sans-serif; font-size: 13pt; color: #f5c800; line-height:1; }
+  .diploma-stamp-sub { font-size: 5.5pt; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+  .diploma-badge-row {
+    display: flex; gap: 6px; align-items: center; justify-content: flex-end;
+  }
+  .diploma-lv-badge {
+    padding: 4px 12px; border-radius: 20px; font-size: 9pt; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="logo">OG <span>SKILLS</span>-PASS</div>
+    <div class="header-sub">Aufgaben-Modus</div>
+  </div>
+  <div class="header-right" style="align-items:center;">
+    <div class="sync-badge no-print" id="sync-badge" title="Firebase Sync-Status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">Lokal</span>
+    </div>
+    <button class="icon-btn no-print" onclick="window.print()" title="Drucken">🖨️</button>
+  </div>
+</div>
+
+<!-- SCREEN 1: KURS WÄHLEN -->
+<div class="screen active" id="screen-home">
+  <div class="days-row" id="days-row"></div>
+  <div class="section-title" id="courses-label">TAG WÄHLEN</div>
+  <div id="courses-list"></div>
+  <button class="add-course-btn no-print" id="add-course-btn" style="display:none" onclick="openCourseModal(null)">
+    ＋ Kurs hinzufügen
+  </button>
+  <button class="add-course-btn no-print" id="print-all-btn" style="display:none;margin-top:6px;border-color:#f5c800;color:#f5c800" onclick="printAllDiplomas()">
+    🎓 Alle Kids dieses Tages drucken (Diplome)
+  </button>
+  <div id="day-summary" class="no-print"></div>
+</div>
+
+<!-- SCREEN 2: AUFGABEN-ÜBERSICHT -->
+<div class="screen" id="screen-overview">
+  <div class="course-banner">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <div>
+      <div class="course-banner-title" id="ov-course-name"></div>
+      <div class="course-banner-sub" id="ov-course-sub"></div>
+    </div>
+  </div>
+  <div class="section-title">AUFGABEN WÄHLEN</div>
+  <div class="tasks-grid" id="tasks-grid"></div>
+  <div class="print-btn-row no-print">
+    <button class="btn btn-done" onclick="window.print()">🖨️ Alle Kids drucken</button>
+    <button class="btn btn-secondary" onclick="showHome()">← Anderen Kurs wählen</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: AUFGABE EINGEBEN -->
+<div class="screen" id="screen-task">
+  <div class="course-banner">
+    <button class="back-btn" onclick="showOverview()">←</button>
+    <div>
+      <div class="course-banner-title" id="task-course-name"></div>
+      <div class="course-banner-sub" id="task-course-sub"></div>
+    </div>
+  </div>
+  <div class="task-header">
+    <div class="task-progress" id="task-progress-lbl"></div>
+    <div class="task-name-big" id="task-name-big"></div>
+    <div class="task-unit-lbl" id="task-unit-lbl"></div>
+  </div>
+  <div id="kids-list"></div>
+  <div class="task-input-nav no-print">
+    <button class="btn-half btn-back" onclick="showOverview()">← Übersicht</button>
+    <button class="btn-half btn-save" onclick="saveAndBack()">✓ Speichern</button>
+  </div>
+</div>
+
+<!-- ── MODAL: AUFGABE HINZUFÜGEN ── -->
+<div class="modal-overlay" id="modal-task" onclick="closeTaskModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Aufgabe hinzufügen</div>
+    <div class="modal-field">
+      <div class="modal-label">Name der Aufgabe</div>
+      <input class="modal-input" id="new-task-name" placeholder="z.B. Liegestütze" />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Einheit</div>
+      <input class="modal-input" id="new-task-unit" placeholder="z.B. Wdh / s / cm / /5" />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Typ</div>
+      <div class="modal-type-row">
+        <button class="type-btn active" data-type="count" onclick="selectType(this)">Anzahl</button>
+        <button class="type-btn" data-type="time" onclick="selectType(this)">Zeit (s)</button>
+        <button class="type-btn" data-type="mass" onclick="selectType(this)">Distanz (cm)</button>
+        <button class="type-btn" data-type="rating" onclick="selectType(this)">Rating 1–5</button>
+      </div>
+    </div>
+    <div class="modal-row2" id="modal-range-row">
+      <div class="modal-field">
+        <div class="modal-label">Min</div>
+        <input class="modal-input" id="new-task-min" type="number" value="0" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Max</div>
+        <input class="modal-input" id="new-task-max" type="number" value="50" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Schritt</div>
+        <input class="modal-input" id="new-task-step" type="number" value="1" step="0.1" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeTaskModalDirect()">Abbrechen</button>
+      <button class="modal-add" onclick="addCustomTask()">+ Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: KURS BEARBEITEN / HINZUFÜGEN ── -->
+<div class="modal-overlay" id="modal-course" onclick="closeCourseModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="course-modal-title">Kurs hinzufügen</div>
+
+    <div class="modal-field">
+      <div class="modal-label">Kursname</div>
+      <input class="modal-input" id="edit-course-name" placeholder="z.B. Parkour Einsteiger 10–13J" />
+    </div>
+
+    <div class="modal-row-half">
+      <div class="modal-field">
+        <div class="modal-label">Uhrzeit</div>
+        <input class="modal-input" id="edit-course-time" placeholder="16:30" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Stufe</div>
+        <select class="modal-select" id="edit-course-level">
+          <option value="Basis">Basis</option>
+          <option value="Mittel">Mittel</option>
+          <option value="Fortgeschritten">Fortgeschritten</option>
+          <option value="Alle Stufen">Alle Stufen</option>
+          <option value="Team">Team</option>
+          <option value="Comp">Comp</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <div class="modal-label">Coach / Trainer</div>
+      <input class="modal-input" id="edit-course-trainer" placeholder="z.B. Chris Harmat" />
+    </div>
+
+    <div class="modal-field">
+      <div class="modal-label">Kinder — Namen tippen, Enter drücken</div>
+      <div class="kids-chips-container" id="kids-chips-container" onclick="focusKidsInput()">
+        <input class="kids-input" id="kids-chips-input" placeholder="Name eingeben…"
+          onkeydown="handleKidsInput(event)" oninput="handleKidsInputChange()" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeCourseModalDirect()">Abbrechen</button>
+      <button class="modal-add" onclick="saveCourse()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: KURS LÖSCHEN (Passwort) ── -->
+<div class="modal-overlay" id="modal-delete" onclick="closeDeleteModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="padding-bottom:32px">
+    <div class="pw-modal-icon">🔒</div>
+    <div class="modal-title" style="text-align:center">Kurs löschen</div>
+    <div class="pw-modal-msg">Bitte Passwort eingeben um<br><span class="pw-modal-name" id="delete-course-name-display"></span><br>zu löschen.</div>
+    <div class="modal-field">
+      <div class="modal-label">Passwort</div>
+      <input class="modal-input" id="delete-password-input" type="password" placeholder="••••"
+        onkeydown="if(event.key==='Enter')confirmDeleteCourse()" />
+    </div>
+    <div id="delete-pw-error" style="color:var(--red);font-size:13px;margin-top:-8px;margin-bottom:12px;display:none">
+      ❌ Falsches Passwort
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeDeleteModalDirect()">Abbrechen</button>
+      <button class="modal-delete-btn" onclick="confirmDeleteCourse()">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT VIEW (kid-first, regular) -->
+<div class="print-view" id="print-view"></div>
+
+<!-- DIPLOMA VIEW (all courses, per kid) -->
+<div id="diploma-view"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// NAME POOLS
+// ─────────────────────────────────────────────────────────
+const POOL_Y = ['Luca','Mia','Noah','Emma','Ben','Lea','Felix','Anna','Tim','Sara','Max','Lena','Jonas','Clara','Finn'];
+const POOL_M = ['Marco','Jana','Niklas','Leonie','Pascal','Alina','Simon','Marlene','Tanja','Patrick','Sophie','Fabian'];
+const POOL_T = ['Alexander','Valentina','Tobias','Melissa','Raphael','Jasmin','Sandra','David','Laura','Dominik','Selina'];
+const POOL_S = ['M.','K.','H.','S.','W.','B.','F.','R.','T.','P.','L.','G.'];
+function genKids(n, age) {
+  if (n <= 0) return [];
+  const pool = age === '5-8' ? POOL_Y : age === '13-15' ? POOL_T : POOL_M;
+  return Array.from({length: n}, (_, i) => pool[i % pool.length] + ' ' + POOL_S[i % POOL_S.length]);
+}
+
+// ─────────────────────────────────────────────────────────
+// DEFAULT SKILLS
+// ─────────────────────────────────────────────────────────
+const DEFAULT_SKILLS = {
+  polysport: [
+    { id:'weitsprung',   label:'Weitsprung',   type:'mass',   unit:'cm', min:0,   max:300, step:5   },
+    { id:'hochsprung',   label:'Hochsprung',   type:'mass',   unit:'cm', min:0,   max:150, step:5   },
+    { id:'sprint_20m',   label:'20m Sprint',   type:'time',   unit:'s',  min:2.0, max:8.0, step:0.1 },
+    { id:'liegestuetze', label:'Liegestütze',  type:'count',  unit:'Wdh',min:0,   max:50,  step:1   },
+    { id:'balance',      label:'Balance',      type:'time',   unit:'s',  min:0,   max:60,  step:1   },
+  ],
+  akrobatik: [
+    { id:'rolle_vw',     label:'Rolle vorwärts',type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'handstand',    label:'Handstand',    type:'time',   unit:'s',  min:0, max:60, step:1 },
+    { id:'rad',          label:'Rad',          type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'koordination', label:'Koordination', type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
+  parkour: [
+    { id:'precision',    label:'Precision Jump',type:'mass',  unit:'cm', min:0,   max:250, step:5   },
+    { id:'balance_pk',   label:'Balance Beam', type:'time',   unit:'s',  min:0,   max:60,  step:1   },
+    { id:'vault',        label:'Vault Technik', type:'rating', unit:'/5', min:1,   max:5,   step:1   },
+    { id:'lauf_30m',     label:'30m Lauf',     type:'time',   unit:'s',  min:3.0, max:10.0,step:0.1 },
+  ],
+  grappling: [
+    { id:'technik',      label:'Technik',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'kraft',        label:'Kraft',        type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'ausdauer',     label:'Ausdauer',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'taktik',       label:'Taktik',       type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
+  ninja: [
+    { id:'precision',    label:'Precision Jump',type:'mass',  unit:'cm', min:0,   max:300, step:5   },
+    { id:'hindernislauf',label:'Hindernislauf', type:'time',  unit:'s',  min:5.0, max:90.0,step:0.5 },
+    { id:'klettern',     label:'Klettern',     type:'rating', unit:'/5', min:1,   max:5,   step:1   },
+    { id:'balance',      label:'Balance',      type:'time',   unit:'s',  min:0,   max:60,  step:1   },
+    { id:'koordination', label:'Koordination', type:'rating', unit:'/5', min:1,   max:5,   step:1   },
+  ],
+  team: [
+    { id:'technik',      label:'Technik',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'kraft',        label:'Kraft',        type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'ausdauer',     label:'Ausdauer',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'teamwork',     label:'Teamwork',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'performance',  label:'Performance',  type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
+  wct: [
+    { id:'speed',        label:'Speed',        type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'agility',      label:'Agilität',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'taktik',       label:'Taktik',       type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'ausdauer',     label:'Ausdauer',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
+  default: [
+    { id:'technik',      label:'Technik',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'koordination', label:'Koordination', type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'einsatz',      label:'Einsatz',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'fortschritt',  label:'Fortschritt',  type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
+};
+function courseType(name) {
+  const n = (name||'').toLowerCase();
+  if (n.includes('polysport'))                        return 'polysport';
+  if (n.includes('akrobatik'))                        return 'akrobatik';
+  if (n.includes('parkour')||n.includes('freerun'))   return 'parkour';
+  if (n.includes('grappling'))                        return 'grappling';
+  if (n.includes('ninja'))                            return 'ninja';
+  if (n.includes('chase tag')||n.includes('wct'))     return 'wct';
+  if (n.includes('team')||n.includes('comp'))         return 'team';
+  return 'default';
+}
+function lvBadgeClass(l) {
+  const s = (l||'').toLowerCase();
+  if (s==='basis') return 'basis'; if (s==='mittel') return 'mittel';
+  if (s.includes('fort')) return 'fort'; if (s==='team'||s==='comp') return 'team';
+  return 'alle';
+}
+
+// ─────────────────────────────────────────────────────────
+// DEFAULT COURSES DATA
+// ─────────────────────────────────────────────────────────
+const DEFAULT_COURSES = {
+  0:[
+    {id:'so_pk10', name:'Parkour Einsteiger 10–13J',code:'',  time:'11:30',trainer:'Chris Harmat',       level:'Basis',      kids:genKids(4,'9-12')},
+    {id:'so_pk14', name:'Parkour Einsteiger 14–18J',code:'',  time:'14:00',trainer:'Chris Harmat',       level:'Basis',      kids:genKids(3,'13-15')},
+    {id:'so_grapp',name:'Öko-Grappling',            code:'',  time:'14:00',trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids:genKids(6,'9-12')},
+  ],
+  1:[
+    {id:'mob1',  name:'Basic: Polysport 5–8',            code:'MoB1',time:'15:30',trainer:'Agrena Schuler', level:'Basis', kids:['Aedan Ferry','Anouk Weber','Caetano Frisoli','Emil Frei','Janosh Weber','Lydia Ros','Naomi Ros','Niccolò Frei','Niklas Adam']},
+    {id:'mob2',  name:'Fortgeschritten: Polysport 5–8',  code:'MoB2',time:'16:30',trainer:'Agrena Schuler', level:'Mittel',kids:genKids(3,'5-8')},
+    {id:'moc1',  name:'Basic: Polysport 9–12',           code:'MoC1',time:'16:30',trainer:'Lukas Daum',     level:'Basis', kids:genKids(5,'9-12')},
+    {id:'mo_nj1',name:'Ninja Kidz 6–9J',                code:'MoN1',time:'16:30',trainer:'Robin Simon',    level:'Basis', kids:genKids(6,'5-8')},
+    {id:'mod1',  name:'Basic: Polysport 13–15',          code:'MoD1',time:'17:30',trainer:'Diego Heubeck',  level:'Basis', kids:genKids(1,'13-15')},
+    {id:'mod2',  name:'Fortgeschritten: Polysport 13–15',code:'MoD2',time:'17:30',trainer:'Diego Heubeck',  level:'Mittel',kids:genKids(2,'13-15')},
+    {id:'mo_nj2',name:'Ninja Kidz 10–13J',              code:'MoN2',time:'17:30',trainer:'Robin Simon',    level:'Mittel',kids:genKids(7,'9-12')},
+    {id:'moc2',  name:'Fortgeschritten: Polysport 9–12', code:'MoC2',time:'18:30',trainer:'Lukas Daum',     level:'Mittel',kids:genKids(12,'9-12')},
+    {id:'mo_kt', name:'Kids Team',                      code:'MoKT',time:'18:30',trainer:'Agrena Schuler', level:'Team',  kids:genKids(8,'9-12'),isTeam:true},
+  ],
+  2:[
+    {id:'dib1',  name:'Basic: Polysport 5–8',            code:'DiB1', time:'16:30',trainer:'Robin Simon',   level:'Basis',      kids:genKids(5,'5-8')},
+    {id:'dik1',  name:'Akrobatik',                       code:'DiK1', time:'16:30',trainer:'Mathis Rüsch',  level:'Basis',      kids:genKids(8,'9-12')},
+    {id:'dic1',  name:'Basic: Polysport 9–12',           code:'DiC1', time:'16:30',trainer:'Lukas Daum',    level:'Basis',      kids:genKids(6,'9-12')},
+    {id:'di_nj1',name:'Ninja Kidz 6–9J',                code:'DiN1', time:'16:30',trainer:'Chris Harmat',  level:'Basis',      kids:genKids(8,'5-8')},
+    {id:'dib2',  name:'Fortgeschritten: Polysport 5–8',  code:'DiB2', time:'17:30',trainer:'Agrena Schuler',level:'Mittel',     kids:genKids(4,'5-8')},
+    {id:'dic2',  name:'Fortgeschritten: Polysport 9–12', code:'DiC2', time:'17:30',trainer:'Lukas Daum',    level:'Mittel',     kids:genKids(5,'9-12')},
+    {id:'did1',  name:'Basic: Polysport 13–15',          code:'DiD1', time:'17:30',trainer:'Diego Heubeck', level:'Basis',      kids:genKids(7,'13-15')},
+    {id:'di_nj2',name:'Ninja Kidz 10–13J',              code:'DiN2', time:'17:30',trainer:'Chris Harmat',  level:'Mittel',     kids:genKids(6,'9-12')},
+    {id:'did2',  name:'Fortgeschritten: Polysport 13–15',code:'DiD2', time:'18:30',trainer:'Diego Heubeck', level:'Mittel',     kids:genKids(5,'13-15')},
+    {id:'dipm1', name:'Basic: Girls Parkour',            code:'DiPM1',time:'18:30',trainer:'Julia Menz / Anja Rüfenacht',level:'Alle Stufen',kids:genKids(5,'9-12')},
+    {id:'di_kt', name:'Kids Team',                      code:'DiKT', time:'19:00',trainer:'Agrena Schuler',level:'Team',       kids:genKids(10,'9-12'),isTeam:true},
+    {id:'di_ct', name:'Comp Team',                      code:'DiCT', time:'20:00',trainer:'Chris Harmat',  level:'Team',       kids:genKids(8,'13-15'),isTeam:true},
+  ],
+  3:[
+    {id:'mic1',  name:'Basic: Polysport 9–12',           code:'MiC1', time:'16:30',trainer:'Lukas Daum',    level:'Basis',      kids:genKids(6,'9-12')},
+    {id:'mic2',  name:'Fortgeschritten: Polysport 9–12', code:'MiC2', time:'17:30',trainer:'Lukas Daum',    level:'Mittel',     kids:genKids(5,'9-12')},
+    {id:'mi_wct',name:'World Chase Tag',                code:'MiWCT',time:'17:30',trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids:genKids(10,'9-12')},
+    {id:'mid1',  name:'Basic: Polysport 13–15',          code:'MiD1', time:'18:30',trainer:'Diego Heubeck', level:'Basis',      kids:genKids(4,'13-15')},
+    {id:'mid2',  name:'Fortgeschritten: Polysport 13–15',code:'MiD2', time:'18:30',trainer:'Diego Heubeck', level:'Mittel',     kids:genKids(3,'13-15')},
+  ],
+  4:[
+    {id:'dob1',  name:'Basic: Polysport 5–8',            code:'DoB1',time:'16:30',trainer:'Diego Heubeck',  level:'Basis', kids:genKids(4,'5-8')},
+    {id:'doc1',  name:'Basic: Polysport 9–12',           code:'DoC1',time:'16:30',trainer:'Lukas Daum',     level:'Basis', kids:genKids(6,'9-12')},
+    {id:'do_nj1',name:'Ninja Kidz 6–9J',                code:'DoN1',time:'16:30',trainer:'Robin Simon',    level:'Basis', kids:genKids(7,'5-8')},
+    {id:'dob2',  name:'Fortgeschritten: Polysport 5–8',  code:'DoB2',time:'17:30',trainer:'Agrena Schuler', level:'Mittel',kids:genKids(5,'5-8')},
+    {id:'doc2',  name:'Fortgeschritten: Polysport 9–12', code:'DoC2',time:'17:30',trainer:'Lukas Daum',     level:'Mittel',kids:genKids(4,'9-12')},
+    {id:'dod1',  name:'Basic: Polysport 13–15',          code:'DoD1',time:'17:30',trainer:'Diego Heubeck',  level:'Basis', kids:genKids(7,'13-15')},
+    {id:'do_njt',name:'Ninja Teen 14–17J',              code:'DoNT',time:'17:30',trainer:'Chris Harmat',   level:'Mittel',kids:genKids(5,'13-15')},
+    {id:'dod2',  name:'Fortgeschritten: Polysport 13–15',code:'DoD2',time:'18:30',trainer:'Diego Heubeck',  level:'Mittel',kids:genKids(3,'13-15')},
+    {id:'do_kt', name:'Kids Team',                      code:'DoKT',time:'18:30',trainer:'Robin Simon',    level:'Team',  kids:genKids(8,'9-12'),isTeam:true},
+    {id:'do_ct', name:'Comp Team',                      code:'DoCT',time:'19:30',trainer:'Chris Harmat',   level:'Team',  kids:genKids(10,'13-15'),isTeam:true},
+  ],
+  5:[
+    {id:'fra1',  name:'Basic: Polysport 5–8',            code:'FrA1',time:'15:30',trainer:'Robin Simon',    level:'Basis',      kids:genKids(8,'5-8')},
+    {id:'frc1',  name:'Basic: Polysport 9–12',           code:'FrC1',time:'15:30',trainer:'Lukas Daum',     level:'Basis',      kids:genKids(6,'9-12')},
+    {id:'fra2',  name:'Fortgeschritten: Polysport 5–8',  code:'FrA2',time:'16:30',trainer:'Agrena Schuler', level:'Mittel',     kids:genKids(5,'5-8')},
+    {id:'frc2',  name:'Fortgeschritten: Polysport 9–12', code:'FrC2',time:'16:30',trainer:'Lukas Daum',     level:'Mittel',     kids:genKids(4,'9-12')},
+    {id:'frd1',  name:'Basic: Polysport 13–15',          code:'FrD1',time:'17:30',trainer:'Diego Heubeck',  level:'Basis',      kids:genKids(6,'13-15')},
+    {id:'frd2',  name:'Fortgeschritten: Polysport 13–15',code:'FrD2',time:'17:30',trainer:'Diego Heubeck',  level:'Mittel',     kids:genKids(3,'13-15')},
+    {id:'fr_wct',name:'World Chase Tag',                code:'FrWCT',time:'18:00',trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids:genKids(8,'9-12')},
+    {id:'fr_ct', name:'Comp Team',                      code:'FrCT',time:'19:00',trainer:'Chris Harmat',   level:'Team',       kids:genKids(12,'13-15'),isTeam:true},
+  ],
+  6:[
+    {id:'sa_km58', name:'KidsMove 5–8 Jahre', code:'',    time:'12:30',trainer:'Overground Team',      level:'Alle Stufen',kids:genKids(6,'5-8')},
+    {id:'sa_km912',name:'KidsMove 9–12 Jahre',code:'',    time:'14:00',trainer:'Overground Team',      level:'Alle Stufen',kids:genKids(8,'9-12')},
+    {id:'sa_wct',  name:'World Chase Tag',    code:'SaWCT',time:'13:00',trainer:'Loki Pacheco-Taylor',level:'Alle Stufen',kids:genKids(6,'9-12')},
+  ],
+};
+const DAY_NAMES = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+let S = {
+  day: null, course: null, taskIdx: 0,
+  data: {}, customSkills: {}, skillOverrides: {},
+  courses: null,          // mutable course data per day
+  _editingCourseId: null, // null = new, string = edit
+  _pendingDeleteId: null, // course id pending delete
+  _editingSkillIdx: null, // null = adding new task, number = editing existing
+};
+
+// ─────────────────────────────────────────────────────────
+// FIREBASE CONFIG
+// ══════════════════════════════════════════════════════════
+// EINRICHTEN: Ersetze die Platzhalter-Werte unten mit deinen
+// echten Firebase-Konfigurationswerten aus der Firebase Console.
+// (Projekteinstellungen → Deine Apps → Konfiguration kopieren)
+// ══════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAPlavJbdeD6twR2HU4-AdcpVYvyZ7IpB0",
+  authDomain:        "og-skills-pass-30a3e.firebaseapp.com",
+  databaseURL:       "https://og-skills-pass-30a3e-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "og-skills-pass-30a3e",
+  storageBucket:     "og-skills-pass-30a3e.firebasestorage.app",
+  messagingSenderId: "997170921455",
+  appId:             "1:997170921455:web:a159b7115acf856f3c801a"
+};
+// Firebase DB-Pfade
+const FB_PATH_DATA    = '/og-skillpass/appdata';
+const FB_PATH_COURSES = '/og-skillpass/courses';
+
+// Firebase-Instanz (null wenn nicht konfiguriert)
+let _db = null;
+let _fbActive = false;
+
+function initFirebase() {
+  // Nur initialisieren wenn echte Werte eingetragen sind
+  if (FIREBASE_CONFIG.apiKey === 'DEIN_API_KEY') {
+    setSyncStatus('local');
+    return;
+  }
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    _db = firebase.database();
+    _fbActive = true;
+    setSyncStatus('local'); // bis Verbindung steht
+  } catch (e) {
+    console.warn('Firebase init fehlgeschlagen:', e);
+    setSyncStatus('error');
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// SYNC STATUS INDICATOR
+// ─────────────────────────────────────────────────────────
+function setSyncStatus(state) {
+  // state: 'local' | 'syncing' | 'live' | 'error'
+  const badge = document.getElementById('sync-badge');
+  const label = document.getElementById('sync-label');
+  if (!badge || !label) return;
+  badge.className = 'sync-badge no-print';
+  const labels = { local: 'Lokal', syncing: 'Sync…', live: 'Live', error: 'Fehler' };
+  label.textContent = labels[state] || state;
+  if (state === 'syncing') badge.classList.add('syncing');
+  else if (state === 'live')    badge.classList.add('live');
+  else if (state === 'error')   badge.classList.add('error');
+}
+
+// ─────────────────────────────────────────────────────────
+// FIREBASE HELPER: object-indexed arrays ← Firebase speichert
+// JS-Arrays als {0:…, 1:…, 2:…} Objekte. Diese Funktion
+// wandelt sie wieder in Arrays um.
+// ─────────────────────────────────────────────────────────
+function firebaseToArray(val) {
+  if (val === null || val === undefined) return [];
+  if (Array.isArray(val)) return val;
+  // Firebase converts arrays to objects with numeric string keys
+  const maxIdx = Math.max(...Object.keys(val).map(Number).filter(n => !isNaN(n)));
+  const arr = [];
+  for (let i = 0; i <= maxIdx; i++) arr.push(val[i] !== undefined ? val[i] : null);
+  return arr;
+}
+
+function fixCoursesFromFirebase(raw) {
+  if (!raw) return JSON.parse(JSON.stringify(DEFAULT_COURSES));
+  const result = {};
+  for (const dayKey of Object.keys(raw)) {
+    const dayArr = firebaseToArray(raw[dayKey]);
+    result[dayKey] = dayArr.map(course => {
+      if (!course) return null;
+      return { ...course, kids: firebaseToArray(course.kids) };
+    }).filter(Boolean);
+  }
+  return result;
+}
+
+function fixAppdataFromFirebase(raw) {
+  if (!raw) return { data: {}, customSkills: {}, skillOverrides: {} };
+  // data[courseId][kid][skillId] – innerste Ebene ist ein flaches Objekt (kein Array)
+  // customSkills[courseId] ist ein Array
+  const data = raw.data || {};
+  const customSkills = {};
+  if (raw.customSkills) {
+    for (const cid of Object.keys(raw.customSkills)) {
+      customSkills[cid] = firebaseToArray(raw.customSkills[cid]);
+    }
+  }
+  return { data, customSkills, skillOverrides: raw.skillOverrides || {} };
+}
+
+// ─────────────────────────────────────────────────────────
+// REALTIME SYNC SETUP
+// ─────────────────────────────────────────────────────────
+let _suppressRemoteUpdate = false; // Verhindert Echo-Updates
+
+function setupRealtimeSync() {
+  if (!_fbActive || !_db) return;
+
+  // Verbindungsstatus überwachen
+  _db.ref('.info/connected').on('value', snap => {
+    if (snap.val() === true) {
+      setSyncStatus('live');
+    } else {
+      setSyncStatus('syncing');
+    }
+  });
+
+  // Kursdaten synchronisieren
+  _db.ref(FB_PATH_COURSES).on('value', snap => {
+    if (_suppressRemoteUpdate) return;
+    const raw = snap.val();
+    if (raw !== null) {
+      S.courses = fixCoursesFromFirebase(raw);
+      // Lokaler Fallback aktualisieren
+      try { localStorage.setItem('og_sp_courses_v2', JSON.stringify(S.courses)); } catch(_) {}
+      refreshCurrentView();
+    }
+  });
+
+  // App-Daten synchronisieren (Scores, Skills, Overrides)
+  _db.ref(FB_PATH_DATA).on('value', snap => {
+    if (_suppressRemoteUpdate) return;
+    const raw = snap.val();
+    if (raw !== null) {
+      const fixed = fixAppdataFromFirebase(raw);
+      S.data = fixed.data;
+      S.customSkills = fixed.customSkills;
+      S.skillOverrides = fixed.skillOverrides;
+      // Lokaler Fallback aktualisieren
+      try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify({
+        data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides
+      })); } catch(_) {}
+      refreshCurrentView();
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// REFRESH CURRENT VIEW (nach Remote-Update)
+// ─────────────────────────────────────────────────────────
+function refreshCurrentView() {
+  const activeScreen = document.querySelector('.screen.active');
+  if (!activeScreen) return;
+  const id = activeScreen.id;
+  if (id === 'screen-home')     renderHome();
+  else if (id === 'screen-course')   renderCourseView();
+  else if (id === 'screen-task')     { if (S.course) renderTaskView(S.course); }
+  else if (id === 'screen-diploma')  { if (S.day !== null) buildDiplomaView(S.day); }
+}
+
+// ─────────────────────────────────────────────────────────
+// PERSIST / HYDRATE
+// ─────────────────────────────────────────────────────────
+function persist() {
+  const payload = { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides };
+  // 1. Immer zuerst lokal speichern (auch offline verfügbar)
+  try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(payload)); } catch(_) {}
+  // 2. Wenn Firebase aktiv: auch in die Cloud schreiben
+  if (_fbActive && _db) {
+    _suppressRemoteUpdate = true;
+    setSyncStatus('syncing');
+    _db.ref(FB_PATH_DATA).set(payload)
+      .then(() => { setSyncStatus('live'); })
+      .catch(e => { console.warn('Firebase write (data) fehlgeschlagen:', e); setSyncStatus('error'); })
+      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 300); });
+  }
+}
+function persistCourses() {
+  // 1. Immer zuerst lokal speichern
+  try { localStorage.setItem('og_sp_courses_v2', JSON.stringify(S.courses)); } catch(_) {}
+  // 2. Wenn Firebase aktiv: auch in die Cloud schreiben
+  if (_fbActive && _db) {
+    _suppressRemoteUpdate = true;
+    setSyncStatus('syncing');
+    _db.ref(FB_PATH_COURSES).set(S.courses)
+      .then(() => { setSyncStatus('live'); })
+      .catch(e => { console.warn('Firebase write (courses) fehlgeschlagen:', e); setSyncStatus('error'); })
+      .finally(() => { setTimeout(() => { _suppressRemoteUpdate = false; }, 300); });
+  }
+}
+function hydrate() {
+  try {
+    const d = localStorage.getItem('og_sp_aufgaben_v2');
+    if (d) { const p = JSON.parse(d); S.data = p.data||{}; S.customSkills = p.customSkills||{}; S.skillOverrides = p.skillOverrides||{}; }
+  } catch(_) {}
+  // Load mutable courses (deep-clone defaults if not saved yet)
+  try {
+    const c = localStorage.getItem('og_sp_courses_v2');
+    if (c) {
+      S.courses = JSON.parse(c);
+    } else {
+      S.courses = JSON.parse(JSON.stringify(DEFAULT_COURSES));
+    }
+  } catch(_) {
+    S.courses = JSON.parse(JSON.stringify(DEFAULT_COURSES));
+  }
+}
+function getCourses(day) { return (S.courses[day] || []); }
+
+// ─────────────────────────────────────────────────────────
+// SKILL HELPERS
+// ─────────────────────────────────────────────────────────
+function getCourseSkills(course) {
+  const type = courseType(course.name);
+  const base = DEFAULT_SKILLS[type] || DEFAULT_SKILLS.default;
+  const custom = S.customSkills[course.id] || [];
+  const overrides = S.skillOverrides[course.id] || {};
+  // Apply overrides to default skills
+  const resolvedBase = base.map(s => overrides[s.id] ? { ...s, ...overrides[s.id] } : s);
+  // Apply overrides to custom skills too (by id)
+  const resolvedCustom = custom.map(s => overrides[s.id] ? { ...s, ...overrides[s.id] } : s);
+  return [...resolvedBase, ...resolvedCustom];
+}
+function getVal(courseId, kid, skillId, skill) {
+  const mid = Math.round(((skill.min + skill.max) / 2) / skill.step) * skill.step;
+  return S.data?.[courseId]?.[kid]?.[skillId] ?? mid;
+}
+function setVal(courseId, kid, skillId, val) {
+  if (!S.data[courseId]) S.data[courseId] = {};
+  if (!S.data[courseId][kid]) S.data[courseId][kid] = {};
+  S.data[courseId][kid][skillId] = val;
+  persist();
+}
+function isSkillDone(course, skill) {
+  // Done only when EVERY kid has an explicitly stored value
+  return course.kids.length > 0 && course.kids.every(kid =>
+    S.data?.[course.id]?.[kid]?.[skill.id] !== undefined
+  );
+}
+
+function courseProgress(course) {
+  const skills = getCourseSkills(course);
+  const total = skills.length * course.kids.length;
+  if (total === 0) return { done: 0, total: 0, percent: 0, started: false, finished: false };
+  let done = 0;
+  for (const skill of skills) {
+    for (const kid of course.kids) {
+      if (S.data?.[course.id]?.[kid]?.[skill.id] !== undefined) done++;
+    }
+  }
+  return {
+    done, total,
+    percent: Math.round(done / total * 100),
+    started: done > 0,
+    finished: done >= total
+  };
+}
+
+function dayProgress(day) {
+  const courses = getCourses(day);
+  let totalDone = 0, totalAll = 0;
+  for (const c of courses) {
+    const p = courseProgress(c);
+    totalDone += p.done; totalAll += p.total;
+  }
+  return {
+    done: totalDone, total: totalAll,
+    percent: totalAll > 0 ? Math.round(totalDone / totalAll * 100) : 0,
+    courses
+  };
+}
+function formatVal(val, skill) {
+  return (skill.step < 1 ? parseFloat(val).toFixed(1) : val) + skill.unit;
+}
+function encodeId(s) { return s.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,''); }
+
+// ─────────────────────────────────────────────────────────
+// SCREEN: HOME
+// ─────────────────────────────────────────────────────────
+let _sortable = null;
+
+function renderHome() {
+  // Day buttons
+  const daysRow = document.getElementById('days-row');
+  daysRow.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (getCourses(i).length ? ' has-courses':'') + (S.day===i?' active':'');
+    btn.innerHTML = `<span class="day-name">${DAY_NAMES[i]}</span><span class="day-dot"></span>`;
+    btn.onclick = () => { S.day = i; renderHome(); };
+    daysRow.appendChild(btn);
+  }
+
+  const list = document.getElementById('courses-list');
+  const label = document.getElementById('courses-label');
+  const addBtn = document.getElementById('add-course-btn');
+  const printAllBtn = document.getElementById('print-all-btn');
+
+  if (S.day === null) {
+    label.textContent = 'TAG WÄHLEN';
+    list.innerHTML = '';
+    addBtn.style.display = 'none';
+    printAllBtn.style.display = 'none';
+    return;
+  }
+
+  const courses = getCourses(S.day);
+  label.textContent = DAY_NAMES[S.day]+'TAG — '+courses.length+' KURSE';
+  addBtn.style.display = 'flex';
+  printAllBtn.style.display = 'flex';
+  list.innerHTML = '';
+
+  courses.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'course-row' + (c.isTeam ? ' team-row' : '');
+    row.dataset.id = c.id;
+
+    const handle = document.createElement('span');
+    handle.className = 'drag-handle';
+    handle.innerHTML = '⠿';
+
+    const prog = courseProgress(c);
+    const stateClass = prog.finished ? 'done' : prog.started ? 'wip' : 'idle';
+    const stateTxt   = prog.finished ? '✓ Fertig' : prog.started ? 'In Arbeit' : '';
+    const fillColor  = prog.finished ? 'var(--green)' : prog.started ? 'var(--accent)' : 'var(--surface3)';
+
+    const body = document.createElement('div');
+    body.className = 'course-card-body';
+    body.innerHTML = `
+      <span class="lv-badge ${lvBadgeClass(c.level)}">${c.level}</span>
+      <div class="course-name">${c.name}</div>
+      <div class="course-meta">${c.time} Uhr · ${c.trainer} · ${c.kids.length} Kinder</div>
+      <div class="course-progress-wrap">
+        <div class="course-progress-bar">
+          <div class="course-progress-fill" style="width:${prog.percent}%;background:${fillColor}"></div>
+        </div>
+        <div class="course-pct-row">
+          <span class="course-pct-text">${prog.percent}% · ${prog.done}/${prog.total} Einträge</span>
+          <span class="course-state-badge ${stateClass}">${stateTxt}</span>
+        </div>
+      </div>`;
+    body.onclick = () => { S.course = c; showOverview(); };
+
+    const acts = document.createElement('div');
+    acts.className = 'course-acts';
+    acts.innerHTML = `
+      <button class="course-act-btn" title="Bearbeiten" onclick="openCourseModal('${c.id}')">✎</button>
+      <button class="course-act-btn del" title="Löschen" onclick="openDeleteModal('${c.id}')">✕</button>`;
+
+    row.appendChild(handle);
+    row.appendChild(body);
+    row.appendChild(acts);
+    list.appendChild(row);
+  });
+
+  // Render day summary (Headcoach overview)
+  const dp = dayProgress(S.day);
+  const summaryEl = document.getElementById('day-summary');
+  const rowsHtml = courses.map(c => {
+    const p = courseProgress(c);
+    const col = p.finished ? 'var(--green)' : p.started ? 'var(--accent)' : 'var(--border)';
+    const pctTxt = p.started ? `${p.percent}%` : '–';
+    const pctCol  = p.finished ? 'var(--green)' : p.started ? 'var(--accent)' : 'var(--muted)';
+    return `<div class="day-course-row">
+      <span class="day-course-time">${c.time}</span>
+      <span class="day-course-name">${c.name}</span>
+      <div class="day-course-mini-bar">
+        <div class="day-course-mini-fill" style="width:${p.percent}%;background:${col}"></div>
+      </div>
+      <span class="day-course-pct-txt" style="color:${pctCol}">${pctTxt}</span>
+    </div>`;
+  }).join('');
+
+  const totalColor = dp.percent >= 100 ? 'var(--green)' : dp.percent > 0 ? 'var(--accent)' : 'var(--muted)';
+  summaryEl.innerHTML = `
+    <div class="day-summary-card">
+      <div class="day-summary-label">Headcoach · Tag-Übersicht</div>
+      <div class="day-summary-main">
+        <div class="day-summary-pct" style="color:${totalColor}">${dp.percent}%</div>
+        <div class="day-summary-right">
+          <div class="day-summary-bar-wrap">
+            <div class="day-summary-bar-fill" style="width:${dp.percent}%;background:${totalColor}"></div>
+          </div>
+          <div class="day-summary-stats">${dp.done} von ${dp.total} Einträgen · ${courses.filter(c=>courseProgress(c).finished).length}/${courses.length} Kurse fertig</div>
+        </div>
+      </div>
+      <div class="day-courses-grid">${rowsHtml}</div>
+    </div>`;
+
+  // Destroy old Sortable, create new one
+  if (_sortable) { _sortable.destroy(); _sortable = null; }
+  _sortable = new Sortable(list, {
+    animation: 180,
+    handle: '.drag-handle',
+    ghostClass: 'sortable-ghost',
+    onEnd(evt) {
+      const arr = S.courses[S.day];
+      const item = arr.splice(evt.oldIndex, 1)[0];
+      arr.splice(evt.newIndex, 0, item);
+      persistCourses();
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// COURSE EDIT MODAL
+// ─────────────────────────────────────────────────────────
+let _editKids = [];
+
+function openCourseModal(courseId) {
+  S._editingCourseId = courseId;
+  const isNew = courseId === null;
+
+  document.getElementById('course-modal-title').textContent = isNew ? 'Kurs hinzufügen' : 'Kurs bearbeiten';
+
+  if (!isNew) {
+    // Find course across all days (it should be in current day)
+    const courses = getCourses(S.day);
+    const c = courses.find(x => x.id === courseId);
+    if (!c) return;
+    document.getElementById('edit-course-name').value = c.name || '';
+    document.getElementById('edit-course-time').value = c.time || '';
+    document.getElementById('edit-course-trainer').value = c.trainer || '';
+    document.getElementById('edit-course-level').value = c.level || 'Basis';
+    _editKids = [...(c.kids || [])];
+  } else {
+    document.getElementById('edit-course-name').value = '';
+    document.getElementById('edit-course-time').value = '';
+    document.getElementById('edit-course-trainer').value = '';
+    document.getElementById('edit-course-level').value = 'Basis';
+    _editKids = [];
+  }
+
+  renderKidsChips();
+  document.getElementById('modal-course').classList.add('open');
+  setTimeout(() => document.getElementById('edit-course-name').focus(), 100);
+}
+
+function renderKidsChips() {
+  const container = document.getElementById('kids-chips-container');
+  // Remove existing chips (keep input)
+  container.querySelectorAll('.kid-chip').forEach(c => c.remove());
+  const input = document.getElementById('kids-chips-input');
+
+  _editKids.forEach((kid, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'kid-chip';
+    chip.innerHTML = `<span>${kid}</span>`;
+    const rm = document.createElement('button');
+    rm.className = 'kid-chip-remove';
+    rm.innerHTML = '×';
+    rm.onclick = () => { _editKids.splice(idx, 1); renderKidsChips(); };
+    chip.appendChild(rm);
+    container.insertBefore(chip, input);
+  });
+}
+
+function focusKidsInput() {
+  document.getElementById('kids-chips-input').focus();
+}
+
+function handleKidsInput(e) {
+  const input = document.getElementById('kids-chips-input');
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = input.value.trim().replace(/,$/, '');
+    if (val) { _editKids.push(val); renderKidsChips(); input.value = ''; }
+  } else if (e.key === 'Backspace' && input.value === '' && _editKids.length > 0) {
+    _editKids.pop(); renderKidsChips();
+  }
+}
+
+function handleKidsInputChange() {
+  const input = document.getElementById('kids-chips-input');
+  // Allow comma-separated paste
+  if (input.value.includes(',')) {
+    const parts = input.value.split(',').map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1 || (parts.length === 1 && input.value.endsWith(','))) {
+      parts.forEach(p => { if (p) _editKids.push(p); });
+      renderKidsChips();
+      input.value = '';
+    }
+  }
+}
+
+function saveCourse() {
+  const name = document.getElementById('edit-course-name').value.trim();
+  if (!name) { document.getElementById('edit-course-name').focus(); return; }
+
+  // Commit any typed-but-not-added kid
+  const kidsInput = document.getElementById('kids-chips-input');
+  const pending = kidsInput.value.trim();
+  if (pending) { _editKids.push(pending); kidsInput.value = ''; }
+
+  const level = document.getElementById('edit-course-level').value;
+  const updated = {
+    id: S._editingCourseId || ('custom_' + Date.now()),
+    name,
+    time: document.getElementById('edit-course-time').value.trim() || '',
+    trainer: document.getElementById('edit-course-trainer').value.trim() || '',
+    level,
+    code: '',
+    kids: [..._editKids],
+    isTeam: level === 'Team' || level === 'Comp',
+  };
+
+  if (!S.courses[S.day]) S.courses[S.day] = [];
+
+  if (S._editingCourseId === null) {
+    // Add new
+    S.courses[S.day].push(updated);
+  } else {
+    // Update existing
+    const idx = S.courses[S.day].findIndex(c => c.id === S._editingCourseId);
+    if (idx >= 0) S.courses[S.day][idx] = { ...S.courses[S.day][idx], ...updated };
+  }
+
+  persistCourses();
+  closeCourseModalDirect();
+  renderHome();
+}
+
+function closeCourseModal(e) { if (e.target === document.getElementById('modal-course')) closeCourseModalDirect(); }
+function closeCourseModalDirect() { document.getElementById('modal-course').classList.remove('open'); }
+
+// ─────────────────────────────────────────────────────────
+// COURSE DELETE MODAL
+// ─────────────────────────────────────────────────────────
+function openDeleteModal(courseId) {
+  S._pendingDeleteId = courseId;
+  const courses = getCourses(S.day);
+  const c = courses.find(x => x.id === courseId);
+  document.getElementById('delete-course-name-display').textContent = c ? '"' + c.name + '"' : 'diesen Kurs';
+  document.getElementById('delete-password-input').value = '';
+  document.getElementById('delete-pw-error').style.display = 'none';
+  document.getElementById('modal-delete').classList.add('open');
+  setTimeout(() => document.getElementById('delete-password-input').focus(), 100);
+}
+function confirmDeleteCourse() {
+  const pw = document.getElementById('delete-password-input').value;
+  if (pw !== '2021') {
+    document.getElementById('delete-pw-error').style.display = 'block';
+    document.getElementById('delete-password-input').value = '';
+    document.getElementById('delete-password-input').focus();
+    return;
+  }
+  // Delete
+  if (S.courses[S.day]) {
+    S.courses[S.day] = S.courses[S.day].filter(c => c.id !== S._pendingDeleteId);
+    persistCourses();
+  }
+  closeDeleteModalDirect();
+  renderHome();
+}
+function closeDeleteModal(e) { if (e.target === document.getElementById('modal-delete')) closeDeleteModalDirect(); }
+function closeDeleteModalDirect() { document.getElementById('modal-delete').classList.remove('open'); }
+
+// ─────────────────────────────────────────────────────────
+// SCREEN: AUFGABEN ÜBERSICHT
+// ─────────────────────────────────────────────────────────
+function showOverview() {
+  showScreen('screen-overview');
+  renderOverview();
+  buildPrintView();
+}
+
+function renderOverview() {
+  const course = S.course;
+  document.getElementById('ov-course-name').textContent = course.name;
+  document.getElementById('ov-course-sub').textContent = course.time+' Uhr · '+course.trainer+' · '+course.kids.length+' Kinder';
+
+  const skills = getCourseSkills(course);
+  const grid = document.getElementById('tasks-grid');
+  grid.innerHTML = '';
+
+  skills.forEach((skill, idx) => {
+    const done = isSkillDone(course, skill);
+    const tile = document.createElement('div');
+    tile.className = 'task-tile' + (done ? ' done' : '');
+    tile.innerHTML = `
+      ${done ? '<span class="task-tile-check">✓</span>' : ''}
+      <div class="task-tile-num">Aufgabe ${idx+1}</div>
+      <div class="task-tile-name">${skill.label}</div>
+      <div class="task-tile-unit">${skill.unit}</div>
+      <button class="task-tile-edit" title="Bearbeiten">✎</button>`;
+    // Separate click targets: edit button vs. tile body
+    tile.onclick = (e) => {
+      if (e.target.classList.contains('task-tile-edit')) {
+        e.stopPropagation();
+        openTaskModal(idx);
+      } else {
+        openTask(idx);
+      }
+    };
+    grid.appendChild(tile);
+  });
+
+  const addTile = document.createElement('div');
+  addTile.className = 'add-task-tile';
+  addTile.innerHTML = `<span class="plus">＋</span><span>Aufgabe hinzufügen</span>`;
+  addTile.onclick = openTaskModal;
+  grid.appendChild(addTile);
+}
+
+// ─────────────────────────────────────────────────────────
+// SCREEN: AUFGABE EINGEBEN
+// ─────────────────────────────────────────────────────────
+function openTask(idx) {
+  S.taskIdx = idx;
+  showScreen('screen-task');
+  renderTaskInput();
+}
+function renderTaskInput() {
+  const course = S.course;
+  const skills = getCourseSkills(course);
+  const skill = skills[S.taskIdx];
+
+  document.getElementById('task-course-name').textContent = course.name;
+  document.getElementById('task-course-sub').textContent = course.time+' Uhr · '+course.trainer;
+  document.getElementById('task-progress-lbl').textContent = `Aufgabe ${S.taskIdx+1} von ${skills.length}`;
+  document.getElementById('task-name-big').textContent = skill.label;
+  document.getElementById('task-unit-lbl').textContent =
+    skill.type==='time'?'Sekunden (s)':skill.type==='mass'?'Zentimeter (cm)':
+    skill.type==='count'?'Wiederholungen':'Bewertung 1–5';
+
+  const list = document.getElementById('kids-list');
+  list.innerHTML = '';
+
+  course.kids.forEach(kid => {
+    const val = getVal(course.id, kid, skill.id, skill);
+    const row = document.createElement('div');
+    row.className = 'kid-row';
+    if (skill.type === 'rating') {
+      let starsHtml = '';
+      for (let v = skill.min; v <= skill.max; v += skill.step)
+        starsHtml += `<button class="rating-star${val===v?' active':''}"
+          onclick="rateKid('${course.id}','${kid}','${skill.id}',${v},this.parentElement.parentElement)">${v}</button>`;
+      row.innerHTML = `
+        <div class="kid-row-top">
+          <span class="kid-name">${kid}</span>
+          <span class="kid-value-display" id="dv-${encodeId(kid)}-${skill.id}">${val}${skill.unit}</span>
+        </div>
+        <div class="rating-row">${starsHtml}</div>`;
+    } else {
+      row.innerHTML = `
+        <div class="kid-row-top">
+          <span class="kid-name">${kid}</span>
+          <span class="kid-value-display" id="dv-${encodeId(kid)}-${skill.id}">${formatVal(val,skill)}</span>
+        </div>
+        <input type="range" class="kid-slider"
+          min="${skill.min}" max="${skill.max}" step="${skill.step}" value="${val}"
+          oninput="slideKid('${course.id}','${kid}','${skill.id}',this)">`;
+    }
+    list.appendChild(row);
+  });
+}
+
+function slideKid(courseId, kid, skillId, input) {
+  const val = parseFloat(input.value);
+  setVal(courseId, kid, skillId, val);
+  const el = document.getElementById(`dv-${encodeId(kid)}-${skillId}`);
+  if (el) {
+    const skills = getCourseSkills(S.course);
+    const skill = skills.find(s => s.id === skillId);
+    if (skill) el.textContent = formatVal(val, skill);
+  }
+}
+function rateKid(courseId, kid, skillId, val, row) {
+  setVal(courseId, kid, skillId, val);
+  row.querySelectorAll('.rating-star').forEach(b => b.classList.toggle('active', +b.textContent===val));
+  const skills = getCourseSkills(S.course);
+  const skill = skills.find(s=>s.id===skillId);
+  const el = document.getElementById(`dv-${encodeId(kid)}-${skillId}`);
+  if (el&&skill) el.textContent = val+skill.unit;
+}
+function saveAndBack() { buildPrintView(); showOverview(); }
+
+// ─────────────────────────────────────────────────────────
+// ADD CUSTOM TASK (MODAL)
+// ─────────────────────────────────────────────────────────
+let selectedType = 'count';
+function openTaskModal(skillIdx = null) {
+  S._editingSkillIdx = skillIdx;
+  const isEdit = skillIdx !== null;
+
+  // Update modal title and button label
+  document.querySelector('#modal-task .modal-title').textContent = isEdit ? 'Aufgabe bearbeiten' : 'Aufgabe hinzufügen';
+  document.querySelector('#modal-task .modal-add').textContent = isEdit ? '✓ Speichern' : '+ Hinzufügen';
+
+  if (isEdit) {
+    const skill = getCourseSkills(S.course)[skillIdx];
+    document.getElementById('new-task-name').value = skill.label || '';
+    document.getElementById('new-task-unit').value = skill.unit || '';
+    document.getElementById('new-task-min').value = skill.min ?? 0;
+    document.getElementById('new-task-max').value = skill.max ?? 50;
+    document.getElementById('new-task-step').value = skill.step ?? 1;
+    selectedType = skill.type || 'count';
+  } else {
+    document.getElementById('new-task-name').value = '';
+    document.getElementById('new-task-unit').value = '';
+    document.getElementById('new-task-min').value = '0';
+    document.getElementById('new-task-max').value = '50';
+    document.getElementById('new-task-step').value = '1';
+    selectedType = 'count';
+  }
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type===selectedType));
+  document.getElementById('modal-task').classList.add('open');
+  setTimeout(() => document.getElementById('new-task-name').focus(), 100);
+}
+function selectType(btn) {
+  selectedType = btn.dataset.type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b===btn));
+  if (selectedType==='rating') {
+    document.getElementById('new-task-min').value='1'; document.getElementById('new-task-max').value='5';
+    document.getElementById('new-task-step').value='1'; document.getElementById('new-task-unit').value='/5';
+  } else if (selectedType==='time') {
+    document.getElementById('new-task-min').value='0'; document.getElementById('new-task-max').value='60';
+    document.getElementById('new-task-step').value='1'; document.getElementById('new-task-unit').value='s';
+  } else if (selectedType==='mass') {
+    document.getElementById('new-task-min').value='0'; document.getElementById('new-task-max').value='300';
+    document.getElementById('new-task-step').value='5'; document.getElementById('new-task-unit').value='cm';
+  } else {
+    document.getElementById('new-task-min').value='0'; document.getElementById('new-task-max').value='50';
+    document.getElementById('new-task-step').value='1'; document.getElementById('new-task-unit').value='Wdh';
+  }
+}
+function closeTaskModal(e) { document.getElementById('modal-task').classList.remove('open'); }
+function closeTaskModalDirect() { document.getElementById('modal-task').classList.remove('open'); }
+function addCustomTask() {
+  const name = document.getElementById('new-task-name').value.trim();
+  if (!name) { document.getElementById('new-task-name').focus(); return; }
+  const unit  = document.getElementById('new-task-unit').value.trim() || '';
+  const min   = parseFloat(document.getElementById('new-task-min').value)  || 0;
+  const max   = parseFloat(document.getElementById('new-task-max').value)  || 10;
+  const step  = parseFloat(document.getElementById('new-task-step').value) || 1;
+  const cid   = S.course.id;
+
+  if (S._editingSkillIdx !== null) {
+    // EDIT MODE — save as override (works for both default and custom skills)
+    const skills = getCourseSkills(S.course);
+    const existing = skills[S._editingSkillIdx];
+    if (!S.skillOverrides[cid]) S.skillOverrides[cid] = {};
+    S.skillOverrides[cid][existing.id] = { label: name, type: selectedType, unit, min, max, step };
+  } else {
+    // ADD MODE — create new custom skill
+    const id = 'custom_' + Date.now();
+    const skill = { id, label: name, type: selectedType, unit, min, max, step, _custom: true };
+    if (!S.customSkills[cid]) S.customSkills[cid] = [];
+    S.customSkills[cid].push(skill);
+  }
+  persist();
+  closeTaskModalDirect();
+  renderOverview();
+}
+
+// ─────────────────────────────────────────────────────────
+// PRINT VIEW (kid-first)
+// ─────────────────────────────────────────────────────────
+function buildPrintView() {
+  const course = S.course;
+  if (!course) return;
+  const skills = getCourseSkills(course);
+  const pv = document.getElementById('print-view');
+  pv.innerHTML = '';
+  course.kids.forEach(kid => {
+    const card = document.createElement('div');
+    card.className = 'print-kid-card';
+    let rows = skills.map(skill => {
+      const val = getVal(course.id, kid, skill.id, skill);
+      return `<div class="print-skill-row">
+        <span class="print-skill-label">${skill.label}</span>
+        <span class="print-skill-val">${formatVal(val,skill)}</span>
+      </div>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="print-header-row">
+        <div>
+          <div class="print-og-logo">OG SKILLS-PASS</div>
+          <div class="print-kid-name">${kid}</div>
+          <div class="print-course-info">${course.name} · ${DAY_NAMES[S.day]}tag · ${course.time} Uhr</div>
+        </div>
+        <div style="text-align:right;font-size:9pt;color:#888;padding-top:4px">Coach:<br>${course.trainer}</div>
+      </div>
+      ${rows}`;
+    pv.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// DIPLOME DRUCKEN (alle Kurse des Tages)
+// ─────────────────────────────────────────────────────────
+function buildDiplomaView(day) {
+  const dv = document.getElementById('diploma-view');
+  dv.innerHTML = '';
+  const courses = getCourses(day);
+  const dayName = DAY_NAMES[day] + 'tag';
+  const dateStr = new Date().toLocaleDateString('de-CH', {day:'2-digit', month:'2-digit', year:'numeric'});
+
+  courses.forEach(course => {
+    const skills = getCourseSkills(course);
+    const lvStyle = lvDiplomaStyle(course.level);
+
+    course.kids.forEach(kid => {
+      const card = document.createElement('div');
+      card.className = 'diploma-card';
+
+      // Build skills HTML
+      let skillsHtml = skills.map(skill => {
+        const val = getVal(course.id, kid, skill.id, skill);
+        if (skill.type === 'rating') {
+          let stars = '';
+          for (let v = skill.min; v <= skill.max; v += skill.step) {
+            stars += `<span class="diploma-star${v <= val ? ' filled' : ''}">★</span>`;
+          }
+          return `<div class="diploma-skill-row">
+            <span class="diploma-skill-label">${skill.label}</span>
+            <span class="diploma-skill-dots"></span>
+            <span class="diploma-skill-val"><span class="diploma-rating-stars">${stars}</span></span>
+          </div>`;
+        }
+        return `<div class="diploma-skill-row">
+          <span class="diploma-skill-label">${skill.label}</span>
+          <span class="diploma-skill-dots"></span>
+          <span class="diploma-skill-val">${formatVal(val, skill)}</span>
+        </div>`;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="diploma-frame"></div>
+        <div class="diploma-corner tl"></div>
+        <div class="diploma-corner tr"></div>
+        <div class="diploma-corner bl"></div>
+        <div class="diploma-corner br"></div>
+        <div class="diploma-inner">
+          <div class="diploma-top">
+            <div class="diploma-logo-row">
+              <div class="diploma-logo">OG <span>SKILLS</span>-PASS</div>
+            </div>
+            <div class="diploma-stars">★ ★ ★ ★ ★</div>
+          </div>
+
+          <hr class="diploma-hr">
+
+          <div class="diploma-kid-name">${kid}</div>
+
+          <div class="diploma-course-info" style="margin-top:10px">
+            <div class="diploma-course-name">${course.name}</div>
+            <div class="diploma-meta-row">
+              ${dayName} · ${course.time} Uhr · Coach: <strong>${course.trainer}</strong>
+            </div>
+            <div style="margin-top:6px">
+              <span class="diploma-lv-badge" style="${lvStyle}">${course.level}</span>
+            </div>
+          </div>
+
+          <hr class="diploma-hr-thin" style="margin-top:12px">
+
+          <div class="diploma-skills-section">
+            <div class="diploma-skills-title">Absolvierte Skills</div>
+            ${skillsHtml}
+          </div>
+
+          <div class="diploma-footer">
+            <div class="diploma-sig-block">
+              <div class="diploma-sig-line">COACH</div>
+            </div>
+            <div class="diploma-stamp">
+              <div class="diploma-stamp-og">OG</div>
+              <div class="diploma-stamp-sub">Basel</div>
+            </div>
+            <div class="diploma-sig-block">
+              <div class="diploma-sig-line">DATUM</div>
+            </div>
+          </div>
+        </div>`;
+
+      dv.appendChild(card);
+    });
+  });
+}
+
+function lvDiplomaStyle(level) {
+  const s = (level||'').toLowerCase();
+  if (s === 'basis')         return 'background:#e8f0ff;color:#1d4ed8;border:1.5px solid #3b82f6;';
+  if (s === 'mittel')        return 'background:#fff7e0;color:#b45309;border:1.5px solid #f59e0b;';
+  if (s.includes('fort'))    return 'background:#fff3e8;color:#c2410c;border:1.5px solid #f97316;';
+  if (s === 'team' || s === 'comp') return 'background:#ffe8e8;color:#b91c1c;border:1.5px solid #ef4444;';
+  return 'background:#f0e8ff;color:#7c3aed;border:1.5px solid #a855f7;';
+}
+
+function printAllDiplomas() {
+  if (S.day === null) return;
+  buildDiplomaView(S.day);
+  document.body.classList.add('printing-diplomas');
+  const cleanup = () => {
+    document.body.classList.remove('printing-diplomas');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+}
+
+// ─────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showHome() { showScreen('screen-home'); renderHome(); }
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+hydrate();
+const todayJs = new Date().getDay();
+if (getCourses(todayJs).length > 0) S.day = todayJs;
+renderHome();
+
+// Firebase initialisieren und Echtzeit-Sync starten
+initFirebase();
+setupRealtimeSync();
+</script>
+</body>
+</html>
