@@ -1033,6 +1033,11 @@ function setupRealtimeSync() {
     const raw = snap.val();
     if (raw !== null) {
       S.courses = fixCoursesFromFirebase(raw);
+      // Keep S.course pointing to the updated object so renderOverview/softUpdate stay correct
+      if (S.course && S.day !== null) {
+        const fresh = (S.courses[S.day] || []).find(c => c.id === S.course.id);
+        if (fresh) S.course = fresh;
+      }
       try { localStorage.setItem('og_sp_courses_v2', JSON.stringify(S.courses)); } catch(_) {}
       refreshCurrentView();
     }
@@ -1095,22 +1100,59 @@ function softUpdateTaskView() {
 // ─────────────────────────────────────────────────────────
 // PERSIST / HYDRATE
 // ─────────────────────────────────────────────────────────
+// Encode a string so it's safe as a Firebase RTDB key/path segment
+// Firebase forbids: . # $ [ ] / in key names
+function fbKey(s) {
+  return String(s)
+    .replace(/\./g, '%2E').replace(/#/g, '%23').replace(/\$/g, '%24')
+    .replace(/\[/g, '%5B').replace(/\]/g, '%5D').replace(/\//g, '%2F');
+}
+
+// ── Granular score writes: only the changed value is written to Firebase,
+//    so two coaches entering different kids simultaneously never overwrite each other. ──
+let _pendingScoreWrites = {}; // { key: {courseId, kid, skillId, val} }
+let _scoreWriteTimer    = null;
+
+function flushScoreWrites() {
+  if (!_fbActive || !_db || Object.keys(_pendingScoreWrites).length === 0) return;
+  const pending = _pendingScoreWrites;
+  _pendingScoreWrites = {};
+  // Build a multi-path update object on the root ref
+  const rootBase = FB_PATH_DATA.replace(/^\//, ''); // strip leading slash
+  const updates  = {};
+  for (const { courseId, kid, skillId, val } of Object.values(pending)) {
+    updates[`${rootBase}/data/${fbKey(courseId)}/${fbKey(kid)}/${fbKey(skillId)}`] = val;
+  }
+  _suppressRemoteData = true;
+  setSyncStatus('syncing');
+  _db.ref('/').update(updates)
+    .then(() => setSyncStatus('live'))
+    .catch(e => {
+      console.warn('Granular score write fehlgeschlagen, fallback auf full persist:', e);
+      setSyncStatus('error');
+      // Fallback: full payload write
+      const payload = { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides };
+      _db.ref(FB_PATH_DATA).set(payload).catch(() => {});
+    })
+    .finally(() => { setTimeout(() => { _suppressRemoteData = false; }, 800); });
+}
+
+// Full persist: used only for skill-structure changes (customSkills / skillOverrides)
+// NOT called by setVal() anymore — scores use granular writes instead.
 let _persistDataTimer = null;
 function persist() {
   const payload = { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides };
-  // 1. Immer zuerst lokal speichern (auch offline verfügbar)
   try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(payload)); } catch(_) {}
-  // 2. Wenn Firebase aktiv: debounced write (reduces writes during slider dragging)
   if (_fbActive && _db) {
     setSyncStatus('syncing');
     clearTimeout(_persistDataTimer);
     _persistDataTimer = setTimeout(() => {
       _suppressRemoteData = true;
       _db.ref(FB_PATH_DATA).set(payload)
-        .then(() => { setSyncStatus('live'); })
-        .catch(e => { console.warn('Firebase write (data) fehlgeschlagen:', e); setSyncStatus('error'); })
+        .then(() => setSyncStatus('live'))
+        .catch(e => { console.warn('Firebase full persist fehlgeschlagen:', e); setSyncStatus('error'); })
         .finally(() => { setTimeout(() => { _suppressRemoteData = false; }, 1200); });
-    }, 400); // wait 400 ms of inactivity before writing to Firebase
+    }, 400);
   }
 }
 function persistCourses() {
@@ -1167,7 +1209,19 @@ function setVal(courseId, kid, skillId, val) {
   if (!S.data[courseId]) S.data[courseId] = {};
   if (!S.data[courseId][kid]) S.data[courseId][kid] = {};
   S.data[courseId][kid][skillId] = val;
-  persist();
+  // Save locally immediately
+  try {
+    localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(
+      { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides }
+    ));
+  } catch(_) {}
+  // Queue a debounced granular write to Firebase (only this one value, not the full dataset)
+  if (_fbActive && _db) {
+    setSyncStatus('syncing');
+    _pendingScoreWrites[`${courseId}||${kid}||${skillId}`] = { courseId, kid, skillId, val };
+    clearTimeout(_scoreWriteTimer);
+    _scoreWriteTimer = setTimeout(flushScoreWrites, 400);
+  }
 }
 function isSkillDone(course, skill) {
   // Done only when EVERY kid has an explicitly stored value
