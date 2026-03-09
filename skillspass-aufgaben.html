@@ -379,7 +379,7 @@
 
   /* PRINT */
   @media print {
-    @page { size: A4 portrait; margin: 8mm 12mm; }
+    @page { size: A4 portrait; margin: 0; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     /* Reset height constraints so multi-kid content flows across pages */
     html, body { height: auto !important; min-height: 0 !important; overflow: visible !important; }
@@ -414,10 +414,10 @@
     page-break-after: always;
     break-after: page;
     width: 100%;
-    /* Exact A4 height minus @page margins (8mm top + 8mm bottom = 16mm) */
-    height: 281mm;
-    max-height: 281mm;
-    padding: 20px 28px;
+    /* Full A4 with @page margin:0 — card IS the page */
+    height: 297mm;
+    max-height: 297mm;
+    padding: 14mm 14mm;
     position: relative;
     background: #fff;
     display: flex; flex-direction: column;
@@ -454,7 +454,8 @@
   .diploma-inner {
     position: relative; z-index: 1;
     display: flex; flex-direction: column;
-    flex: 1; padding: 10px 16px;
+    flex: 1; overflow: hidden;
+    transform-origin: top center;
   }
 
   .diploma-top { text-align: center; margin-bottom: 14px; }
@@ -555,45 +556,65 @@
 
   /* ── DIPLOMA DENSITY VARIANTS ─────────────────────────────
      Automatically applied based on number of skills per course.
-     Ensures every diploma fits exactly on one A4 page.
+     Card is always 297mm (@page margin:0), JS auto-scales overflow.
   ────────────────────────────────────────────────────────── */
 
   /* MEDIUM: 8–11 skills */
-  .diploma-md .diploma-inner        { padding: 6px 14px; }
-  .diploma-md .diploma-top          { margin-bottom: 8px; }
+  .diploma-md .diploma-top          { margin-bottom: 6px; }
   .diploma-md .diploma-logo         { font-size: 22pt; }
   .diploma-md .diploma-stars        { font-size: 11pt; }
-  .diploma-md .diploma-hr           { margin: 7px 0; }
-  .diploma-md .diploma-hr-thin      { margin: 7px 0; }
-  .diploma-md .diploma-kid-name     { font-size: 24pt; margin: 4px 0 3px; padding-bottom: 6px; }
+  .diploma-md .diploma-hr           { margin: 6px 0; }
+  .diploma-md .diploma-hr-thin      { margin: 6px 0; }
+  .diploma-md .diploma-kid-name     { font-size: 24pt; margin: 4px 0 3px; padding-bottom: 5px; }
   .diploma-md .diploma-course-info  { margin-top: 6px; }
-  .diploma-md .diploma-skills-section { margin: 8px 0; }
+  .diploma-md .diploma-skills-section { margin: 7px 0; }
   .diploma-md .diploma-skill-row    { padding: 4px 0; }
   .diploma-md .diploma-skill-label  { font-size: 9.5pt; }
   .diploma-md .diploma-skill-val    { font-size: 11pt; }
   .diploma-md .diploma-footer       { margin-top: 8px; padding-top: 8px; }
 
   /* SMALL: 12–15 skills */
-  .diploma-sm .diploma-inner        { padding: 4px 12px; }
-  .diploma-sm .diploma-top          { margin-bottom: 5px; }
+  .diploma-sm .diploma-top          { margin-bottom: 4px; }
   .diploma-sm .diploma-logo         { font-size: 19pt; }
   .diploma-sm .diploma-stars        { font-size: 10pt; }
-  .diploma-sm .diploma-hr           { margin: 5px 0; border-top-width: 1.5px; }
-  .diploma-sm .diploma-hr-thin      { margin: 5px 0; }
-  .diploma-sm .diploma-kid-name     { font-size: 20pt; margin: 3px 0 2px; padding-bottom: 5px; border-bottom-width: 2px; }
-  .diploma-sm .diploma-cert-text    { font-size: 8pt; margin-bottom: 3px; }
+  .diploma-sm .diploma-hr           { margin: 4px 0; border-top-width: 1.5px; }
+  .diploma-sm .diploma-hr-thin      { margin: 4px 0; }
+  .diploma-sm .diploma-kid-name     { font-size: 20pt; margin: 3px 0 2px; padding-bottom: 4px; border-bottom-width: 2px; }
+  .diploma-sm .diploma-cert-text    { font-size: 8pt; margin-bottom: 2px; }
   .diploma-sm .diploma-course-info  { margin-top: 4px; }
   .diploma-sm .diploma-course-name  { font-size: 10pt; }
   .diploma-sm .diploma-meta-row     { font-size: 8pt; margin-top: 2px; }
-  .diploma-sm .diploma-skills-section { margin: 5px 0; }
-  .diploma-sm .diploma-skills-title { font-size: 7pt; margin-bottom: 4px; }
+  .diploma-sm .diploma-skills-section { margin: 4px 0; }
+  .diploma-sm .diploma-skills-title { font-size: 7pt; margin-bottom: 3px; }
   .diploma-sm .diploma-skill-row    { padding: 3px 0; }
   .diploma-sm .diploma-skill-label  { font-size: 8.5pt; }
   .diploma-sm .diploma-skill-val    { font-size: 9.5pt; min-width: 50px; }
-  .diploma-sm .diploma-footer       { margin-top: 6px; padding-top: 6px; }
+  .diploma-sm .diploma-footer       { margin-top: 5px; padding-top: 5px; }
   .diploma-sm .diploma-stamp        { width: 56px; height: 56px; }
   .diploma-sm .diploma-stamp-og     { font-size: 11pt; }
   .diploma-sm .diploma-sig-line     { font-size: 7pt; width: 120px; }
+
+  /* EXTRA SMALL: 16+ skills */
+  .diploma-xs .diploma-top          { margin-bottom: 2px; }
+  .diploma-xs .diploma-logo         { font-size: 16pt; letter-spacing: 2px; }
+  .diploma-xs .diploma-stars        { font-size: 9pt; letter-spacing: 1px; }
+  .diploma-xs .diploma-hr           { margin: 3px 0; border-top-width: 1.5px; }
+  .diploma-xs .diploma-hr-thin      { margin: 3px 0; }
+  .diploma-xs .diploma-kid-name     { font-size: 16pt; margin: 2px 0 1px; padding-bottom: 3px; border-bottom-width: 2px; }
+  .diploma-xs .diploma-cert-text    { font-size: 7pt; margin-bottom: 1px; }
+  .diploma-xs .diploma-course-info  { margin-top: 2px; }
+  .diploma-xs .diploma-course-name  { font-size: 9pt; }
+  .diploma-xs .diploma-meta-row     { font-size: 7.5pt; margin-top: 1px; }
+  .diploma-xs .diploma-skills-section { margin: 2px 0; }
+  .diploma-xs .diploma-skills-title { font-size: 6.5pt; margin-bottom: 2px; }
+  .diploma-xs .diploma-skill-row    { padding: 1.5px 0; }
+  .diploma-xs .diploma-skill-label  { font-size: 7.5pt; }
+  .diploma-xs .diploma-skill-val    { font-size: 8.5pt; min-width: 45px; }
+  .diploma-xs .diploma-footer       { margin-top: 3px; padding-top: 3px; }
+  .diploma-xs .diploma-stamp        { width: 46px; height: 46px; }
+  .diploma-xs .diploma-stamp-og     { font-size: 9pt; }
+  .diploma-xs .diploma-stamp-sub    { font-size: 4.5pt; }
+  .diploma-xs .diploma-sig-line     { font-size: 6.5pt; width: 100px; }
 
   /* ── KOMPETENZRASTER DIPLOMA PAGE ──────────────────────── */
   .diploma-komp-title {
@@ -603,22 +624,23 @@
   }
   .diploma-komp-subtitle {
     font-size: 7pt; color: #bbb; text-align: center;
-    margin-bottom: 10px; letter-spacing: 1px;
+    margin-bottom: 8px; letter-spacing: 1px;
   }
   .diploma-komp-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0 18px;
+    flex: 1;
   }
   .diploma-komp-cat {
     font-size: 6.5pt; font-weight: 700; text-transform: uppercase;
     letter-spacing: 1.5px; color: #f5c800;
-    margin: 8px 0 3px;
+    margin: 6px 0 2px;
     grid-column: 1 / -1;
   }
   .diploma-komp-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 2.5px 0; border-bottom: 1px solid #f5f5f5;
+    padding: 2px 0; border-bottom: 1px solid #f5f5f5;
     font-size: 7.5pt; color: #333;
     break-inside: avoid;
   }
@@ -626,29 +648,6 @@
   .diploma-komp-stars { display: flex; gap: 1px; flex-shrink: 0; }
   .diploma-komp-star  { font-size: 8pt; color: #ddd; }
   .diploma-komp-star.filled { color: #f5c800; }
-
-    /* EXTRA SMALL: 16+ skills */
-  .diploma-xs .diploma-inner        { padding: 2px 10px; }
-  .diploma-xs .diploma-top          { margin-bottom: 2px; }
-  .diploma-xs .diploma-logo         { font-size: 16pt; letter-spacing: 2px; }
-  .diploma-xs .diploma-stars        { font-size: 9pt; letter-spacing: 1px; }
-  .diploma-xs .diploma-hr           { margin: 4px 0; border-top-width: 1.5px; }
-  .diploma-xs .diploma-hr-thin      { margin: 4px 0; }
-  .diploma-xs .diploma-kid-name     { font-size: 16pt; margin: 2px 0 1px; padding-bottom: 4px; border-bottom-width: 2px; }
-  .diploma-xs .diploma-cert-text    { font-size: 7pt; margin-bottom: 1px; }
-  .diploma-xs .diploma-course-info  { margin-top: 2px; }
-  .diploma-xs .diploma-course-name  { font-size: 9pt; }
-  .diploma-xs .diploma-meta-row     { font-size: 7.5pt; margin-top: 1px; }
-  .diploma-xs .diploma-skills-section { margin: 3px 0; }
-  .diploma-xs .diploma-skills-title { font-size: 6.5pt; margin-bottom: 2px; }
-  .diploma-xs .diploma-skill-row    { padding: 2px 0; }
-  .diploma-xs .diploma-skill-label  { font-size: 7.5pt; }
-  .diploma-xs .diploma-skill-val    { font-size: 8.5pt; min-width: 45px; }
-  .diploma-xs .diploma-footer       { margin-top: 4px; padding-top: 4px; }
-  .diploma-xs .diploma-stamp        { width: 48px; height: 48px; }
-  .diploma-xs .diploma-stamp-og     { font-size: 9pt; }
-  .diploma-xs .diploma-stamp-sub    { font-size: 4.5pt; }
-  .diploma-xs .diploma-sig-line     { font-size: 6.5pt; width: 100px; }
 </style>
 </head>
 <body>
@@ -2187,6 +2186,8 @@ function buildDiplomaView(day) {
     // Density for sport-skills page (without komp)
     const ns = sportSkills.length;
     const density = ns <= 7 ? '' : ns <= 11 ? ' diploma-md' : ns <= 15 ? ' diploma-sm' : ' diploma-xs';
+    // Category header top-margin: tighter in dense modes
+    const catTopMargin = density === ' diploma-xs' ? '2px' : density === ' diploma-sm' ? '3px' : density === ' diploma-md' ? '4px' : '6px';
 
     course.kids.forEach(kid => {
       // ── PAGE 1: Sport Skills ──────────────────────────────
@@ -2200,7 +2201,7 @@ function buildDiplomaView(day) {
         let catHeader = '';
         if (skill.category && skill.category !== lastCat) {
           lastCat = skill.category;
-          catHeader = `<div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#f5c800;margin:6px 0 2px;grid-column:1/-1">${skill.category}</div>`;
+          catHeader = `<div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#f5c800;margin:${catTopMargin} 0 2px;grid-column:1/-1">${skill.category}</div>`;
         }
         let valHtml;
         if (skill.type === 'rating') {
@@ -2238,7 +2239,7 @@ function buildDiplomaView(day) {
 
           <div class="diploma-kid-name">${kid}</div>
 
-          <div class="diploma-course-info" style="margin-top:10px">
+          <div class="diploma-course-info">
             <div class="diploma-course-name">${course.name}</div>
             <div class="diploma-meta-row">
               ${dayName} · ${course.time} Uhr · Coach: <strong>${course.trainer}</strong>
@@ -2248,7 +2249,7 @@ function buildDiplomaView(day) {
             </div>
           </div>
 
-          <hr class="diploma-hr-thin" style="margin-top:12px">
+          <hr class="diploma-hr-thin">
 
           <div class="diploma-skills-section">
             <div class="diploma-skills-title">Absolvierte Skills</div>
@@ -2352,9 +2353,43 @@ function lvDiplomaStyle(level) {
   return 'background:#f0e8ff;color:#7c3aed;border:1.5px solid #a855f7;';
 }
 
+// ── Auto-scale diploma inner content to always fit the card ──
+// Runs before printing AND after buildDiplomaView so screen preview is accurate.
+function autoscaleDiplomas() {
+  document.querySelectorAll('.diploma-card').forEach(card => {
+    const inner = card.querySelector('.diploma-inner');
+    if (!inner) return;
+    // Reset any previous scale so we measure the natural height
+    inner.style.transform = '';
+    // Force layout recalc
+    void inner.offsetHeight;
+    // Available height = card's inner content area (card height minus card padding)
+    const cardStyle = getComputedStyle(card);
+    const available = card.clientHeight
+      - parseFloat(cardStyle.paddingTop)
+      - parseFloat(cardStyle.paddingBottom);
+    const needed = inner.scrollHeight;
+    if (needed > available * 0.995) {
+      const scale = (available * 0.99) / needed;
+      inner.style.transform = `scale(${scale.toFixed(5)})`;
+      inner.style.transformOrigin = 'top center';
+    }
+  });
+}
+// Scale before the browser renders for print
+window.addEventListener('beforeprint', autoscaleDiplomas);
+// Reset after printing (not strictly necessary but keeps DOM clean)
+window.addEventListener('afterprint', () => {
+  document.querySelectorAll('.diploma-card .diploma-inner').forEach(el => {
+    el.style.transform = '';
+    el.style.transformOrigin = '';
+  });
+});
+
 function printAllDiplomas() {
   if (S.day === null) return;
   buildDiplomaView(S.day);
+  autoscaleDiplomas();   // measure & scale now, before print dialog
   document.body.classList.add('printing-diplomas');
   const cleanup = () => {
     document.body.classList.remove('printing-diplomas');
