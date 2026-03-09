@@ -179,6 +179,7 @@
   }
   .course-act-btn:hover { background: var(--surface2); color: var(--text); }
   .course-act-btn.del:hover { background: #1a0606; color: var(--red); }
+  .course-act-btn.rst:hover { background: #0a1a2a; color: var(--accent); }
   .course-act-btn + .course-act-btn { border-top: 1px solid var(--border); }
 
   /* ADD COURSE BUTTON */
@@ -712,6 +713,27 @@
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeDeleteModalDirect()">Abbrechen</button>
       <button class="modal-delete-btn" onclick="confirmDeleteCourse()">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: KURS ZURÜCKSETZEN ── -->
+<div class="modal-overlay" id="modal-reset" onclick="closeResetModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="padding-bottom:32px">
+    <div class="pw-modal-icon">↺</div>
+    <div class="modal-title" style="text-align:center">Kurs zurücksetzen</div>
+    <div class="pw-modal-msg">Alle eingetragenen Werte von<br><span class="pw-modal-name" id="reset-course-name-display"></span><br>werden gelöscht.<br>Bitte Passwort eingeben.</div>
+    <div class="modal-field">
+      <div class="modal-label">Passwort</div>
+      <input class="modal-input" id="reset-password-input" type="password" placeholder="••••"
+        onkeydown="if(event.key==='Enter')confirmResetCourse()" />
+    </div>
+    <div id="reset-pw-error" style="color:var(--red);font-size:13px;margin-top:-8px;margin-bottom:12px;display:none">
+      ❌ Falsches Passwort
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeResetModalDirect()">Abbrechen</button>
+      <button class="modal-delete-btn" onclick="confirmResetCourse()">Zurücksetzen</button>
     </div>
   </div>
 </div>
@@ -1386,6 +1408,7 @@ function renderHome() {
     acts.className = 'course-acts';
     acts.innerHTML = `
       <button class="course-act-btn" title="Bearbeiten" onclick="openCourseModal('${c.id}')">✎</button>
+      <button class="course-act-btn rst" title="Zurücksetzen" onclick="openResetModal('${c.id}')">↺</button>
       <button class="course-act-btn del" title="Löschen" onclick="openDeleteModal('${c.id}')">✕</button>`;
 
     row.appendChild(handle);
@@ -1595,6 +1618,59 @@ function confirmDeleteCourse() {
 }
 function closeDeleteModal(e) { if (e.target === document.getElementById('modal-delete')) closeDeleteModalDirect(); }
 function closeDeleteModalDirect() { document.getElementById('modal-delete').classList.remove('open'); }
+
+// ─────────────────────────────────────────────────────────
+// RESET COURSE
+// ─────────────────────────────────────────────────────────
+function openResetModal(courseId) {
+  S._pendingResetId = courseId;
+  const courses = getCourses(S.day);
+  const c = courses.find(x => x.id === courseId);
+  document.getElementById('reset-course-name-display').textContent = c ? '"' + c.name + '"' : 'diesen Kurs';
+  document.getElementById('reset-password-input').value = '';
+  document.getElementById('reset-pw-error').style.display = 'none';
+  document.getElementById('modal-reset').classList.add('open');
+  setTimeout(() => document.getElementById('reset-password-input').focus(), 100);
+}
+function confirmResetCourse() {
+  const pw = document.getElementById('reset-password-input').value;
+  if (pw !== '2021') {
+    document.getElementById('reset-pw-error').style.display = 'block';
+    document.getElementById('reset-password-input').value = '';
+    document.getElementById('reset-password-input').focus();
+    return;
+  }
+  const courseId = S._pendingResetId;
+  // Clear any pending granular writes for this course so they don't re-add data
+  for (const key of Object.keys(_pendingScoreWrites)) {
+    if (_pendingScoreWrites[key].courseId === courseId) delete _pendingScoreWrites[key];
+  }
+  clearTimeout(_scoreWriteTimer);
+  // Delete score data for this course from local state
+  delete S.data[courseId];
+  // Write null to the Firebase path for this course (granular delete)
+  if (_fbActive && _db) {
+    const rootBase = FB_PATH_DATA.replace(/^\//, '');
+    const updates = {};
+    updates[`${rootBase}/data/${fbKey(courseId)}`] = null;
+    _suppressRemoteData = true;
+    setSyncStatus('syncing');
+    _db.ref('/').update(updates)
+      .then(() => setSyncStatus('live'))
+      .catch(() => setSyncStatus('error'))
+      .finally(() => { setTimeout(() => { _suppressRemoteData = false; }, 1200); });
+  }
+  // Also update localStorage
+  try {
+    localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(
+      { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides }
+    ));
+  } catch(_) {}
+  closeResetModalDirect();
+  renderHome();
+}
+function closeResetModal(e) { if (e.target === document.getElementById('modal-reset')) closeResetModalDirect(); }
+function closeResetModalDirect() { document.getElementById('modal-reset').classList.remove('open'); }
 
 // ─────────────────────────────────────────────────────────
 // SCREEN: AUFGABEN ÜBERSICHT
