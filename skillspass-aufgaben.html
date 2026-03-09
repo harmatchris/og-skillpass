@@ -1000,10 +1000,69 @@ const DEFAULT_SKILLS = {
     { id:'k_tb_stop',    label:'…den Sicherheitsstop am Trampolin',       section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
     { id:'k_tb_airbag',  label:'…richtig im Airbag landen / abrollen',   section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
   ],
+
+  level2: [
+    // ── SPORT SKILLS (aus OG SkillPass Excel, Tab Level2) ─
+    // NINJA
+    { id:'l2_dismount',   label:'Dismount',               section:'skills', category:'Ninja',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'l2_balrolle',   label:'Balancerolle',            section:'skills', category:'Ninja',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'l2_wall',       label:'Wall',                   section:'skills', category:'Ninja',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'l2_mikados',    label:'Mikados',                section:'skills', category:'Ninja',            type:'count',  unit:'Rnd', min:0, max:20,  step:1   },
+    { id:'l2_monkeybars', label:'MonkeyBars',             section:'skills', category:'Ninja',            type:'count',  unit:'Rnd', min:0, max:20,  step:1   },
+    // KRAFT
+    { id:'l2_standweit',  label:'Standweitsprung',        section:'skills', category:'Kraft',            type:'mass',   unit:'cm',  min:0, max:300, step:5   },
+    { id:'l2_legraises',  label:'Leg raises',             section:'skills', category:'Kraft',            type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'l2_klimmzuege', label:'Klimmzüge / neg. Hold',  section:'skills', category:'Kraft',            type:'count',  unit:'Wdh', min:0, max:30,  step:1   },
+    { id:'l2_haengen',    label:'Hängen',                 section:'skills', category:'Kraft',            type:'time',   unit:'s',   min:0, max:120, step:1   },
+    // CHASETAG
+    { id:'l2_pkrot',      label:'Parkour rot',            section:'skills', category:'Chase Tag',        type:'time',   unit:'s',   min:0, max:120, step:1   },
+    // TRICKING FLOOR
+    { id:'l2_tr_stange',  label:'Trampolin an Stange',    section:'skills', category:'Tricking Floor',   type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    // PARKOUR
+    { id:'l2_vstep',      label:'V-Step',                 section:'skills', category:'Parkour',          type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'l2_prezi',      label:'Prezi',                  section:'skills', category:'Parkour',          type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'l2_armsprung',  label:'Armsprung',              section:'skills', category:'Parkour',          type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    { id:'l2_speedpk',    label:'Speedparkour',           section:'skills', category:'Parkour',          type:'time',   unit:'s',   min:0, max:120, step:1   },
+    // TRAMPOLIN
+    { id:'l2_easycombo',  label:'Easy Combo',             section:'skills', category:'Trampolin',        type:'rating', unit:'/5',  min:1, max:5,   step:1   },
+    // ── KOMPETENZRASTER (Ich kann…) ───────────────────────
+    // ORGANISATIONSRAHMEN
+    { id:'l2k_reihe',     label:'…mich in einer Reihe aufstellen',            section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_zuschauen', label:'…bei Übungen aufmerksam zuschauen',          section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_anfeuern',  label:'…mein Team anfeuern und motivieren',         section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_regeln',    label:'…mich an Regeln halten',                     section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_aufwaerm',  label:'…eine Aufwärmübung vorzeigen',               section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_koordin',   label:'…eine koordinative Übung vorzeigen',         section:'komp', category:'Organisation',      type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // NINJA WARRIOR
+    { id:'l2k_nj_hang',   label:'…sicher ein Hindernis durchhangeln',         section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_nj_schwung',label:'…meinen Schwung kontrollieren',              section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_nj_landen', label:'…sicher abspringen und sicher landen',       section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_nj_dism',   label:'…einen Dismount von einer Stange',           section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_nj_tech',   label:'…spezifische Ninjatechniken (z.B. Mikados)', section:'komp', category:'Ninja Warrior',     type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // TRICKING FLOOR
+    { id:'l2k_tr_spr',    label:'…beidbeinig ins Trampolin springen',         section:'komp', category:'Tricking Floor',    type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_tr_stange', label:'…vom Trampolin an eine Stange springen',     section:'komp', category:'Tricking Floor',    type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // WORLD CHASE TAG
+    { id:'l2k_wct_tech',  label:'…Grundtechniken im WorldChaseTag umsetzen',  section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_wct_reg',   label:'…Spielregeln halten und verstehen',          section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_wct_abk',   label:'…Hindernisse abkürzen',                     section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_wct_safe',  label:'…Sicherheitsregeln erklären',               section:'komp', category:'World Chase Tag',   type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // PARKOUR
+    { id:'l2k_pk_prezi',  label:'…einen Prezisprung',                        section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_pk_steep',  label:'…einen SteepStep',                          section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_pk_lauf',   label:'…mir einen einfachen Parkourlauf merken',   section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_pk_rolle',  label:'…die Parkourrolle',                         section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_pk_climb',  label:'…einen einfachen ClimbUp',                  section:'komp', category:'Parkour',           type:'rating', unit:'/5', min:1, max:5, step:1 },
+    // TRAMPOLIN & AIRBAG
+    { id:'l2k_tb_safe',   label:'…Sicherheitsregeln erklären und umsetzen',  section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_tb_stop',   label:'…den Sicherheitsstop am Trampolin',         section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
+    { id:'l2k_tb_airbag', label:'…richtig im Airbag landen / abrollen',      section:'komp', category:'Trampolin & Airbag',type:'rating', unit:'/5', min:1, max:5, step:1 },
+  ],
 };
 function courseType(name) {
   const n = (name||'').toLowerCase();
-  if (n.includes('level 1')||n.includes('level1'))    return 'level1';
+  if (n.includes('level 2')||n.includes('level2')||n.includes('fortgeschritten')) return 'level2';
+  if (n.includes('level 1')||n.includes('level1')||n.includes('basic'))          return 'level1';
   if (n.includes('polysport'))                        return 'polysport';
   if (n.includes('akrobatik'))                        return 'akrobatik';
   if (n.includes('parkour')||n.includes('freerun'))   return 'parkour';
