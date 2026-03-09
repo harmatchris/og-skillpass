@@ -437,6 +437,47 @@
   .pw-modal-msg { font-size: 14px; color: var(--muted); margin-bottom: 18px; text-align: center; }
   .pw-modal-name { color: var(--text); font-weight: 600; }
 
+  /* ── PWA INSTALL BANNER ── */
+  #pwa-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
+    max-width: 480px; margin: 0 auto;
+    background: #1a1a1a; border-top: 2px solid var(--accent);
+    padding: 14px 16px 28px; display: none;
+    animation: slide-up .3s ease;
+  }
+  #pwa-banner.show { display: block; }
+  @keyframes slide-up { from { transform: translateY(100%); opacity:0; } to { transform: translateY(0); opacity:1; } }
+  .pwa-banner-inner { display: flex; align-items: flex-start; gap: 12px; }
+  .pwa-banner-icon {
+    width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+    background: #0e0e0e; border: 1px solid #333;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .pwa-banner-icon .bi-og  { font-family: 'Arial Black', Arial; font-weight: 900; font-size: 16px; color: #f5c800; }
+  .pwa-banner-icon .bi-sub { font-family: 'Arial Black', Arial; font-weight: 900; font-size: 7px;  color: #f5c800; letter-spacing: 1px; }
+  .pwa-banner-icon .bi-sub2{ font-family: 'Arial Black', Arial; font-weight: 900; font-size: 7px;  color: #fff;    letter-spacing: 1px; }
+  .pwa-banner-text { flex: 1; }
+  .pwa-banner-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .pwa-banner-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .pwa-banner-desc strong { color: var(--text); }
+  .pwa-banner-close {
+    background: none; border: none; color: var(--muted); font-size: 20px;
+    cursor: pointer; padding: 0; line-height: 1; flex-shrink: 0;
+  }
+  .pwa-banner-close:hover { color: var(--text); }
+  .pwa-banner-btn {
+    margin-top: 12px; width: 100%; padding: 11px; border-radius: 10px; border: none;
+    background: var(--accent); color: #000; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  /* iOS share arrow hint */
+  .pwa-ios-hint {
+    margin-top: 10px; padding: 10px 12px; background: #0e0e0e; border-radius: 10px;
+    font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px;
+  }
+  .pwa-ios-hint .share-icon { font-size: 18px; }
+
   /* PRINT */
   @media print {
     @page { size: A4 portrait; margin: 0; }
@@ -826,7 +867,7 @@
   <div class="section-title">AUFGABEN WÄHLEN</div>
   <div class="tasks-grid" id="tasks-grid"></div>
   <div class="print-btn-row no-print">
-    <button class="btn btn-done" onclick="window.print()">🖨️ Alle Kids drucken</button>
+    <button class="btn btn-done" onclick="printSingleCourseDiplomas()">🖨️ Alle Kids drucken</button>
     <button class="btn btn-secondary" onclick="showHome()">← Anderen Kurs wählen</button>
     <div style="margin-top:10px;padding:10px 12px;background:#1a1a1a;border:1px solid #333;border-radius:10px;font-size:11px;color:#888;line-height:1.5">
       💡 <strong style="color:#f5c800">Drucktipp:</strong> Im Chrome-Druckdialog unter <em>Weitere Einstellungen</em> die Option <em>Kopf- und Fusszeilen</em> deaktivieren — dann verschwinden URL und Datum, und der Goldrahmen geht bis zum Blattrand.
@@ -2739,11 +2780,33 @@ window.addEventListener('afterprint', () => {
 function printAllDiplomas() {
   if (S.day === null) return;
   buildDiplomaView(S.day);
-  autoscaleDiplomas();   // measure & scale now, before print dialog
+  autoscaleDiplomas();
   document.body.classList.add('printing-diplomas');
   const cleanup = () => {
     document.body.classList.remove('printing-diplomas');
     window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+}
+
+// Print only the current single course in diploma style
+function printSingleCourseDiplomas() {
+  if (!S.course) return;
+  // Temporarily build diploma-view for just this one course
+  const dv = document.getElementById('diploma-view');
+  dv.innerHTML = '';
+  const savedCourses = S.courses[S.day];
+  // Swap to single-course array so buildDiplomaView only renders this course
+  S.courses[S.day] = [S.course];
+  buildDiplomaView(S.day);
+  S.courses[S.day] = savedCourses;  // restore
+  autoscaleDiplomas();
+  document.body.classList.add('printing-diplomas');
+  const cleanup = () => {
+    document.body.classList.remove('printing-diplomas');
+    window.removeEventListener('afterprint', cleanup);
+    dv.innerHTML = '';   // clean up after print
   };
   window.addEventListener('afterprint', cleanup);
   window.print();
@@ -2790,6 +2853,83 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.warn('[PWA] SW registration failed:', err));
   });
 }
+</script>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwa-banner">
+  <div class="pwa-banner-inner">
+    <div class="pwa-banner-icon">
+      <span class="bi-og">OG</span>
+      <span class="bi-sub">SKILL</span>
+      <span class="bi-sub2">PASS</span>
+    </div>
+    <div class="pwa-banner-text">
+      <div class="pwa-banner-title">OG Skills-Pass installieren</div>
+      <div class="pwa-banner-desc" id="pwa-banner-desc">App auf dem Homescreen speichern für schnellen Zugriff.</div>
+    </div>
+    <button class="pwa-banner-close" onclick="dismissPwaBanner()">✕</button>
+  </div>
+  <!-- Android: install button -->
+  <button class="pwa-banner-btn" id="pwa-install-btn" style="display:none" onclick="triggerPwaInstall()">
+    📲 App installieren
+  </button>
+  <!-- iOS: step-by-step hint -->
+  <div class="pwa-ios-hint" id="pwa-ios-hint" style="display:none">
+    <span class="share-icon">⬆️</span>
+    <span>Tippe auf <strong>Teilen</strong> → <strong>„Zum Home-Bildschirm"</strong></span>
+  </div>
+</div>
+
+<script>
+// ── PWA INSTALL BANNER LOGIC ───────────────────────────────
+(function() {
+  const DISMISSED_KEY = 'og_pwa_banner_dismissed';
+
+  // Don't show if already running as installed PWA
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
+  // Don't show if dismissed before
+  if (localStorage.getItem(DISMISSED_KEY)) return;
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  let _deferredPrompt = null;
+
+  function showBanner() {
+    document.getElementById('pwa-banner').classList.add('show');
+  }
+
+  function dismissPwaBanner() {
+    document.getElementById('pwa-banner').classList.remove('show');
+    localStorage.setItem(DISMISSED_KEY, '1');
+  }
+  window.dismissPwaBanner = dismissPwaBanner;
+
+  function triggerPwaInstall() {
+    if (!_deferredPrompt) return;
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') localStorage.setItem(DISMISSED_KEY, '1');
+      document.getElementById('pwa-banner').classList.remove('show');
+      _deferredPrompt = null;
+    });
+  }
+  window.triggerPwaInstall = triggerPwaInstall;
+
+  if (isIOS) {
+    // iOS: show hint with share arrow
+    document.getElementById('pwa-ios-hint').style.display = 'flex';
+    document.getElementById('pwa-banner-desc').textContent = 'Installiere die App direkt auf deinem Homescreen:';
+    setTimeout(showBanner, 1200);
+
+  } else {
+    // Android/Chrome: intercept beforeinstallprompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      _deferredPrompt = e;
+      document.getElementById('pwa-install-btn').style.display = 'block';
+      setTimeout(showBanner, 1200);
+    });
+  }
+})();
 </script>
 </body>
 </html>
