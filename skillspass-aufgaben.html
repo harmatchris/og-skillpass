@@ -1784,7 +1784,57 @@ function exportMyData() {
 let _suppressRemoteData    = false;
 let _suppressRemoteCourses = false;
 
-function setupRealtimeSync() {
+async function mergeLocalIntoRemote() {
+  // KRITISCH: Schützt lokale Coach-Eingaben die NICHT in der DB sind
+  // (entstanden während DB blockiert war). Wird vor on('value') aufgerufen,
+  // damit der Listener nicht über lokale Unique-Werte drüberbügelt.
+  if (!_fbActive || !_db) return;
+  let pushed = 0;
+  try {
+    const snap = await _db.ref(FB_PATH_DATA).once('value');
+    const remoteRaw = snap.val();
+    const remote = fixAppdataFromFirebase(remoteRaw);
+
+    // 1) Scores: für jedes lokale data[course][kid][skill] das remote NICHT hat → pushen
+    const ops = [];
+    for (const cid in (S.data || {})) {
+      for (const kid in S.data[cid]) {
+        for (const sid in S.data[cid][kid]) {
+          const localVal = S.data[cid][kid][sid];
+          const remoteVal = remote.data?.[cid]?.[kid]?.[sid];
+          if (remoteVal === undefined && localVal !== undefined && localVal !== null) {
+            const encKid = fbKey(kid), encSid = fbKey(sid);
+            ops.push(_db.ref(`${FB_PATH_DATA}/data/${cid}/${encKid}/${encSid}`).set(localVal));
+            auditLog('local-merge-score', `${cid}/${kid}/${sid}`, null, localVal);
+            pushed++;
+          }
+        }
+      }
+    }
+    // 2) Custom Skills: jedes lokale customSkills[course] das remote nicht hat
+    for (const cid in (S.customSkills || {})) {
+      if (!remote.customSkills?.[cid]) {
+        ops.push(_db.ref(`${FB_PATH_DATA}/customSkills/${fbKey(cid)}`).set(S.customSkills[cid]));
+        auditLog('local-merge-customSkills', cid, null, { count: (S.customSkills[cid]||[]).length });
+        pushed++;
+      }
+    }
+    // 3) Skill-Overrides
+    for (const cid in (S.skillOverrides || {})) {
+      if (!remote.skillOverrides?.[cid]) {
+        ops.push(_db.ref(`${FB_PATH_DATA}/skillOverrides/${fbKey(cid)}`).set(S.skillOverrides[cid]));
+        auditLog('local-merge-overrides', cid, null, S.skillOverrides[cid]);
+        pushed++;
+      }
+    }
+    await Promise.all(ops);
+    if (pushed > 0) console.info(`[OG] ${pushed} lokale Einträge wurden in die DB gemerged (waren vorher nur lokal).`);
+  } catch (e) {
+    console.warn('Initial Local→Remote Merge fehlgeschlagen:', e);
+  }
+}
+
+async function setupRealtimeSync() {
   if (!_fbActive || !_db) return;
 
   // Verbindungsstatus überwachen
@@ -1795,6 +1845,10 @@ function setupRealtimeSync() {
       setSyncStatus('syncing');
     }
   });
+
+  // KRITISCH: erst lokale Unique-Werte hochpushen, BEVOR der Listener attached wird
+  // (sonst überschreibt Remote alle lokalen Eingaben die während DB-Sperre entstanden sind)
+  await mergeLocalIntoRemote();
 
   // Kursdaten synchronisieren
   _db.ref(FB_PATH_COURSES).on('value', snap => {
