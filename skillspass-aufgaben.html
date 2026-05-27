@@ -846,6 +846,7 @@
   <button class="coach-menu-item" onclick="closeCoachMenu();openAuditModal();">📜 Änderungs-Log</button>
   <button class="coach-menu-item" onclick="closeCoachMenu();exportMyData();">💾 Meine Daten exportieren</button>
   <button class="coach-menu-item" id="cm-headcoach" onclick="closeCoachMenu();tryHeadCoachLogin();">👑 Head-Coach Login</button>
+  <button class="coach-menu-item" id="cm-backend" onclick="closeCoachMenu();openBackendModal();" style="display:none">⚙️ Backend (Stammdaten)</button>
 </div>
 
 <!-- EMOJI PICKER PANEL -->
@@ -1727,6 +1728,156 @@ function openAuditModal() {
 }
 
 // ─────────────────────────────────────────────────────────
+// HEAD-COACH BACKEND (Master-Stammdaten)
+// ─────────────────────────────────────────────────────────
+const FB_PATH_MASTER = '/og-skillpass/master';
+
+function slugify(s) {
+  return String(s || '').toLowerCase().normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'unnamed';
+}
+
+function extractMasterCandidates() {
+  // Aus allen Kursen unique Kids + Trainer ziehen
+  const kids = new Map();    // slug → name
+  const trainers = new Map();
+  for (const day of Object.keys(S.courses || {})) {
+    const list = S.courses[day] || [];
+    for (const c of list) {
+      if (!c) continue;
+      if (c.trainer) {
+        const t = String(c.trainer).trim();
+        if (t) trainers.set(slugify(t), t);
+      }
+      for (const k of (c.kids || [])) {
+        const n = String(k).trim();
+        if (n) kids.set(slugify(n), n);
+      }
+    }
+  }
+  return { kids, trainers };
+}
+
+async function runMigration() {
+  if (!isHeadCoach()) { alert('Nur für Head-Coach.'); return; }
+  if (!_fbActive || !_db) { alert('Firebase nicht verbunden.'); return; }
+  const { kids, trainers } = extractMasterCandidates();
+
+  // Existierende master/* lesen, damit wir nur Neue schreiben (idempotent)
+  const [kidsSnap, trainersSnap] = await Promise.all([
+    _db.ref(`${FB_PATH_MASTER}/kids`).once('value'),
+    _db.ref(`${FB_PATH_MASTER}/trainers`).once('value'),
+  ]);
+  const existingKids = kidsSnap.val() || {};
+  const existingTrainers = trainersSnap.val() || {};
+
+  let newKids = 0, newTrainers = 0;
+  const updates = {};
+  for (const [slug, name] of kids.entries()) {
+    if (!existingKids[slug]) {
+      updates[`${FB_PATH_MASTER}/kids/${slug}`] = { name, addedAt: firebase.database.ServerValue.TIMESTAMP, addedBy: getCoachName() || '(unbekannt)' };
+      newKids++;
+    }
+  }
+  for (const [slug, name] of trainers.entries()) {
+    if (!existingTrainers[slug]) {
+      updates[`${FB_PATH_MASTER}/trainers/${slug}`] = { name, addedAt: firebase.database.ServerValue.TIMESTAMP, addedBy: getCoachName() || '(unbekannt)' };
+      newTrainers++;
+    }
+  }
+
+  if (newKids + newTrainers === 0) {
+    alert('Stammdaten sind bereits aktuell — nichts zu importieren.');
+    return;
+  }
+  const ok = confirm(`Migration ausführen?\n\n• ${newKids} neue Kinder\n• ${newTrainers} neue Trainer/Coaches\n\nBestehende Master-Einträge bleiben unverändert.`);
+  if (!ok) return;
+
+  await _db.ref('/').update(updates);
+  auditLog('migration', 'master', null, { newKids, newTrainers });
+  alert(`Migration erfolgreich:\n• ${newKids} neue Kinder\n• ${newTrainers} neue Trainer/Coaches\n\nIm Backend → Kids / Trainer einsehbar (kommt in nächster Iteration).`);
+  refreshBackendStats();
+}
+
+async function refreshBackendStats() {
+  const kidsCount = document.getElementById('bk-kids-count');
+  const trainersCount = document.getElementById('bk-trainers-count');
+  if (!kidsCount || !trainersCount || !_db) return;
+  const [kSnap, tSnap] = await Promise.all([
+    _db.ref(`${FB_PATH_MASTER}/kids`).once('value'),
+    _db.ref(`${FB_PATH_MASTER}/trainers`).once('value'),
+  ]);
+  kidsCount.textContent = kSnap.numChildren();
+  trainersCount.textContent = tSnap.numChildren();
+  // Candidates from current courses (for preview)
+  const { kids, trainers } = extractMasterCandidates();
+  const pendKids = document.getElementById('bk-kids-pending');
+  const pendTrainers = document.getElementById('bk-trainers-pending');
+  if (pendKids) pendKids.textContent = kids.size;
+  if (pendTrainers) pendTrainers.textContent = trainers.size;
+}
+
+function openBackendModal() {
+  if (!isHeadCoach()) { alert('Nur für Head-Coach sichtbar.'); return; }
+  let m = document.getElementById('backend-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'backend-modal';
+    m.style.cssText = 'position:fixed;inset:0;background:#000c;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto';
+    m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:560px;width:100%;padding:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">👑 BACKEND</h3>
+        <button onclick="document.getElementById('backend-modal').remove()" style="background:none;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;cursor:pointer">✕</button>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+        <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">📦 Stammdaten-Migration</h4>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4">
+          Extrahiert Kinder und Trainer aus allen bestehenden Kursen und legt sie zentral unter <code>/master/</code> an.
+          <strong style="color:var(--text)">Sicher</strong> — nur additiv, keine Löschung, keine Überschreibung bestehender Master-Einträge.
+        </p>
+        <div style="display:flex;gap:12px;margin-bottom:10px;font-size:12px">
+          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+            <div style="color:var(--muted);font-size:10px">Bereits zentral</div>
+            <div style="font-size:18px;font-weight:600">👶 <span id="bk-kids-count">…</span></div>
+          </div>
+          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+            <div style="color:var(--muted);font-size:10px">In Kursen gefunden</div>
+            <div style="font-size:18px;font-weight:600">👶 <span id="bk-kids-pending">…</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:10px;font-size:12px">
+          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+            <div style="color:var(--muted);font-size:10px">Bereits zentral</div>
+            <div style="font-size:18px;font-weight:600">🧑‍🏫 <span id="bk-trainers-count">…</span></div>
+          </div>
+          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+            <div style="color:var(--muted);font-size:10px">In Kursen gefunden</div>
+            <div style="font-size:18px;font-weight:600">🧑‍🏫 <span id="bk-trainers-pending">…</span></div>
+          </div>
+        </div>
+        <button onclick="runMigration()" style="width:100%;background:var(--accent);color:#000;border:0;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">▶ Migration jetzt ausführen</button>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--muted);font-size:12px">
+        <strong style="color:var(--text)">Nächste Iterationen (kommen demnächst):</strong>
+        <ul style="margin:6px 0 0 18px;line-height:1.6">
+          <li>Tab Kinder: Liste anzeigen, Jahrgang/Notizen editieren</li>
+          <li>Tab Trainer: Liste, Email/Rechte verwalten</li>
+          <li>Tab Kurs-Templates: zentrale Kurs-Vorlagen</li>
+          <li>Tab Skills: globale Skill-Definitionen</li>
+          <li>Kurse mergen (doppelte zusammenführen)</li>
+          <li>Soft-Delete für Kurse (hidden statt gelöscht)</li>
+        </ul>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.onclick = (e) => { if (e.target === m) m.remove(); };
+  }
+  refreshBackendStats();
+}
+
+// ─────────────────────────────────────────────────────────
 // EXPORT / IMPORT (Sicherheits-Backup für jeden Coach)
 // ─────────────────────────────────────────────────────────
 function toggleCoachMenu(e) {
@@ -1741,6 +1892,8 @@ function toggleCoachMenu(e) {
   const hcBtn = document.getElementById('cm-headcoach');
   if (hcBtn) hcBtn.innerHTML = isHeadCoach() ? '👑 Head-Coach <span style="color:var(--muted)">(abmelden)</span>' : '👑 Head-Coach Login';
   if (hcBtn) hcBtn.onclick = () => { closeCoachMenu(); isHeadCoach() ? logoutHeadCoach() : tryHeadCoachLogin(); };
+  const beBtn = document.getElementById('cm-backend');
+  if (beBtn) beBtn.style.display = isHeadCoach() ? 'block' : 'none';
   panel.style.display = 'block';
   setTimeout(() => document.addEventListener('click', _outsideCoachMenu, { once: true }), 0);
 }
