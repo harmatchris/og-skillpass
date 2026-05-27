@@ -25,6 +25,7 @@
        ══════════════════════════════════════════════════════ -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -55,6 +56,12 @@
     transition: all .2s;
   }
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .coach-menu-item {
+    display: block; width: 100%; text-align: left;
+    background: transparent; border: 0; color: var(--text);
+    padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px;
+  }
+  .coach-menu-item:hover { background: var(--surface2); color: var(--accent); }
 
   /* SYNC STATUS */
   .sync-badge {
@@ -826,7 +833,19 @@
       <span id="sync-label">Lokal</span>
     </div>
     <button class="coach-emoji-btn no-print" id="coach-emoji-btn" onclick="toggleEmojiPicker(event)" title="Coach-Emoji wählen 😄">🏃</button>
+    <button class="icon-btn no-print" id="coach-menu-btn" onclick="toggleCoachMenu(event)" title="Menü" style="position:relative">
+      ⋮
+      <span id="audit-badge-count" style="position:absolute;top:-4px;right:-4px;background:var(--accent);color:#000;font-size:9px;font-weight:700;border-radius:10px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px"></span>
+    </button>
   </div>
+</div>
+
+<!-- COACH MENU PANEL -->
+<div id="coach-menu-panel" class="no-print" style="display:none;position:absolute;top:54px;right:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px;z-index:200;min-width:220px;box-shadow:0 8px 24px #000a">
+  <button class="coach-menu-item" onclick="closeCoachMenu();ensureCoachName();">👤 Mein Name: <span id="cm-name-label" style="color:var(--accent);margin-left:4px"></span></button>
+  <button class="coach-menu-item" onclick="closeCoachMenu();openAuditModal();">📜 Änderungs-Log</button>
+  <button class="coach-menu-item" onclick="closeCoachMenu();exportMyData();">💾 Meine Daten exportieren</button>
+  <button class="coach-menu-item" id="cm-headcoach" onclick="closeCoachMenu();tryHeadCoachLogin();">👑 Head-Coach Login</button>
 </div>
 
 <!-- EMOJI PICKER PANEL -->
@@ -1487,9 +1506,11 @@ const FB_PATH_COURSES = '/og-skillpass/courses';
 // Firebase-Instanz (null wenn nicht konfiguriert)
 let _db = null;
 let _fbActive = false;
+let _fbAuthUid = null;
+const _fbReadyCallbacks = [];
+function onFirebaseReady(cb) { if (_fbActive && _fbAuthUid) cb(); else _fbReadyCallbacks.push(cb); }
 
 function initFirebase() {
-  // Nur initialisieren wenn echte Werte eingetragen sind
   if (FIREBASE_CONFIG.apiKey === 'DEIN_API_KEY') {
     setSyncStatus('local');
     return;
@@ -1498,9 +1519,20 @@ function initFirebase() {
     if (!firebase.apps.length) {
       firebase.initializeApp(FIREBASE_CONFIG);
     }
-    _db = firebase.database();
-    _fbActive = true;
-    setSyncStatus('local'); // bis Verbindung steht
+    setSyncStatus('syncing');
+    firebase.auth().signInAnonymously()
+      .then(() => firebase.auth().currentUser)
+      .then(user => {
+        _fbAuthUid = user.uid;
+        _db = firebase.database();
+        _fbActive = true;
+        setSyncStatus('live');
+        while (_fbReadyCallbacks.length) _fbReadyCallbacks.shift()();
+      })
+      .catch(e => {
+        console.warn('Firebase Anonymous Auth fehlgeschlagen:', e);
+        setSyncStatus('error');
+      });
   } catch (e) {
     console.warn('Firebase init fehlgeschlagen:', e);
     setSyncStatus('error');
@@ -1583,6 +1615,166 @@ function fixAppdataFromFirebase(raw) {
     }
   }
   return { data, customSkills, skillOverrides };
+}
+
+// ─────────────────────────────────────────────────────────
+// COACH IDENTITY, HEAD-COACH MODE, AUDIT LOG
+// ─────────────────────────────────────────────────────────
+const FB_PATH_AUDIT = '/og-skillpass/audit';
+// SHA-256 von "2021" — Modus-Schalter, kein echtes Security-Bollwerk
+const HEADCOACH_HASH = '901d2d8ca6cdf67a1f95837dec827a2c4172bd1b418ebd1f0f7d22d3f4e80a89';
+
+function getCoachName() {
+  return (localStorage.getItem('coachName') || '').trim();
+}
+function ensureCoachName() {
+  let n = getCoachName();
+  if (n) return n;
+  n = (prompt('Wie heisst du? (z.B. "Chris H.")\nWird im Änderungs-Log gespeichert.') || '').trim();
+  if (n) localStorage.setItem('coachName', n);
+  return n;
+}
+function isHeadCoach() {
+  return localStorage.getItem('isHeadCoach') === '1';
+}
+async function sha256Hex(str) {
+  const buf = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function tryHeadCoachLogin() {
+  const pw = prompt('Head-Coach Passwort:');
+  if (!pw) return;
+  const h = await sha256Hex(pw);
+  if (h === HEADCOACH_HASH) {
+    localStorage.setItem('isHeadCoach', '1');
+    alert('Head-Coach Modus aktiv ✓');
+    location.reload();
+  } else {
+    alert('Falsches Passwort.');
+  }
+}
+function logoutHeadCoach() {
+  localStorage.removeItem('isHeadCoach');
+  alert('Head-Coach Modus aus.');
+  location.reload();
+}
+
+function auditLog(action, path, oldVal, newVal) {
+  if (!_fbActive || !_db) return;
+  const coach = getCoachName() || '(unbekannt)';
+  const emoji = localStorage.getItem('coachEmoji') || '';
+  const entry = {
+    ts: firebase.database.ServerValue.TIMESTAMP,
+    coach, emoji,
+    head: isHeadCoach(),
+    action, path,
+    old: oldVal === undefined ? null : JSON.parse(JSON.stringify(oldVal)),
+    new: newVal === undefined ? null : JSON.parse(JSON.stringify(newVal))
+  };
+  _db.ref(FB_PATH_AUDIT).push(entry).catch(e => console.warn('Audit-Log Schreibfehler:', e));
+}
+
+// Audit-Anzeige (in Memory ringbuffer)
+const _auditCache = [];
+const AUDIT_CACHE_MAX = 60;
+function attachAuditListener() {
+  if (!_fbActive || !_db) return;
+  _db.ref(FB_PATH_AUDIT).limitToLast(AUDIT_CACHE_MAX).on('child_added', snap => {
+    const v = snap.val();
+    if (!v) return;
+    _auditCache.unshift({ ...v, _id: snap.key });
+    if (_auditCache.length > AUDIT_CACHE_MAX) _auditCache.length = AUDIT_CACHE_MAX;
+    const badge = document.getElementById('audit-badge-count');
+    if (badge) badge.textContent = _auditCache.length;
+  });
+}
+function formatAuditChange(e) {
+  const t = e.ts ? new Date(e.ts).toLocaleString('de-CH', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+  const who = `${e.emoji || ''} ${e.coach || '?'}${e.head ? ' 👑' : ''}`.trim();
+  const fmt = v => {
+    if (v === null || v === undefined) return '∅';
+    if (typeof v === 'object') return JSON.stringify(v).slice(0, 80);
+    return String(v);
+  };
+  return `<div style="border-bottom:1px solid var(--border);padding:8px 4px;font-size:12px">
+    <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:10px">
+      <span>${t}</span><span>${who}</span>
+    </div>
+    <div style="margin-top:2px"><strong>${e.action}</strong> ${e.path}</div>
+    <div style="font-family:monospace;font-size:11px;margin-top:2px;color:var(--muted);word-break:break-all">${fmt(e.old)} → ${fmt(e.new)}</div>
+  </div>`;
+}
+function openAuditModal() {
+  let m = document.getElementById('audit-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'audit-modal';
+    m.style.cssText = 'position:fixed;inset:0;background:#000c;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto';
+    m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:520px;width:100%;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 style="margin:0;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">ÄNDERUNGS-LOG</h3>
+        <button onclick="document.getElementById('audit-modal').remove()" style="background:none;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;cursor:pointer">✕</button>
+      </div>
+      <div id="audit-list" style="max-height:70vh;overflow-y:auto"></div>
+    </div>`;
+    document.body.appendChild(m);
+    m.onclick = (e) => { if (e.target === m) m.remove(); };
+  }
+  document.getElementById('audit-list').innerHTML = _auditCache.length
+    ? _auditCache.map(formatAuditChange).join('')
+    : '<div style="color:var(--muted);padding:12px">Noch keine Änderungen aufgezeichnet.</div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// EXPORT / IMPORT (Sicherheits-Backup für jeden Coach)
+// ─────────────────────────────────────────────────────────
+function toggleCoachMenu(e) {
+  e && e.stopPropagation();
+  const panel = document.getElementById('coach-menu-panel');
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  if (open) { panel.style.display = 'none'; return; }
+  // Refresh dynamic labels
+  const nameLbl = document.getElementById('cm-name-label');
+  if (nameLbl) nameLbl.textContent = getCoachName() || '(setzen)';
+  const hcBtn = document.getElementById('cm-headcoach');
+  if (hcBtn) hcBtn.innerHTML = isHeadCoach() ? '👑 Head-Coach <span style="color:var(--muted)">(abmelden)</span>' : '👑 Head-Coach Login';
+  if (hcBtn) hcBtn.onclick = () => { closeCoachMenu(); isHeadCoach() ? logoutHeadCoach() : tryHeadCoachLogin(); };
+  panel.style.display = 'block';
+  setTimeout(() => document.addEventListener('click', _outsideCoachMenu, { once: true }), 0);
+}
+function closeCoachMenu() {
+  const panel = document.getElementById('coach-menu-panel');
+  if (panel) panel.style.display = 'none';
+}
+function _outsideCoachMenu(e) {
+  const panel = document.getElementById('coach-menu-panel');
+  if (panel && !panel.contains(e.target) && e.target.id !== 'coach-menu-btn') closeCoachMenu();
+}
+
+function exportMyData() {
+  const payload = {
+    _meta: {
+      exportedAt: new Date().toISOString(),
+      coach: getCoachName() || '(unbekannt)',
+      emoji: localStorage.getItem('coachEmoji') || '',
+      head: isHeadCoach(),
+      source: 'og-skillpass-export-v1'
+    },
+    data: S.data || {},
+    customSkills: S.customSkills || {},
+    skillOverrides: S.skillOverrides || {},
+    courses: S.courses || {}
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
+  a.href = url;
+  a.download = `skillpass-${(payload._meta.coach || 'coach').replace(/\s+/g,'_')}-${ts}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1769,7 +1961,7 @@ function persistCourses() {
     _suppressRemoteCourses = true;
     setSyncStatus('syncing');
     _db.ref(FB_PATH_COURSES).set(S.courses)
-      .then(() => { setSyncStatus('live'); })
+      .then(() => { setSyncStatus('live'); auditLog('courses', 'courses', null, { dayCount: Object.keys(S.courses).length }); })
       .catch(e => { console.warn('Firebase write (courses) fehlgeschlagen:', e); setSyncStatus('error'); })
       .finally(() => { setTimeout(() => { _suppressRemoteCourses = false; }, 1200); });
   }
@@ -1819,7 +2011,10 @@ function getVal(courseId, kid, skillId, skill) {
 function setVal(courseId, kid, skillId, val) {
   if (!S.data[courseId]) S.data[courseId] = {};
   if (!S.data[courseId][kid]) S.data[courseId][kid] = {};
+  const oldVal = S.data[courseId][kid][skillId];
+  if (oldVal === val) return; // kein No-Op-Audit
   S.data[courseId][kid][skillId] = val;
+  auditLog('score', `${courseId}/${kid}/${skillId}`, oldVal, val);
   // Save locally immediately
   try {
     localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(
@@ -2830,9 +3025,12 @@ const todayJs = new Date().getDay();
 if (getCourses(todayJs).length > 0) S.day = todayJs;
 renderHome();
 
-// Firebase initialisieren und Echtzeit-Sync starten
+// Firebase initialisieren und Echtzeit-Sync starten (nach Auth)
 initFirebase();
-setupRealtimeSync();
+onFirebaseReady(() => {
+  setupRealtimeSync();
+  attachAuditListener();
+});
 
 // Apply saved OG logo to header on startup
 (function() {
