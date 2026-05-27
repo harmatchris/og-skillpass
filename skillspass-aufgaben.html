@@ -1819,6 +1819,8 @@ async function refreshBackendStats() {
   if (pendTrainers) pendTrainers.textContent = trainers.size;
 }
 
+let _backendTab = 'migration';
+
 function openBackendModal() {
   if (!isHeadCoach()) { alert('Nur für Head-Coach sichtbar.'); return; }
   let m = document.getElementById('backend-modal');
@@ -1826,55 +1828,246 @@ function openBackendModal() {
     m = document.createElement('div');
     m.id = 'backend-modal';
     m.style.cssText = 'position:fixed;inset:0;background:#000c;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto';
-    m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:560px;width:100%;padding:18px">
+    m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:640px;width:100%;padding:18px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <h3 style="margin:0;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">👑 BACKEND</h3>
         <button onclick="document.getElementById('backend-modal').remove()" style="background:none;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;cursor:pointer">✕</button>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
-        <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">📦 Stammdaten-Migration</h4>
-        <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4">
-          Extrahiert Kinder und Trainer aus allen bestehenden Kursen und legt sie zentral unter <code>/master/</code> an.
-          <strong style="color:var(--text)">Sicher</strong> — nur additiv, keine Löschung, keine Überschreibung bestehender Master-Einträge.
-        </p>
-        <div style="display:flex;gap:12px;margin-bottom:10px;font-size:12px">
-          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
-            <div style="color:var(--muted);font-size:10px">Bereits zentral</div>
-            <div style="font-size:18px;font-weight:600">👶 <span id="bk-kids-count">…</span></div>
-          </div>
-          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
-            <div style="color:var(--muted);font-size:10px">In Kursen gefunden</div>
-            <div style="font-size:18px;font-weight:600">👶 <span id="bk-kids-pending">…</span></div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;margin-bottom:10px;font-size:12px">
-          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
-            <div style="color:var(--muted);font-size:10px">Bereits zentral</div>
-            <div style="font-size:18px;font-weight:600">🧑‍🏫 <span id="bk-trainers-count">…</span></div>
-          </div>
-          <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
-            <div style="color:var(--muted);font-size:10px">In Kursen gefunden</div>
-            <div style="font-size:18px;font-weight:600">🧑‍🏫 <span id="bk-trainers-pending">…</span></div>
-          </div>
-        </div>
-        <button onclick="runMigration()" style="width:100%;background:var(--accent);color:#000;border:0;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">▶ Migration jetzt ausführen</button>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--muted);font-size:12px">
-        <strong style="color:var(--text)">Nächste Iterationen (kommen demnächst):</strong>
-        <ul style="margin:6px 0 0 18px;line-height:1.6">
-          <li>Tab Kinder: Liste anzeigen, Jahrgang/Notizen editieren</li>
-          <li>Tab Trainer: Liste, Email/Rechte verwalten</li>
-          <li>Tab Kurs-Templates: zentrale Kurs-Vorlagen</li>
-          <li>Tab Skills: globale Skill-Definitionen</li>
-          <li>Kurse mergen (doppelte zusammenführen)</li>
-          <li>Soft-Delete für Kurse (hidden statt gelöscht)</li>
-        </ul>
-      </div>
+      <div id="bk-tabs" style="display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;flex-wrap:wrap"></div>
+      <div id="bk-content" style="min-height:200px"></div>
     </div>`;
     document.body.appendChild(m);
     m.onclick = (e) => { if (e.target === m) m.remove(); };
   }
+  renderBackendTabs();
+  renderBackendTab();
+}
+
+function renderBackendTabs() {
+  const tabs = [
+    { id: 'migration', label: '📦 Migration' },
+    { id: 'kids',      label: '👶 Kinder' },
+    { id: 'trainers',  label: '🧑‍🏫 Trainer' },
+  ];
+  const el = document.getElementById('bk-tabs');
+  if (!el) return;
+  el.innerHTML = tabs.map(t => `
+    <button onclick="_backendTab='${t.id}';renderBackendTabs();renderBackendTab()"
+      style="background:${t.id===_backendTab?'var(--accent)':'var(--surface2)'};color:${t.id===_backendTab?'#000':'var(--text)'};border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:${t.id===_backendTab?'700':'400'}">
+      ${t.label}
+    </button>
+  `).join('');
+}
+
+function renderBackendTab() {
+  const c = document.getElementById('bk-content');
+  if (!c) return;
+  if (_backendTab === 'migration') return renderMigrationTab(c);
+  if (_backendTab === 'kids')      return renderKidsTab(c);
+  if (_backendTab === 'trainers')  return renderTrainersTab(c);
+}
+
+function renderMigrationTab(c) {
+  c.innerHTML = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+    <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">Stammdaten aus Kursen importieren</h4>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4">
+      Extrahiert Kinder und Trainer aus allen bestehenden Kursen und legt sie zentral unter <code>/master/</code> an.
+      <strong style="color:var(--text)">Sicher</strong> — nur additiv.
+    </p>
+    <div style="display:flex;gap:12px;margin-bottom:10px;font-size:12px">
+      <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+        <div style="color:var(--muted);font-size:10px">Bereits zentral</div>
+        <div style="font-size:18px;font-weight:600">👶 <span id="bk-kids-count">…</span></div>
+      </div>
+      <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+        <div style="color:var(--muted);font-size:10px">In Kursen gefunden</div>
+        <div style="font-size:18px;font-weight:600">👶 <span id="bk-kids-pending">…</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:10px;font-size:12px">
+      <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+        <div style="color:var(--muted);font-size:10px">Bereits zentral</div>
+        <div style="font-size:18px;font-weight:600">🧑‍🏫 <span id="bk-trainers-count">…</span></div>
+      </div>
+      <div style="flex:1;background:var(--surface);padding:8px;border-radius:6px;text-align:center">
+        <div style="color:var(--muted);font-size:10px">In Kursen gefunden</div>
+        <div style="font-size:18px;font-weight:600">🧑‍🏫 <span id="bk-trainers-pending">…</span></div>
+      </div>
+    </div>
+    <button onclick="runMigration()" style="width:100%;background:var(--accent);color:#000;border:0;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">▶ Migration jetzt ausführen</button>
+  </div>`;
   refreshBackendStats();
+}
+
+function _crudRowStyle() { return 'display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--border);font-size:12px;align-items:center'; }
+function _crudInput(value, placeholder) { return `<input value="${(value||'').toString().replace(/"/g,'&quot;')}" placeholder="${placeholder||''}" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:4px 6px;font-size:12px;min-width:0">`; }
+
+function renderKidsTab(c) {
+  c.innerHTML = `<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:12px;color:var(--muted)" id="bk-kids-summary">Lädt…</span>
+      <button onclick="addMasterKid()" style="background:var(--accent);color:#000;border:0;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">+ Neu</button>
+    </div>
+    <input id="bk-kids-search" oninput="renderKidsList()" placeholder="🔍 Suchen…" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:12px;margin-bottom:8px">
+    <div id="bk-kids-list" style="max-height:55vh;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px"></div>
+  </div>`;
+  loadAndRenderKids();
+}
+
+async function loadAndRenderKids() {
+  if (!_db) return;
+  const snap = await _db.ref(`${FB_PATH_MASTER}/kids`).once('value');
+  window._masterKids = snap.val() || {};
+  renderKidsList();
+}
+
+function renderKidsList() {
+  const map = window._masterKids || {};
+  const q = (document.getElementById('bk-kids-search')?.value || '').toLowerCase();
+  const entries = Object.entries(map)
+    .filter(([_, v]) => !q || (v.name||'').toLowerCase().includes(q))
+    .sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+  const list = document.getElementById('bk-kids-list');
+  const sum  = document.getElementById('bk-kids-summary');
+  if (sum) sum.textContent = `${entries.length} von ${Object.keys(map).length} Kindern`;
+  if (!list) return;
+  if (entries.length === 0) {
+    list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Keine Treffer</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([id, v]) => `
+    <div style="${_crudRowStyle()}">
+      ${_crudInput(v.name, 'Name')}
+      <input type="number" value="${v.year || ''}" placeholder="JG" style="width:60px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:4px 6px;font-size:12px">
+      ${_crudInput(v.notes, 'Notiz')}
+      <button onclick="saveMasterKid('${id}', this)" style="background:var(--green);color:#000;border:0;border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer;font-weight:700">✓</button>
+      <button onclick="deleteMasterKid('${id}')" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer">×</button>
+    </div>
+  `).join('');
+}
+
+async function saveMasterKid(id, btn) {
+  const row = btn.parentElement;
+  const inputs = row.querySelectorAll('input');
+  const payload = {
+    name:  inputs[0].value.trim(),
+    year:  inputs[1].value ? Number(inputs[1].value) : null,
+    notes: inputs[2].value.trim() || null,
+    editedAt: firebase.database.ServerValue.TIMESTAMP,
+    editedBy: getCoachName() || '(unbekannt)'
+  };
+  if (!payload.name) { alert('Name darf nicht leer sein.'); return; }
+  const oldVal = (window._masterKids||{})[id];
+  await _db.ref(`${FB_PATH_MASTER}/kids/${id}`).update(payload);
+  auditLog('master-kid-edit', `kids/${id}`, oldVal, payload);
+  btn.textContent = '✓'; btn.style.background = 'var(--green)';
+  setTimeout(loadAndRenderKids, 300);
+}
+
+async function deleteMasterKid(id) {
+  const oldVal = (window._masterKids||{})[id];
+  const name = oldVal?.name || id;
+  if (!confirm(`Kind "${name}" wirklich aus der Master-Liste löschen?\n\n(Scores bleiben unangetastet, Kid wird nur aus zentraler Liste entfernt.)`)) return;
+  await _db.ref(`${FB_PATH_MASTER}/kids/${id}`).remove();
+  auditLog('master-kid-delete', `kids/${id}`, oldVal, null);
+  loadAndRenderKids();
+}
+
+async function addMasterKid() {
+  const name = (prompt('Name des Kindes:') || '').trim();
+  if (!name) return;
+  const id = slugify(name);
+  const exists = (window._masterKids||{})[id];
+  if (exists) { alert(`"${exists.name}" existiert schon.`); return; }
+  const payload = { name, addedAt: firebase.database.ServerValue.TIMESTAMP, addedBy: getCoachName() || '(unbekannt)' };
+  await _db.ref(`${FB_PATH_MASTER}/kids/${id}`).set(payload);
+  auditLog('master-kid-add', `kids/${id}`, null, payload);
+  loadAndRenderKids();
+}
+
+function renderTrainersTab(c) {
+  c.innerHTML = `<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:12px;color:var(--muted)" id="bk-trainers-summary">Lädt…</span>
+      <button onclick="addMasterTrainer()" style="background:var(--accent);color:#000;border:0;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">+ Neu</button>
+    </div>
+    <input id="bk-trainers-search" oninput="renderTrainersList()" placeholder="🔍 Suchen…" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:12px;margin-bottom:8px">
+    <div id="bk-trainers-list" style="max-height:55vh;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px"></div>
+  </div>`;
+  loadAndRenderTrainers();
+}
+
+async function loadAndRenderTrainers() {
+  if (!_db) return;
+  const snap = await _db.ref(`${FB_PATH_MASTER}/trainers`).once('value');
+  window._masterTrainers = snap.val() || {};
+  renderTrainersList();
+}
+
+function renderTrainersList() {
+  const map = window._masterTrainers || {};
+  const q = (document.getElementById('bk-trainers-search')?.value || '').toLowerCase();
+  const entries = Object.entries(map)
+    .filter(([_, v]) => !q || (v.name||'').toLowerCase().includes(q))
+    .sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+  const list = document.getElementById('bk-trainers-list');
+  const sum  = document.getElementById('bk-trainers-summary');
+  if (sum) sum.textContent = `${entries.length} von ${Object.keys(map).length} Trainern`;
+  if (!list) return;
+  if (entries.length === 0) {
+    list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Keine Treffer</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([id, v]) => `
+    <div style="${_crudRowStyle()}">
+      ${_crudInput(v.name, 'Name')}
+      ${_crudInput(v.email, 'E-Mail (optional)')}
+      <label title="Head-Coach Rechte" style="display:flex;align-items:center;gap:4px;color:var(--muted);font-size:11px;cursor:pointer">
+        <input type="checkbox" ${v.isHeadCoach ? 'checked' : ''}> HC
+      </label>
+      <button onclick="saveMasterTrainer('${id}', this)" style="background:var(--green);color:#000;border:0;border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer;font-weight:700">✓</button>
+      <button onclick="deleteMasterTrainer('${id}')" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:4px 8px;font-size:11px;cursor:pointer">×</button>
+    </div>
+  `).join('');
+}
+
+async function saveMasterTrainer(id, btn) {
+  const row = btn.parentElement;
+  const inputs = row.querySelectorAll('input');
+  const payload = {
+    name:        inputs[0].value.trim(),
+    email:       inputs[1].value.trim() || null,
+    isHeadCoach: inputs[2].checked,
+    editedAt:    firebase.database.ServerValue.TIMESTAMP,
+    editedBy:    getCoachName() || '(unbekannt)'
+  };
+  if (!payload.name) { alert('Name darf nicht leer sein.'); return; }
+  const oldVal = (window._masterTrainers||{})[id];
+  await _db.ref(`${FB_PATH_MASTER}/trainers/${id}`).update(payload);
+  auditLog('master-trainer-edit', `trainers/${id}`, oldVal, payload);
+  btn.textContent = '✓';
+  setTimeout(loadAndRenderTrainers, 300);
+}
+
+async function deleteMasterTrainer(id) {
+  const oldVal = (window._masterTrainers||{})[id];
+  const name = oldVal?.name || id;
+  if (!confirm(`Trainer "${name}" wirklich aus der Master-Liste löschen?\n\n(Kurse mit diesem Trainer-Namen bleiben unangetastet.)`)) return;
+  await _db.ref(`${FB_PATH_MASTER}/trainers/${id}`).remove();
+  auditLog('master-trainer-delete', `trainers/${id}`, oldVal, null);
+  loadAndRenderTrainers();
+}
+
+async function addMasterTrainer() {
+  const name = (prompt('Name des Trainers:') || '').trim();
+  if (!name) return;
+  const id = slugify(name);
+  const exists = (window._masterTrainers||{})[id];
+  if (exists) { alert(`"${exists.name}" existiert schon.`); return; }
+  const payload = { name, addedAt: firebase.database.ServerValue.TIMESTAMP, addedBy: getCoachName() || '(unbekannt)' };
+  await _db.ref(`${FB_PATH_MASTER}/trainers/${id}`).set(payload);
+  auditLog('master-trainer-add', `trainers/${id}`, null, payload);
+  loadAndRenderTrainers();
 }
 
 // ─────────────────────────────────────────────────────────
