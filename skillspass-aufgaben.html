@@ -2614,10 +2614,13 @@ function renderHome() {
 
     const acts = document.createElement('div');
     acts.className = 'course-acts';
+    // Zurücksetzen + Löschen NUR für Head-Coach — Coaches können bearbeiten,
+    // aber keine Scores zurücksetzen oder Kurse löschen (volle Verantwortung HC)
+    const hc = isHeadCoach();
     acts.innerHTML = `
       <button class="course-act-btn" title="Bearbeiten" onclick="openCourseModal('${c.id}')">✎</button>
-      <button class="course-act-btn rst" title="Zurücksetzen" onclick="openResetModal('${c.id}')">↺</button>
-      <button class="course-act-btn del" title="Löschen" onclick="openDeleteModal('${c.id}')">✕</button>`;
+      ${hc ? `<button class="course-act-btn rst" title="Zurücksetzen (Head-Coach)" onclick="openResetModal('${c.id}')">↺</button>
+      <button class="course-act-btn del" title="Löschen (Head-Coach)" onclick="openDeleteModal('${c.id}')">✕</button>` : ''}`;
 
     row.appendChild(handle);
     row.appendChild(body);
