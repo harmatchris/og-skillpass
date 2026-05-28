@@ -605,7 +605,7 @@
   }
 
   /* Skills table */
-  .diploma-skills-section { margin: 10px 0; flex: 1; }
+  .diploma-skills-section { margin: 10px 0; flex: 1; display: flex; flex-direction: column; justify-content: center; }
   .diploma-skills-title {
     font-size: 7pt; text-transform: uppercase; letter-spacing: 2px;
     color: #999; margin-bottom: 5px;
@@ -663,6 +663,55 @@
   }
   .diploma-md .diploma-og-logo-img { height: 28px; }
   .diploma-sm .diploma-og-logo-img, .diploma-xs .diploma-og-logo-img { height: 22px; }
+
+  /* ── DIPLOMA BOX-GRID (kindgerecht, eine Box pro Sportart) ── */
+  .diploma-skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-content: start;
+  }
+  /* Box, die viele Skills hat, darf über beide Spalten gehen */
+  .diploma-cat-box.wide { grid-column: 1 / -1; }
+  .diploma-cat-box {
+    border: 2px solid #f5c80055;
+    border-radius: 10px;
+    padding: 8px 10px 9px;
+    background: #fffdf5;
+    break-inside: avoid; page-break-inside: avoid;
+    display: flex; flex-direction: column;
+  }
+  .diploma-cat-box-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11pt; font-weight: 900; color: #111;
+    text-transform: uppercase; letter-spacing: .5px;
+    border-bottom: 2px solid #f5c800;
+    padding-bottom: 4px; margin-bottom: 5px;
+  }
+  .diploma-cat-box-emoji { font-size: 14pt; line-height: 1; }
+  .diploma-box-skill {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding: 3px 0;
+  }
+  .diploma-box-skill + .diploma-box-skill { border-top: 1px solid #f3f0e4; }
+  .diploma-box-label { font-size: 10.5pt; color: #222; line-height: 1.15; }
+  .diploma-box-value { font-size: 11pt; font-weight: 800; color: #111; white-space: nowrap; }
+  .diploma-box-stars { display: flex; gap: 1px; white-space: nowrap; }
+  .diploma-box-star { font-size: 11pt; color: #ddd; line-height: 1; }
+  .diploma-box-star.filled { color: #f5c800; }
+
+  /* Box-Dichtevarianten (greift bei vielen Skills) */
+  .diploma-md .diploma-box-label,
+  .diploma-md .diploma-box-value { font-size: 10pt; }
+  .diploma-md .diploma-box-star  { font-size: 10pt; }
+  .diploma-md .diploma-cat-box-title { font-size: 10pt; }
+  .diploma-md .diploma-skills-grid { gap: 6px; }
+  .diploma-sm .diploma-box-label,
+  .diploma-sm .diploma-box-value { font-size: 10pt; }
+  .diploma-sm .diploma-box-star  { font-size: 9.5pt; }
+  .diploma-sm .diploma-cat-box-title { font-size: 9.5pt; }
+  .diploma-sm .diploma-cat-box { padding: 6px 8px; }
+  .diploma-sm .diploma-skills-grid { gap: 5px; }
 
   /* ── DIPLOMA DENSITY VARIANTS ─────────────────────────────
      Automatically applied based on number of skills per course.
@@ -845,6 +894,7 @@
   <button class="coach-menu-item" onclick="closeCoachMenu();ensureCoachName();">👤 Mein Name: <span id="cm-name-label" style="color:var(--accent);margin-left:4px"></span></button>
   <button class="coach-menu-item" onclick="closeCoachMenu();openAuditModal();">📜 Änderungs-Log</button>
   <button class="coach-menu-item" onclick="closeCoachMenu();exportMyData();">💾 Meine Daten exportieren</button>
+  <button class="coach-menu-item" onclick="closeCoachMenu();printDemoDiploma();">📄 Demo-Diplom (Beispiel)</button>
   <button class="coach-menu-item" id="cm-headcoach" onclick="closeCoachMenu();tryHeadCoachLogin();">👑 Head-Coach Login</button>
   <button class="coach-menu-item" id="cm-backend" onclick="closeCoachMenu();openBackendModal();" style="display:none">⚙️ Backend (Stammdaten)</button>
 </div>
@@ -3268,7 +3318,8 @@ function buildDiplomaView(day) {
   const dv = document.getElementById('diploma-view');
   dv.innerHTML = '';
   const courses = getCourses(day);
-  const dayName = DAY_NAMES[day] + 'tag';
+  const FULL_DAY_NAMES = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const dayName = FULL_DAY_NAMES[day] || '';
   const dateStr = new Date().toLocaleDateString('de-CH', {day:'2-digit', month:'2-digit', year:'numeric'});
   const coachEmoji = localStorage.getItem('coachEmoji') || '';
 
@@ -3290,83 +3341,9 @@ function buildDiplomaView(day) {
       const card = document.createElement('div');
       card.className = 'diploma-card' + density;
 
-      // Build sport skills HTML (grouped by category if present)
-      let lastCat = null;
-      let skillsHtml = sportSkills.map(skill => {
-        const val = getVal(course.id, kid, skill.id, skill);
-        let catHeader = '';
-        if (skill.category && skill.category !== lastCat) {
-          lastCat = skill.category;
-          catHeader = `<div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#f5c800;margin:${catTopMargin} 0 2px;grid-column:1/-1">${skill.category}</div>`;
-        }
-        let valHtml;
-        if (skill.type === 'rating') {
-          let stars = '';
-          for (let v = skill.min; v <= skill.max; v += skill.step)
-            stars += `<span class="diploma-star${v <= val ? ' filled' : ''}">★</span>`;
-          valHtml = `<span class="diploma-skill-val"><span class="diploma-rating-stars">${stars}</span></span>`;
-        } else {
-          valHtml = `<span class="diploma-skill-val">${formatVal(val, skill)}</span>`;
-        }
-        return catHeader + `<div class="diploma-skill-row">
-          <span class="diploma-skill-label">${skill.label}</span>
-          <span class="diploma-skill-dots"></span>
-          ${valHtml}
-        </div>`;
-      }).join('');
-
-      card.innerHTML = `
-        <div class="diploma-frame"></div>
-        <div class="diploma-corner tl"></div>
-        <div class="diploma-corner tr"></div>
-        <div class="diploma-corner bl"></div>
-        <div class="diploma-corner br"></div>
-        <div class="diploma-inner">
-          <div class="diploma-top">
-            <div class="diploma-logo-row ${window.OG_LOGO_SRC ? 'has-img' : ''}">
-              ${window.OG_LOGO_SRC
-                ? `<img class="diploma-og-logo-img" src="${window.OG_LOGO_SRC}" alt="OG Logo" />`
-                : `<div class="diploma-logo">OG <span>SKILLS</span>-PASS</div>`}
-            </div>
-            <div class="diploma-stars">★ ★ ★ ★ ★</div>
-          </div>
-
-          <hr class="diploma-hr">
-
-          <div class="diploma-kid-name">${kid}</div>
-
-          <div class="diploma-course-info">
-            <div class="diploma-course-name">${course.name}</div>
-            <div class="diploma-meta-row">
-              ${dayName} · ${course.time} Uhr · Coach: <strong>${course.trainer}</strong>
-            </div>
-            <div style="margin-top:6px">
-              <span class="diploma-lv-badge" style="${lvStyle}">${course.level}</span>
-            </div>
-          </div>
-
-          <hr class="diploma-hr-thin">
-
-          <div class="diploma-skills-section">
-            <div class="diploma-skills-title">Absolvierte Skills</div>
-            ${skillsHtml}
-          </div>
-
-          ${!hasKomp ? `
-          <div class="diploma-footer">
-            <div class="diploma-sig-block">
-              <div class="diploma-sig-line">${coachEmoji ? `<span style="font-size:1.3em">${coachEmoji}</span> ` : ""}COACH</div>
-            </div>
-            <div class="diploma-stamp">
-              <div class="diploma-stamp-og">OG</div>
-              <div class="diploma-stamp-sub">Basel</div>
-            </div>
-            <div class="diploma-sig-block">
-              <div class="diploma-sig-line">UNTERSCHRIFT</div>
-            </div>
-          </div>` : ''}
-        </div>`;
-
+      // Build sport skills as category-boxes (kindgerecht, Platz sparend)
+      let skillsHtml = buildSkillBoxesHtml(course, kid, sportSkills);
+      card.innerHTML = sportCardInnerHtml({ kid, courseName: course.name, dayName, time: course.time, trainer: course.trainer, level: course.level, lvStyle, skillsHtml, coachEmoji });
       dv.appendChild(card);
 
       // ── PAGE 2: Kompetenzraster (only if this course has komp skills) ─
@@ -3440,6 +3417,164 @@ function buildDiplomaView(day) {
   });
 }
 
+
+// Wiederverwendbare Vorderseite (Sport-Skills) — genutzt von Diplom + Demo
+function sportCardInnerHtml(o) {
+  return `
+    <div class="diploma-frame"></div>
+    <div class="diploma-corner tl"></div>
+    <div class="diploma-corner tr"></div>
+    <div class="diploma-corner bl"></div>
+    <div class="diploma-corner br"></div>
+    <div class="diploma-inner">
+      <div class="diploma-top">
+        <div class="diploma-logo-row ${window.OG_LOGO_SRC ? 'has-img' : ''}">
+          ${window.OG_LOGO_SRC
+            ? `<img class="diploma-og-logo-img" src="${window.OG_LOGO_SRC}" alt="OG Logo" />`
+            : `<div class="diploma-logo">OG <span>SKILLS</span>-PASS</div>`}
+        </div>
+        <div class="diploma-stars">★ ★ ★ ★ ★</div>
+      </div>
+      <hr class="diploma-hr">
+      <div class="diploma-kid-name">${o.kid}</div>
+      <div class="diploma-course-info">
+        <div class="diploma-course-name">${o.courseName}</div>
+        <div class="diploma-meta-row">
+          ${o.dayName} · ${o.time} Uhr · Coach: <strong>${o.trainer}</strong>
+        </div>
+        <div style="margin-top:6px">
+          <span class="diploma-lv-badge" style="${o.lvStyle}">${o.level}</span>
+        </div>
+      </div>
+      <hr class="diploma-hr-thin">
+      <div class="diploma-skills-section">
+        <div class="diploma-skills-title">Absolvierte Skills</div>
+        <div class="diploma-skills-grid">${o.skillsHtml}</div>
+      </div>
+      <div class="diploma-footer">
+        <div class="diploma-sig-block">
+          <div class="diploma-sig-line">${o.coachEmoji ? `<span style="font-size:1.3em">${o.coachEmoji}</span> ` : ""}COACH</div>
+        </div>
+        <div class="diploma-stamp">
+          <div class="diploma-stamp-og">OG</div>
+          <div class="diploma-stamp-sub">Basel</div>
+        </div>
+        <div class="diploma-sig-block">
+          <div class="diploma-sig-line">UNTERSCHRIFT</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Demo-Diplom mit "Max Mustermann" — als Beispiel zum Ausdrucken
+function buildDemoDiplomaCard() {
+  const demoSkills = [
+    { id:'d_dismount', label:'Dismount',        category:'Ninja',   type:'rating', unit:'/5', min:1, max:5, step:1, _v:5 },
+    { id:'d_schlange', label:'Schlange',         category:'Ninja',   type:'rating', unit:'/5', min:1, max:5, step:1, _v:4 },
+    { id:'d_wall',     label:'Wall',             category:'Ninja',   type:'rating', unit:'/5', min:1, max:5, step:1, _v:5 },
+    { id:'d_mikados',  label:'Mikados',          category:'Ninja',   type:'time',   unit:'s',  min:0, max:120, step:1, _v:42 },
+    { id:'d_standweit',label:'Standweitsprung',  category:'Kraft',   type:'mass',   unit:'cm', min:0, max:300, step:5, _v:185 },
+    { id:'d_klimm',    label:'Klimmzüge',        category:'Kraft',   type:'count',  unit:'Wdh',min:0, max:30, step:1, _v:12 },
+    { id:'d_haengen',  label:'Hängen',           category:'Kraft',   type:'time',   unit:'s',  min:0, max:120, step:1, _v:55 },
+    { id:'d_balance',  label:'Balancestange',    category:'Parkour', type:'rating', unit:'/5', min:1, max:5, step:1, _v:4 },
+    { id:'d_prezi',    label:'Prezi',            category:'Parkour', type:'rating', unit:'/5', min:1, max:5, step:1, _v:5 },
+    { id:'d_speed',    label:'Speedparkour',     category:'Parkour', type:'time',   unit:'s',  min:0, max:120, step:1, _v:24 },
+  ];
+  // skillsHtml direkt aus Demo-Werten bauen (ohne S.data)
+  const groups = []; const byCat = {};
+  demoSkills.forEach(s => { const c = s.category; if (!byCat[c]) { byCat[c]=[]; groups.push(c); } byCat[c].push(s); });
+  const skillsHtml = groups.map(cat => {
+    const skills = byCat[cat];
+    const wide = skills.length > 5 ? ' wide' : '';
+    const rows = skills.map(skill => {
+      let valHtml;
+      if (skill.type === 'rating') {
+        let stars = '';
+        for (let v = skill.min; v <= skill.max; v += skill.step)
+          stars += `<span class="diploma-box-star${v <= skill._v ? ' filled' : ''}">★</span>`;
+        valHtml = `<span class="diploma-box-stars">${stars}</span>`;
+      } else {
+        valHtml = `<span class="diploma-box-value">${formatVal(skill._v, skill)}</span>`;
+      }
+      return `<div class="diploma-box-skill"><span class="diploma-box-label">${skill.label}</span>${valHtml}</div>`;
+    }).join('');
+    return `<div class="diploma-cat-box${wide}"><div class="diploma-cat-box-title"><span class="diploma-cat-box-emoji">${categoryEmoji(cat)}</span>${cat}</div>${rows}</div>`;
+  }).join('');
+
+  const card = document.createElement('div');
+  card.className = 'diploma-card';
+  card.innerHTML = sportCardInnerHtml({
+    kid: 'Max Mustermann', courseName: 'Ninja Kidz 10–13J (BEISPIEL)',
+    dayName: 'Dienstag', time: '17:30', trainer: 'Dein Coach',
+    level: 'Mittel', lvStyle: lvDiplomaStyle('Mittel'),
+    skillsHtml, coachEmoji: localStorage.getItem('coachEmoji') || '🥷'
+  });
+  return card;
+}
+
+function printDemoDiploma() {
+  const dv = document.getElementById('diploma-view');
+  dv.innerHTML = '';
+  dv.appendChild(buildDemoDiplomaCard());
+  autoscaleDiplomas();
+  document.body.classList.add('printing-diplomas');
+  const cleanup = () => {
+    document.body.classList.remove('printing-diplomas');
+    window.removeEventListener('afterprint', cleanup);
+    dv.innerHTML = '';
+  };
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+}
+
+// Emoji pro Sportart/Kategorie — kindgerechte Boxen
+const CATEGORY_EMOJI = {
+  'Ninja': '🥷', 'Ninja Warrior': '🥷',
+  'Kraft': '💪',
+  'Parkour': '🧗', 'Chase Tag': '🏃', 'World Chase Tag': '🏃',
+  'Tricking Floor': '🤸', 'Trampolin': '🤾',
+  'Akrobatik': '🤸', 'Organisation': '📋',
+};
+function categoryEmoji(cat) { return CATEGORY_EMOJI[cat] || '⭐'; }
+
+// Baut die Sport-Skills als Grid aus Kategorie-Boxen.
+// Sterne/Werte direkt neben dem Label (kompakt), grosse Schrift.
+function buildSkillBoxesHtml(course, kid, sportSkills) {
+  // nach Kategorie gruppieren (Reihenfolge wie im Skill-Array)
+  const groups = [];
+  const byCat = {};
+  sportSkills.forEach(skill => {
+    const cat = skill.category || 'Skills';
+    if (!byCat[cat]) { byCat[cat] = []; groups.push(cat); }
+    byCat[cat].push(skill);
+  });
+
+  return groups.map(cat => {
+    const skills = byCat[cat];
+    // Box mit vielen Skills (>5) über beide Spalten, sonst halbe Breite
+    const wide = skills.length > 5 ? ' wide' : '';
+    const rows = skills.map(skill => {
+      const val = getVal(course.id, kid, skill.id, skill);
+      let valHtml;
+      if (skill.type === 'rating') {
+        let stars = '';
+        for (let v = skill.min; v <= skill.max; v += skill.step)
+          stars += `<span class="diploma-box-star${v <= val ? ' filled' : ''}">★</span>`;
+        valHtml = `<span class="diploma-box-stars">${stars}</span>`;
+      } else {
+        valHtml = `<span class="diploma-box-value">${formatVal(val, skill)}</span>`;
+      }
+      return `<div class="diploma-box-skill">
+        <span class="diploma-box-label">${skill.label}</span>
+        ${valHtml}
+      </div>`;
+    }).join('');
+    return `<div class="diploma-cat-box${wide}">
+      <div class="diploma-cat-box-title"><span class="diploma-cat-box-emoji">${categoryEmoji(cat)}</span>${cat}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+}
 
 function lvDiplomaStyle(level) {
   const s = (level||'').toLowerCase();
