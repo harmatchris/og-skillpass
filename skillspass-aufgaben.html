@@ -1061,9 +1061,9 @@
 <!-- ── MODAL: KURS LÖSCHEN (Passwort) ── -->
 <div class="modal-overlay" id="modal-delete" onclick="closeDeleteModal(event)">
   <div class="modal" onclick="event.stopPropagation()" style="padding-bottom:32px">
-    <div class="pw-modal-icon">🔒</div>
-    <div class="modal-title" style="text-align:center">Kurs löschen</div>
-    <div class="pw-modal-msg">Bitte Passwort eingeben um<br><span class="pw-modal-name" id="delete-course-name-display"></span><br>zu löschen.</div>
+    <div class="pw-modal-icon">🙈</div>
+    <div class="modal-title" style="text-align:center">Kurs ausblenden</div>
+    <div class="pw-modal-msg">Passwort eingeben um<br><span class="pw-modal-name" id="delete-course-name-display"></span><br>auszublenden.<br><span style="font-size:11px;color:var(--muted)">Scores bleiben erhalten · im Backend wiederherstellbar</span></div>
     <div class="modal-field">
       <div class="modal-label">Passwort</div>
       <input class="modal-input" id="delete-password-input" type="password" placeholder="••••"
@@ -1074,7 +1074,7 @@
     </div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeDeleteModalDirect()">Abbrechen</button>
-      <button class="modal-delete-btn" onclick="confirmDeleteCourse()">Löschen</button>
+      <button class="modal-delete-btn" onclick="confirmDeleteCourse()">Ausblenden</button>
     </div>
   </div>
 </div>
@@ -1900,6 +1900,7 @@ function renderBackendTabs() {
     { id: 'migration', label: '📦 Migration' },
     { id: 'kids',      label: '👶 Kinder' },
     { id: 'trainers',  label: '🧑‍🏫 Trainer' },
+    { id: 'courses',   label: '🗂️ Kurse' },
     { id: 'excel',     label: '📊 Excel' },
   ];
   const el = document.getElementById('bk-tabs');
@@ -1918,7 +1919,118 @@ function renderBackendTab() {
   if (_backendTab === 'migration') return renderMigrationTab(c);
   if (_backendTab === 'kids')      return renderKidsTab(c);
   if (_backendTab === 'trainers')  return renderTrainersTab(c);
+  if (_backendTab === 'courses')   return renderCoursesTab(c);
   if (_backendTab === 'excel')     return renderExcelTab(c);
+}
+
+// ── Kurse-Tab: Übersicht, Wiederherstellen, Mergen ──
+const _DAY_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+function _allCoursesFlat() {
+  const out = [];
+  for (let day = 0; day < 7; day++) {
+    getCoursesRaw(day).forEach((c, idx) => out.push({ ...c, _day: day, _idx: idx }));
+  }
+  return out;
+}
+function _scoreCount(courseId) {
+  const d = S.data[courseId] || {};
+  let n = 0;
+  for (const kid in d) n += Object.keys(d[kid] || {}).length;
+  return n;
+}
+
+let _mergeSrc = '';
+let _mergeTgt = '';
+function renderCoursesTab(c) {
+  const all = _allCoursesFlat();
+  const visible = all.filter(x => !x.hidden);
+  const hidden  = all.filter(x => x.hidden);
+  const optList = visible.map(x => `<option value="${x._day}:${x.id}">${_DAY_SHORT[x._day]} · ${x.name} (${x.kids.length} Kids, ${_scoreCount(x.id)} Scores)</option>`).join('');
+
+  c.innerHTML = `<div style="display:flex;flex-direction:column;gap:14px">
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+      <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">🔀 Kurse zusammenführen (mergen)</h4>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4">
+        Kinder + Scores von Quelle → Ziel übernehmen. Quelle wird danach ausgeblendet.
+        Bestehende Ziel-Werte bleiben, fehlende werden aus der Quelle ergänzt.
+      </p>
+      <label style="font-size:11px;color:var(--muted)">Quelle (wird ausgeblendet)</label>
+      <select id="merge-src" onchange="_mergeSrc=this.value" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px;font-size:12px;margin:3px 0 8px"><option value="">– wählen –</option>${optList}</select>
+      <label style="font-size:11px;color:var(--muted)">Ziel (bleibt bestehen)</label>
+      <select id="merge-tgt" onchange="_mergeTgt=this.value" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px;font-size:12px;margin:3px 0 10px"><option value="">– wählen –</option>${optList}</select>
+      <button onclick="runMergeCourses()" style="width:100%;background:var(--accent);color:#000;border:0;border-radius:8px;padding:10px;font-weight:700;cursor:pointer">🔀 Zusammenführen</button>
+    </div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+      <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">🙈 Ausgeblendete Kurse (${hidden.length})</h4>
+      ${hidden.length === 0
+        ? '<div style="font-size:12px;color:var(--muted)">Keine ausgeblendeten Kurse.</div>'
+        : hidden.map(x => `<div style="${_crudRowStyle()}">
+            <span style="flex:1">${_DAY_SHORT[x._day]} · ${x.name} <span style="color:var(--muted);font-size:10px">(${_scoreCount(x.id)} Scores erhalten)</span></span>
+            <button onclick="restoreCourse(${x._day},'${x.id}')" style="background:var(--green);color:#000;border:0;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:700">↩︎ Wiederherstellen</button>
+          </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function restoreCourse(day, id) {
+  const c = (S.courses[day] || []).find(x => x.id === id);
+  if (!c) return;
+  delete c.hidden; delete c.hiddenAt; delete c.hiddenBy;
+  auditLog('course-restore', `courses/${id}`, { hidden: true }, { name: c.name });
+  persistCourses();
+  renderBackendTab();
+  if (S.day === day) renderHome();
+}
+
+async function runMergeCourses() {
+  if (!isHeadCoach()) { alert('Nur Head-Coach.'); return; }
+  if (!_mergeSrc || !_mergeTgt) { alert('Bitte Quelle UND Ziel wählen.'); return; }
+  if (_mergeSrc === _mergeTgt) { alert('Quelle und Ziel müssen verschieden sein.'); return; }
+  const [srcDay, srcId] = _mergeSrc.split(':');
+  const [tgtDay, tgtId] = _mergeTgt.split(':');
+  const src = (S.courses[srcDay] || []).find(x => x.id === srcId);
+  const tgt = (S.courses[tgtDay] || []).find(x => x.id === tgtId);
+  if (!src || !tgt) { alert('Kurs nicht gefunden.'); return; }
+
+  // Vorschau berechnen
+  const tgtKidsSet = new Set(tgt.kids || []);
+  const newKids = (src.kids || []).filter(k => !tgtKidsSet.has(k));
+  if (!confirm(`„${src.name}" → „${tgt.name}" zusammenführen?\n\n• ${newKids.length} neue Kinder kommen dazu\n• Scores werden übernommen (Lücken im Ziel gefüllt)\n• „${src.name}" wird danach ausgeblendet\n\nFortfahren?`)) return;
+
+  // 1) Kids vereinen
+  (src.kids || []).forEach(k => tgtKidsSet.add(k));
+  tgt.kids = Array.from(tgtKidsSet);
+
+  // 2) Scores übernehmen (Ziel gewinnt, Lücken aus Quelle füllen)
+  const srcData = S.data[srcId] || {};
+  if (!S.data[tgtId]) S.data[tgtId] = {};
+  for (const kid in srcData) {
+    if (!S.data[tgtId][kid]) S.data[tgtId][kid] = {};
+    for (const skillId in srcData[kid]) {
+      if (S.data[tgtId][kid][skillId] === undefined) {
+        S.data[tgtId][kid][skillId] = srcData[kid][skillId];
+      }
+    }
+  }
+  // 3) Custom Skills + Overrides der Quelle ins Ziel (wenn dort fehlend)
+  if (S.customSkills[srcId] && !S.customSkills[tgtId]) S.customSkills[tgtId] = S.customSkills[srcId];
+  if (S.skillOverrides[srcId]) {
+    S.skillOverrides[tgtId] = { ...(S.skillOverrides[srcId]), ...(S.skillOverrides[tgtId] || {}) };
+  }
+
+  // 4) Quelle ausblenden
+  src.hidden = true; src.hiddenAt = Date.now(); src.hiddenBy = getCoachName() || '(Merge)';
+
+  // 5) Persistieren
+  persistCourses();
+  persist();
+  auditLog('course-merge', `${srcId}→${tgtId}`, { src: src.name }, { tgt: tgt.name, totalKids: tgt.kids.length });
+
+  alert(`Zusammengeführt:\n• ${tgt.name} hat jetzt ${tgt.kids.length} Kinder\n• „${src.name}" ausgeblendet`);
+  _mergeSrc = ''; _mergeTgt = '';
+  renderBackendTab();
+  renderHome();
 }
 
 function renderExcelTab(c) {
@@ -2594,7 +2706,10 @@ function hydrate() {
     S.courses = JSON.parse(JSON.stringify(DEFAULT_COURSES));
   }
 }
-function getCourses(day) { return (S.courses[day] || []); }
+// Normale Ansicht: versteckte (soft-deleted) Kurse ausblenden
+function getCourses(day) { return (S.courses[day] || []).filter(c => c && !c.hidden); }
+// Backend/Admin: ALLE Kurse inkl. versteckte
+function getCoursesRaw(day) { return (S.courses[day] || []); }
 
 // ─────────────────────────────────────────────────────────
 // SKILL HELPERS
@@ -3130,10 +3245,17 @@ function confirmDeleteCourse() {
     document.getElementById('delete-password-input').focus();
     return;
   }
-  // Delete
+  // Soft-Delete: Kurs ausblenden statt löschen (Scores bleiben erhalten,
+  // Head-Coach kann im Backend → Kurse wiederherstellen)
   if (S.courses[S.day]) {
-    S.courses[S.day] = S.courses[S.day].filter(c => c.id !== S._pendingDeleteId);
-    persistCourses();
+    const c = S.courses[S.day].find(x => x.id === S._pendingDeleteId);
+    if (c) {
+      c.hidden = true;
+      c.hiddenAt = Date.now();
+      c.hiddenBy = getCoachName() || '(Head-Coach)';
+      auditLog('course-hide', `courses/${c.id}`, { name: c.name }, { hidden: true });
+      persistCourses();
+    }
   }
   closeDeleteModalDirect();
   renderHome();
