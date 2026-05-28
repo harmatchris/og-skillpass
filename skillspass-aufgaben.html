@@ -26,6 +26,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -1899,6 +1900,7 @@ function renderBackendTabs() {
     { id: 'migration', label: '📦 Migration' },
     { id: 'kids',      label: '👶 Kinder' },
     { id: 'trainers',  label: '🧑‍🏫 Trainer' },
+    { id: 'excel',     label: '📊 Excel' },
   ];
   const el = document.getElementById('bk-tabs');
   if (!el) return;
@@ -1916,6 +1918,152 @@ function renderBackendTab() {
   if (_backendTab === 'migration') return renderMigrationTab(c);
   if (_backendTab === 'kids')      return renderKidsTab(c);
   if (_backendTab === 'trainers')  return renderTrainersTab(c);
+  if (_backendTab === 'excel')     return renderExcelTab(c);
+}
+
+function renderExcelTab(c) {
+  const hasLib = typeof XLSX !== 'undefined';
+  c.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">
+    ${!hasLib ? '<div style="background:#3a1a1a;border:1px solid var(--red);color:#fca;padding:10px;border-radius:8px;font-size:12px">⚠️ Excel-Bibliothek noch nicht geladen — kurz warten und Tab neu öffnen.</div>' : ''}
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+      <h4 style="margin:0 0 6px;font-size:13px;color:var(--accent)">1 · Vorlage herunterladen</h4>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4">
+        Leere Excel-Vorlage mit den richtigen Spalten (Blatt „Kinder" und „Trainer").
+        Ausfüllen, dann unten wieder hochladen.
+      </p>
+      <button onclick="downloadExcelTemplate()" style="width:100%;background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-weight:600;cursor:pointer">⬇️ Vorlage (.xlsx) herunterladen</button>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+      <h4 style="margin:0 0 6px;font-size:13px;color:var(--accent)">2 · Aktuelle Stammdaten exportieren</h4>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4">
+        Lädt alle Kinder + Trainer als Excel herunter (Backup oder zum Bearbeiten).
+      </p>
+      <button onclick="exportMasterExcel()" style="width:100%;background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-weight:600;cursor:pointer">⬇️ Stammdaten exportieren (.xlsx)</button>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+      <h4 style="margin:0 0 6px;font-size:13px;color:var(--accent)">3 · Excel importieren</h4>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4">
+        Liest „Kinder" + „Trainer" aus der Datei. <strong style="color:var(--text)">Nur additiv</strong> —
+        neue werden angelegt, bestehende aktualisiert, nichts gelöscht. Vorschau vor dem Speichern.
+      </p>
+      <input type="file" id="excel-import-file" accept=".xlsx,.xls" onchange="previewExcelImport(this)" style="width:100%;font-size:12px;color:var(--text);margin-bottom:8px">
+      <div id="excel-import-preview" style="font-size:12px;color:var(--muted)"></div>
+    </div>
+  </div>`;
+}
+
+function downloadExcelTemplate() {
+  if (typeof XLSX === 'undefined') { alert('Excel-Bibliothek lädt noch — bitte nochmal versuchen.'); return; }
+  const kidsAoa = [
+    ['Name', 'Jahrgang', 'Notizen'],
+    ['Max Mustermann', 2014, 'Beispiel — diese Zeile löschen'],
+    ['Erika Beispiel', 2016, ''],
+  ];
+  const trainersAoa = [
+    ['Name', 'Email', 'HeadCoach (ja/nein)'],
+    ['Dein Coach', 'coach@example.com', 'nein'],
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(kidsAoa), 'Kinder');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(trainersAoa), 'Trainer');
+  XLSX.writeFile(wb, 'og-skillpass-vorlage.xlsx');
+}
+
+async function exportMasterExcel() {
+  if (typeof XLSX === 'undefined') { alert('Excel-Bibliothek lädt noch.'); return; }
+  const [kSnap, tSnap] = await Promise.all([
+    _db.ref(`${FB_PATH_MASTER}/kids`).once('value'),
+    _db.ref(`${FB_PATH_MASTER}/trainers`).once('value'),
+  ]);
+  const kids = kSnap.val() || {}, trainers = tSnap.val() || {};
+  const kidsAoa = [['Name','Jahrgang','Notizen']];
+  Object.values(kids).sort((a,b)=>(a.name||'').localeCompare(b.name||''))
+    .forEach(k => kidsAoa.push([k.name||'', k.year||'', k.notes||'']));
+  const trainersAoa = [['Name','Email','HeadCoach (ja/nein)']];
+  Object.values(trainers).sort((a,b)=>(a.name||'').localeCompare(b.name||''))
+    .forEach(t => trainersAoa.push([t.name||'', t.email||'', t.isHeadCoach?'ja':'nein']));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(kidsAoa), 'Kinder');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(trainersAoa), 'Trainer');
+  const ts = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `og-skillpass-stammdaten-${ts}.xlsx`);
+}
+
+let _excelImportData = null;
+function previewExcelImport(input) {
+  const file = input.files && input.files[0];
+  const box = document.getElementById('excel-import-preview');
+  if (!file) { box.innerHTML = ''; _excelImportData = null; return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const parsed = parseMasterWorkbook(wb);
+      _excelImportData = parsed;
+      box.innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px;margin-top:4px">
+          <div style="margin-bottom:6px">📋 Gefunden: <strong style="color:var(--text)">${parsed.kids.length} Kinder</strong>, <strong style="color:var(--text)">${parsed.trainers.length} Trainer</strong></div>
+          <button onclick="runExcelImport()" style="width:100%;background:var(--accent);color:#000;border:0;border-radius:6px;padding:9px;font-weight:700;cursor:pointer">✓ Jetzt importieren</button>
+        </div>`;
+    } catch (err) {
+      box.innerHTML = `<div style="color:var(--red)">Fehler beim Lesen: ${err.message}</div>`;
+      _excelImportData = null;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseMasterWorkbook(wb) {
+  const out = { kids: [], trainers: [] };
+  const findSheet = (names) => wb.SheetNames.find(n => names.some(x => n.toLowerCase().includes(x)));
+  const kidsSheet = findSheet(['kind','kid','kinder']);
+  const trainerSheet = findSheet(['trainer','coach']);
+  if (kidsSheet) {
+    XLSX.utils.sheet_to_json(wb.Sheets[kidsSheet], { defval: '' }).forEach(row => {
+      const name = String(row.Name || row.name || '').trim();
+      if (!name) return;
+      const year = parseInt(row.Jahrgang || row.jahrgang || row.Year || '', 10);
+      out.kids.push({ name, year: isNaN(year) ? null : year, notes: String(row.Notizen || row.notes || '').trim() || null });
+    });
+  }
+  if (trainerSheet) {
+    XLSX.utils.sheet_to_json(wb.Sheets[trainerSheet], { defval: '' }).forEach(row => {
+      const name = String(row.Name || row.name || '').trim();
+      if (!name) return;
+      const hcRaw = String(row['HeadCoach (ja/nein)'] || row.HeadCoach || row.headcoach || '').trim().toLowerCase();
+      out.trainers.push({ name, email: String(row.Email || row.email || '').trim() || null, isHeadCoach: ['ja','yes','true','1','x'].includes(hcRaw) });
+    });
+  }
+  return out;
+}
+
+async function runExcelImport() {
+  if (!_excelImportData) return;
+  if (!isHeadCoach()) { alert('Nur Head-Coach.'); return; }
+  const { kids, trainers } = _excelImportData;
+  if (!confirm(`Import ausführen?\n\n• ${kids.length} Kinder\n• ${trainers.length} Trainer\n\nBestehende werden aktualisiert, neue angelegt, nichts gelöscht.`)) return;
+
+  const updates = {};
+  kids.forEach(k => {
+    const id = slugify(k.name);
+    updates[`${FB_PATH_MASTER}/kids/${id}/name`] = k.name;
+    if (k.year !== null)  updates[`${FB_PATH_MASTER}/kids/${id}/year`] = k.year;
+    if (k.notes !== null) updates[`${FB_PATH_MASTER}/kids/${id}/notes`] = k.notes;
+    updates[`${FB_PATH_MASTER}/kids/${id}/editedAt`] = firebase.database.ServerValue.TIMESTAMP;
+    updates[`${FB_PATH_MASTER}/kids/${id}/editedBy`] = (getCoachName()||'(Excel-Import)');
+  });
+  trainers.forEach(t => {
+    const id = slugify(t.name);
+    updates[`${FB_PATH_MASTER}/trainers/${id}/name`] = t.name;
+    if (t.email !== null) updates[`${FB_PATH_MASTER}/trainers/${id}/email`] = t.email;
+    updates[`${FB_PATH_MASTER}/trainers/${id}/isHeadCoach`] = t.isHeadCoach;
+    updates[`${FB_PATH_MASTER}/trainers/${id}/editedAt`] = firebase.database.ServerValue.TIMESTAMP;
+  });
+  await _db.ref('/').update(updates);
+  auditLog('excel-import', 'master', null, { kids: kids.length, trainers: trainers.length });
+  alert(`Import erfolgreich:\n• ${kids.length} Kinder\n• ${trainers.length} Trainer`);
+  document.getElementById('excel-import-preview').innerHTML = '<div style="color:var(--green)">✓ Importiert!</div>';
+  _excelImportData = null;
 }
 
 function renderMigrationTab(c) {
