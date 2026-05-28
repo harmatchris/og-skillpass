@@ -3346,12 +3346,14 @@ function buildDiplomaView(day) {
       card.innerHTML = sportCardInnerHtml({ kid, courseName: course.name, dayName, time: course.time, trainer: course.trainer, level: course.level, lvStyle, skillsHtml, coachEmoji });
       dv.appendChild(card);
 
-      // ── PAGE 2: Kompetenzraster (only if this course has komp skills) ─
-      if (!hasKomp) return;
+      // ── PAGE 2: Kompetenzraster (IMMER — Rückseite pro Kind) ─
+      // Eigene Kompetenz-Skills wenn vorhanden, sonst Standard-Raster (leer zum Ausfüllen)
+      const useDefaultKomp = !hasKomp;
+      const kompSource = hasKomp ? kompSkills : DEFAULT_KOMP;
 
       // Group komp skills by category
       const kompByCat = {};
-      kompSkills.forEach(s => {
+      kompSource.forEach(s => {
         const cat = s.category || 'Allgemein';
         if (!kompByCat[cat]) kompByCat[cat] = [];
         kompByCat[cat].push(s);
@@ -3361,7 +3363,8 @@ function buildDiplomaView(day) {
       for (const [cat, catSkills] of Object.entries(kompByCat)) {
         kompHtml += `<div class="diploma-komp-cat">${cat}</div>`;
         catSkills.forEach(skill => {
-          const val = getVal(course.id, kid, skill.id, skill);
+          // Standard-Raster: leere Sterne (vom Coach auszufüllen). Eigene: echter Wert.
+          const val = useDefaultKomp ? 0 : getVal(course.id, kid, skill.id, skill);
           let stars = '';
           for (let v = 1; v <= 5; v++)
             stars += `<span class="diploma-komp-star${v <= val ? ' filled' : ''}">★</span>`;
@@ -3390,7 +3393,7 @@ function buildDiplomaView(day) {
           </div>
 
           <div class="diploma-komp-title">Kompetenzraster</div>
-          <div class="diploma-komp-subtitle">Ich kann…</div>
+          <div class="diploma-komp-subtitle">Ich kann…${useDefaultKomp ? ' <span style="font-size:.8em;color:#999">(vom Coach auszufüllen)</span>' : ''}</div>
 
           <div class="diploma-kid-name" style="font-size:20pt;margin:2px 0 8px;padding-bottom:6px">${kid}</div>
 
@@ -3417,6 +3420,17 @@ function buildDiplomaView(day) {
   });
 }
 
+
+// Standard-Kompetenzraster für Kurse OHNE eigene Kompetenz-Skills
+// (allgemeine Sozial-/Organisationskompetenzen, gelten für alle Sportarten)
+const DEFAULT_KOMP = [
+  { id:'dk_reihe',    label:'…mich in einer Reihe aufstellen',     category:'Organisation' },
+  { id:'dk_zuschau',  label:'…bei Übungen aufmerksam zuschauen',   category:'Organisation' },
+  { id:'dk_anfeuern', label:'…mein Team anfeuern und motivieren',  category:'Organisation' },
+  { id:'dk_regeln',   label:'…mich an Regeln halten',              category:'Organisation' },
+  { id:'dk_helfen',   label:'…anderen helfen und fair sein',       category:'Sozial' },
+  { id:'dk_mut',      label:'…mutig Neues ausprobieren',           category:'Sozial' },
+];
 
 // Wiederverwendbare Vorderseite (Sport-Skills) — genutzt von Diplom + Demo
 function sportCardInnerHtml(o) {
