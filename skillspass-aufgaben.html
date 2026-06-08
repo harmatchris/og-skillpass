@@ -357,6 +357,21 @@
   }
   .add-task-tile:hover { border-color: var(--accent); color: var(--accent); background: #1a1808; }
   .add-task-tile .plus { font-size: 30px; line-height: 1; }
+  .add-task-tile.lib { border-style: solid; border-color: var(--accent); color: var(--accent); background: #1a1808; }
+
+  /* Skill-Bibliothek Zeilen */
+  .sl-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 8px; border-radius: 8px; cursor: pointer;
+    border-bottom: 1px solid var(--border);
+  }
+  .sl-row:last-child { border-bottom: none; }
+  .sl-row:hover { background: var(--surface3); }
+  .sl-row input { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
+  .sl-label { flex: 1; font-size: 13px; }
+  .sl-meta { font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .sl-row.has { opacity: .55; cursor: default; }
+  .sl-row.has .sl-meta { color: var(--green); }
 
   /* schmale Phones: etwas kompakter, aber lesbar */
   @media (max-width: 360px) {
@@ -3605,15 +3620,21 @@ function renderOverview() {
     grid.appendChild(tileRow);
   });
 
-  // Custom tasks without category also shown grouped
+  // Aktionen: einzelne Aufgabe ODER mehrere aus der Bibliothek wählen
   const addTile = document.createElement('div');
   addTile.className = 'add-task-tile';
-  addTile.innerHTML = `<span class="plus">＋</span><span>Aufgabe hinzufügen</span>`;
+  addTile.innerHTML = `<span class="plus">＋</span><span>Neue Aufgabe</span>`;
   addTile.onclick = () => openTaskModal(null);
-  // Wrap add tile in a group-tiles row so it stays in the grid layout
+
+  const libTile = document.createElement('div');
+  libTile.className = 'add-task-tile lib';
+  libTile.innerHTML = `<span class="plus">≡</span><span>Aus Bibliothek wählen</span>`;
+  libTile.onclick = () => openSkillLibrary();
+
   const addRow = document.createElement('div');
   addRow.className = 'task-group-tiles';
   addRow.style.marginTop = '14px';
+  addRow.appendChild(libTile);
   addRow.appendChild(addTile);
   grid.appendChild(addRow);
 }
@@ -3809,6 +3830,136 @@ function addCustomTask() {
   persist();
   closeTaskModalDirect();
   renderOverview();
+}
+
+// ─────────────────────────────────────────────────────────
+// SKILL-BIBLIOTHEK — mehrere Skills auf einmal hinzufügen
+// (aus allen bekannten Skills wählen ODER von einem Kurs übernehmen)
+// ─────────────────────────────────────────────────────────
+function getAllKnownSkills() {
+  const map = {}; // id -> skill-def
+  // 1) alle Default-Skill-Sets
+  for (const setName in DEFAULT_SKILLS) {
+    (DEFAULT_SKILLS[setName] || []).forEach(s => { if (s && s.id && !map[s.id]) map[s.id] = { ...s }; });
+  }
+  // 2) alle Custom-Skills aller Kurse
+  for (const cid in (S.customSkills || {})) {
+    (S.customSkills[cid] || []).forEach(s => { if (s && s.id && !map[s.id]) map[s.id] = { ...s }; });
+  }
+  return Object.values(map);
+}
+
+function openSkillLibrary() {
+  if (!S.course) return;
+  const presentIds = new Set(getCourseSkills(S.course).map(s => s.id));
+  // Kurse für den "übernehmen"-Dropdown (alle sichtbaren ausser dem aktuellen)
+  const otherCourses = [];
+  for (const dk of Object.keys(S.courses || {})) {
+    (S.courses[dk] || []).forEach(c => {
+      if (c && !c.hidden && c.id !== S.course.id) {
+        otherCourses.push({ id: c.id, label: `${DAY_NAMES[dk]} · ${c.name}`, n: getCourseSkills(c).length });
+      }
+    });
+  }
+  // Bibliothek gruppiert nach Kategorie
+  const lib = getAllKnownSkills();
+  const groups = {}; const order = [];
+  lib.forEach(s => {
+    const cat = s.category || (s.section === 'komp' ? 'Kompetenzen' : 'Weitere');
+    if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+    groups[cat].push(s);
+  });
+
+  let m = document.getElementById('skill-lib-modal');
+  if (m) m.remove();
+  m = document.createElement('div');
+  m.id = 'skill-lib-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:#000c;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+
+  const groupsHtml = order.map(cat => `
+    <div style="margin-top:10px">
+      <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${cat}</div>
+      ${groups[cat].map(s => {
+        const has = presentIds.has(s.id);
+        return `<label class="sl-row${has?' has':''}" data-id="${s.id}" data-label="${(s.label||'').toLowerCase()}">
+          <input type="checkbox" ${has?'checked disabled':''} data-skill-id="${s.id}">
+          <span class="sl-label">${s.label}</span>
+          <span class="sl-meta">${has?'im Kurs':(s.unit||'')}</span>
+        </label>`;
+      }).join('')}
+    </div>`).join('');
+
+  m.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:520px;width:100%;padding:18px;display:flex;flex-direction:column;max-height:92vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3 style="margin:0;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">SKILLS HINZUFÜGEN</h3>
+      <button onclick="document.getElementById('skill-lib-modal').remove()" style="background:none;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;cursor:pointer">✕</button>
+    </div>
+    ${otherCourses.length ? `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Schnell: alle Skills von einem Kurs übernehmen</div>
+      <div style="display:flex;gap:6px">
+        <select id="sl-copy-course" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px;font-size:12px">
+          <option value="">– Kurs wählen –</option>
+          ${otherCourses.map(c => `<option value="${c.id}">${c.label} (${c.n})</option>`).join('')}
+        </select>
+        <button onclick="skillLibSelectFromCourse()" style="background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">Markieren</button>
+      </div>
+    </div>` : ''}
+    <input id="sl-search" oninput="skillLibFilter()" placeholder="🔍 Skill suchen…" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;margin-bottom:6px">
+    <div id="sl-list" style="overflow-y:auto;flex:1;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--surface2)">${groupsHtml}</div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="document.getElementById('skill-lib-modal').remove()" style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:11px;font-weight:600;cursor:pointer">Abbrechen</button>
+      <button onclick="addSkillsFromLibrary()" style="flex:2;background:var(--accent);color:#000;border:0;border-radius:8px;padding:11px;font-weight:800;cursor:pointer" id="sl-add-btn">Hinzufügen</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.onclick = (e) => { if (e.target === m) m.remove(); };
+  skillLibUpdateCount();
+  m.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', skillLibUpdateCount));
+}
+
+function skillLibFilter() {
+  const q = (document.getElementById('sl-search')?.value || '').toLowerCase();
+  document.querySelectorAll('#sl-list .sl-row').forEach(r => {
+    r.style.display = (!q || (r.dataset.label || '').includes(q)) ? '' : 'none';
+  });
+}
+function skillLibSelectFromCourse() {
+  const cid = document.getElementById('sl-copy-course')?.value;
+  if (!cid) return;
+  let src = null;
+  for (const dk of Object.keys(S.courses || {})) { const c = (S.courses[dk]||[]).find(x=>x&&x.id===cid); if (c) { src = c; break; } }
+  if (!src) return;
+  const ids = new Set(getCourseSkills(src).map(s => s.id));
+  document.querySelectorAll('#sl-list input[type=checkbox]').forEach(cb => {
+    if (!cb.disabled && ids.has(cb.dataset.skillId)) cb.checked = true;
+  });
+  skillLibUpdateCount();
+}
+function skillLibUpdateCount() {
+  const n = document.querySelectorAll('#sl-list input[type=checkbox]:checked:not(:disabled)').length;
+  const btn = document.getElementById('sl-add-btn');
+  if (btn) { btn.textContent = n ? `${n} Skill${n!==1?'s':''} hinzufügen` : 'Hinzufügen'; btn.disabled = n===0; btn.style.opacity = n===0?'.5':'1'; }
+}
+function addSkillsFromLibrary() {
+  const cid = S.course.id;
+  const presentIds = new Set(getCourseSkills(S.course).map(s => s.id));
+  const lib = {}; getAllKnownSkills().forEach(s => lib[s.id] = s);
+  const checked = [...document.querySelectorAll('#sl-list input[type=checkbox]:checked:not(:disabled)')].map(cb => cb.dataset.skillId);
+  let added = 0;
+  if (!S.customSkills[cid]) S.customSkills[cid] = [];
+  checked.forEach(id => {
+    if (presentIds.has(id)) return;
+    const def = lib[id]; if (!def) return;
+    S.customSkills[cid].push({ ...def, _custom: true });
+    added++;
+  });
+  if (added) {
+    persist();
+    auditLog('skills-add-library', `course/${cid}`, null, { added });
+    renderOverview();
+  }
+  document.getElementById('skill-lib-modal')?.remove();
 }
 
 // ─────────────────────────────────────────────────────────
