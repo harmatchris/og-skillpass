@@ -613,17 +613,21 @@
     body:not(.printing-diplomas) #diploma-view { display: none !important; }
   }
 
-  /* ── DIPLOMA CARD STYLES ── */
+  /* ── DIPLOMA CARD STYLES ──
+     A4-Seite. Der Goldrahmen sitzt mit Sicherheitsabstand (--frame-inset)
+     INNEN, damit ihn kein Drucker-Hardwarerand abschneidet und er die Seite
+     immer sauber dekoriert. Höhe knapp unter 297mm verhindert leere Folgeseiten. */
   .diploma-card {
+    --frame-inset: 9mm;        /* sicherer Abstand des Rahmens zur Blattkante */
     page-break-after: always;
     break-after: page;
     page-break-inside: avoid;
     break-inside: avoid;
-    width: 100%;
-    /* Full A4 with @page margin:0 — card IS the page */
-    height: 297mm;
-    max-height: 297mm;
-    padding: 10mm 12mm;
+    width: 210mm;
+    height: 296mm;             /* 1mm unter A4 → keine leere Folgeseite */
+    margin: 0 auto;
+    /* Innenabstand = Rahmen-Inset + Luft, damit Inhalt im Rahmen liegt */
+    padding: calc(var(--frame-inset) + 6mm) calc(var(--frame-inset) + 7mm);
     position: relative;
     background: #fff;
     display: flex; flex-direction: column;
@@ -634,28 +638,30 @@
   }
   .diploma-card:last-child { page-break-after: avoid; break-after: auto; }
 
-  /* Outer gold border frame — flush with card/page edges */
+  /* Goldrahmen — sitzt im sicheren Bereich, dekoriert die ganze Seite */
   .diploma-frame {
-    position: absolute; inset: 0;
-    border: 3px solid #f5c800;
+    position: absolute; inset: var(--frame-inset);
+    border: 2.5px solid #f5c800;
+    border-radius: 3px;
     pointer-events: none;
   }
   .diploma-frame::before {
     content: '';
-    position: absolute; inset: 6px;
+    position: absolute; inset: 4px;
     border: 1px solid #f5c80066;
+    border-radius: 2px;
   }
-  /* Corner ornaments */
+  /* Eck-Ornamente — sitzen auf den Rahmen-Ecken (am Inset) */
   .diploma-corner {
     position: absolute;
-    width: 32px; height: 32px;
+    width: 26px; height: 26px;
     border-color: #f5c800;
     border-style: solid;
   }
-  .diploma-corner.tl { top: 3px; left: 3px; border-width: 4px 0 0 4px; }
-  .diploma-corner.tr { top: 3px; right: 3px; border-width: 4px 4px 0 0; }
-  .diploma-corner.bl { bottom: 3px; left: 3px; border-width: 0 0 4px 4px; }
-  .diploma-corner.br { bottom: 3px; right: 3px; border-width: 0 4px 4px 0; }
+  .diploma-corner.tl { top: var(--frame-inset); left: var(--frame-inset); border-width: 4px 0 0 4px; }
+  .diploma-corner.tr { top: var(--frame-inset); right: var(--frame-inset); border-width: 4px 4px 0 0; }
+  .diploma-corner.bl { bottom: var(--frame-inset); left: var(--frame-inset); border-width: 0 0 4px 4px; }
+  .diploma-corner.br { bottom: var(--frame-inset); right: var(--frame-inset); border-width: 0 4px 4px 0; }
 
   .diploma-inner {
     position: relative; z-index: 1;
@@ -4143,8 +4149,11 @@ function autoscaleDiplomas() {
       - parseFloat(cardStyle.paddingTop)
       - parseFloat(cardStyle.paddingBottom);
     const needed = inner.scrollHeight;
+    // Schutz: nur skalieren wenn valide gemessen (Karte sichtbar, echte A4-Höhe).
+    // Verhindert dass bei display:none / Fehlmessung der Inhalt auf ~0 schrumpft.
+    if (available < 200 || needed <= 0) return;
     if (needed > available * 0.995) {
-      const scale = (available * 0.99) / needed;
+      const scale = Math.max(0.5, (available * 0.99) / needed); // nie kleiner als 50%
       inner.style.transform = `scale(${scale.toFixed(5)})`;
       inner.style.transformOrigin = 'top center';
     }
