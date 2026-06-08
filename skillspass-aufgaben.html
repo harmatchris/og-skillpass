@@ -118,13 +118,32 @@
   .course-row.lv-fort    { border-left-color: #f97316; }  /* orange – Fortgeschritten */
   .course-row.lv-team    { border-left-color: var(--red); } /* red  – Team / Comp */
   .course-row.lv-alle    { border-left-color: #a855f7; }  /* purple – Alle Stufen */
-  .course-row.sortable-ghost { opacity: 0.3; }
+  /* Ghost = die Lücke wo die Karte landet (dezenter Platzhalter) */
+  .course-row.sortable-ghost {
+    opacity: 1; background: #1a1808;
+    border: 1.5px dashed var(--accent); border-left-width: 4px;
+  }
+  .course-row.sortable-ghost > * { visibility: hidden; }
+  /* chosen = die ausgewählte Karte (am Original-Platz) */
+  .course-row.sortable-chosen { box-shadow: 0 0 0 1px var(--accent); }
+  /* drag/fallback = die Karte die am Finger klebt (flüssiges Anheben) */
+  .course-row.sortable-drag, .course-row.sortable-fallback {
+    opacity: .97 !important; transform: scale(1.03);
+    box-shadow: 0 14px 32px #000c, 0 0 0 1px var(--accent);
+    border-radius: var(--radius); cursor: grabbing;
+  }
+  /* während Drag: keine Textauswahl, kein Tap-Highlight */
+  body.is-dragging { user-select: none; -webkit-user-select: none; }
+  body.is-dragging .course-card-body, body.is-dragging .course-acts { pointer-events: none; }
 
   .drag-handle {
-    display: flex; align-items: center; padding: 0 10px 0 8px;
-    color: var(--muted); font-size: 18px; cursor: grab; user-select: none;
-    flex-shrink: 0; letter-spacing: -2px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 14px; min-width: 40px; align-self: stretch;
+    color: var(--muted); font-size: 20px; cursor: grab; user-select: none;
+    flex-shrink: 0; letter-spacing: -2px; touch-action: none;
+    transition: color .15s, background .15s;
   }
+  .drag-handle:hover { color: var(--accent); background: var(--surface2); }
   .drag-handle:active { cursor: grabbing; color: var(--accent); }
 
   .course-card-body {
@@ -213,14 +232,23 @@
   .add-course-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── CROSS-DAY DRAG DROP-ZONES ── */
+  /* Drop-Zonen als fixe Leiste am unteren Rand — kein Layout-Sprung beim Drag-Start */
   #day-drop-zones {
     display: none;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    margin-bottom: 10px;
-    padding: 8px 0 2px;
+    gap: 5px;
   }
-  #day-drop-zones.visible { display: grid; }
+  #day-drop-zones.visible {
+    display: grid;
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: 0; width: 100%; max-width: 480px; z-index: 150;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: #0e0e0ef2; backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 24px #000a;
+    animation: dropZonesIn .18s ease-out;
+  }
+  @keyframes dropZonesIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
   .day-drop-zone {
     min-height: 46px;
     border: 2px dashed var(--border);
@@ -2648,6 +2676,9 @@ function refreshCurrentView() {
   const activeScreen = document.querySelector('.screen.active');
   if (!activeScreen) return;
   const id = activeScreen.id;
+  // Während eines aktiven Drags NICHT neu rendern (würde die Liste wegreissen).
+  // Stattdessen merken und nach Drag-Ende rendern.
+  if (window._isDragging && id === 'screen-home') { window._pendingRenderAfterDrag = true; return; }
   if (id === 'screen-home')          renderHome();
   else if (id === 'screen-overview') renderOverview();
   else if (id === 'screen-task')     softUpdateTaskView(); // partial update — no DOM rebuild
@@ -3136,30 +3167,60 @@ function renderHome() {
   if (_sortable) { _sortable.destroy(); _sortable = null; }
   _pendingCrossDay = null;
   _sortable = new Sortable(list, {
-    animation: 180,
+    animation: 160,
+    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
     handle: '.drag-handle',
+    draggable: '.course-row',
     ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    dragClass: 'sortable-drag',
+    // forceFallback = SortableJS' eigener Drag (flüssig + konsistent, v.a. iOS/Touch)
+    forceFallback: true,
+    fallbackClass: 'sortable-fallback',
+    fallbackTolerance: 4,
+    // Touch: kurzes Halten startet den Drag → versehentliches Ziehen beim Scrollen vermeiden
+    delay: 120,
+    delayOnTouchOnly: true,
+    touchStartThreshold: 6,
+    // Auto-Scroll wenn man an den Rand zieht (wichtig bei langen Listen am Handy)
+    scroll: true,
+    scrollSensitivity: 90,
+    scrollSpeed: 14,
+    bubbleScroll: true,
     group: { name: 'courses-dnd', pull: true, put: false },
     onStart(evt) {
+      window._isDragging = true;
+      document.body.classList.add('is-dragging');
       showDayDropZones(evt.item.dataset.id);
     },
     onEnd(evt) {
+      window._isDragging = false;
+      document.body.classList.remove('is-dragging');
       hideDayDropZones();
       if (_pendingCrossDay) {
         // Cross-day move: move course to target day
         const { courseId, toDay } = _pendingCrossDay;
         _pendingCrossDay = null;
-        // Restore visual order first (SortableJS may have shifted indices)
-        // then do the actual data move
         moveCourseToDay(courseId, S.day, toDay);
-      } else {
-        // Same-day reorder
-        if (evt.oldIndex !== evt.newIndex) {
-          const arr = S.courses[S.day];
-          const item = arr.splice(evt.oldIndex, 1)[0];
-          arr.splice(evt.newIndex, 0, item);
-          persistCourses();
-        }
+        return;
+      }
+      // Same-day reorder — robust über die echte DOM-Reihenfolge
+      // (funktioniert auch wenn versteckte Kurse im Roh-Array liegen)
+      const orderedIds = [...list.querySelectorAll('.course-row')].map(r => r.dataset.id);
+      const arr = S.courses[S.day] || [];
+      const visible = arr.filter(c => c && !c.hidden);
+      const hidden  = arr.filter(c => c && c.hidden);
+      const beforeOrder = visible.map(c => c.id).join('|');
+      visible.sort((a,b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+      const afterOrder = visible.map(c => c.id).join('|');
+      if (beforeOrder !== afterOrder) {
+        S.courses[S.day] = [...visible, ...hidden];
+        persistCourses();
+      }
+      // Falls während des Drags ein Sync-Update kam: jetzt sauber neu rendern
+      if (window._pendingRenderAfterDrag) {
+        window._pendingRenderAfterDrag = false;
+        setTimeout(renderHome, 0);
       }
     }
   });
