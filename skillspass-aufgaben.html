@@ -263,48 +263,80 @@
   /* Task grid — groups */
   .tasks-grid { display: block; margin-bottom: 12px; }
   .task-group-header {
-    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
-    color: var(--muted); margin: 18px 0 8px;
-    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 800; letter-spacing: .5px;
+    color: var(--text); margin: 22px 0 10px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .task-group-header .tg-emoji { font-size: 18px; line-height: 1; }
+  .task-group-header .tg-count {
+    font-size: 10px; font-weight: 700; color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2px 8px; letter-spacing: .5px;
   }
   .task-group-header::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
+    content: ''; flex: 1; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent)55, transparent);
   }
-  .task-group-header:first-child { margin-top: 4px; }
-  .task-group-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .task-group-header:first-child { margin-top: 6px; }
+  .task-group-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .task-tile {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px 12px;
-    cursor: pointer; transition: all .2s; position: relative;
-    min-height: 90px; display: flex; flex-direction: column; justify-content: space-between;
+    background: linear-gradient(160deg, var(--surface), #161616);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 14px 14px 12px;
+    cursor: pointer; transition: transform .15s, border-color .2s, box-shadow .2s, background .2s; position: relative;
+    min-height: 104px; display: flex; flex-direction: column; justify-content: space-between;
   }
-  .task-tile:hover { border-color: var(--accent); background: #1e1e0d; }
-  .task-tile.done { border-color: var(--green); }
+  .task-tile:hover { border-color: var(--accent); box-shadow: 0 6px 20px #0006, 0 0 0 1px #f5c80033; transform: translateY(-3px); }
+  .task-tile:active { transform: translateY(-1px) scale(.99); }
+  .task-tile.done {
+    border-color: #2f5c3f; background: linear-gradient(160deg, #14241a, #0f1a13);
+  }
   .task-tile.done .task-tile-name { color: var(--green); }
-  .task-tile.active-tile { border-color: var(--accent); background: #2a2200; }
-  .task-tile-num { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-  .task-tile-name { font-weight: 700; font-size: 15px; margin-top: 4px; line-height: 1.2; }
-  .task-tile-unit { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .task-tile-check { position: absolute; top: 10px; right: 10px; color: var(--green); font-size: 16px; }
+  .task-tile.done::before {
+    content: ''; position: absolute; inset: 0; border-radius: 16px;
+    box-shadow: inset 0 0 0 1px #4ade8033; pointer-events: none;
+  }
+  .task-tile.active-tile { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .task-tile-num {
+    font-size: 10px; color: var(--accent); font-weight: 800; letter-spacing: 1px;
+    background: #f5c80018; border-radius: 6px; padding: 1px 7px; display: inline-block; width: fit-content;
+  }
+  .task-tile-name { font-weight: 800; font-size: 16px; margin-top: 7px; line-height: 1.18; }
+  .task-tile-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 6px; }
+  .task-tile-unit { font-size: 11px; color: var(--muted); }
+  .task-tile-date { font-size: 10px; color: var(--green); font-weight: 600; }
+  .task-tile-check {
+    position: absolute; top: 10px; right: 10px; color: #000; background: var(--green);
+    width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px #4ade8066;
+  }
   .task-tile-edit {
     position: absolute; bottom: 8px; right: 8px;
     background: var(--surface3); border: none; color: var(--muted);
-    width: 24px; height: 24px; border-radius: 6px; font-size: 12px;
+    width: 26px; height: 26px; border-radius: 7px; font-size: 12px;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     opacity: 0; transition: opacity .15s, color .15s;
   }
   .task-tile:hover .task-tile-edit { opacity: 1; }
   .task-tile-edit:hover { color: var(--accent); }
   .add-task-tile {
-    background: var(--surface2); border: 1px dashed var(--border);
-    border-radius: var(--radius); padding: 14px 12px;
+    background: var(--surface2); border: 1.5px dashed var(--border);
+    border-radius: 16px; padding: 14px 12px;
     cursor: pointer; transition: all .2s;
-    min-height: 90px; display: flex; flex-direction: column;
+    min-height: 104px; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 6px;
-    color: var(--muted); font-size: 13px; font-weight: 600;
+    color: var(--muted); font-size: 13px; font-weight: 700;
   }
-  .add-task-tile:hover { border-color: var(--accent); color: var(--accent); }
-  .add-task-tile .plus { font-size: 28px; line-height: 1; }
+  .add-task-tile:hover { border-color: var(--accent); color: var(--accent); background: #1a1808; }
+  .add-task-tile .plus { font-size: 30px; line-height: 1; }
+
+  /* schmale Phones: etwas kompakter, aber lesbar */
+  @media (max-width: 360px) {
+    .task-group-tiles { gap: 9px; }
+    .task-tile { min-height: 96px; padding: 12px 11px 10px; }
+    .task-tile-name { font-size: 15px; }
+    .rating-star { height: 40px; font-size: 16px; }
+  }
 
   /* Buttons */
   .print-btn-row { margin-top: 8px; padding-bottom: 30px; }
@@ -329,35 +361,70 @@
   /* KID ROWS */
   .kid-row {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+    border-left: 4px solid var(--border);
   }
-  .kid-row-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .kid-name { font-weight: 600; font-size: 14px; }
+  .kid-row.has-val { border-left-color: var(--green); }
+  .kid-row.absent {
+    background: #2a1414; border-color: #5b2b2b; border-left-color: var(--red);
+  }
+  .kid-row.absent .kid-value-display,
+  .kid-row.absent .kid-input-area { opacity: .35; filter: grayscale(1); }
+  /* Glow-Puls beim Erfassen */
+  @keyframes kidFlash {
+    0%   { box-shadow: 0 0 0 0 #f5c80088; }
+    100% { box-shadow: 0 0 0 14px #f5c80000; }
+  }
+  .kid-row.flash { animation: kidFlash .6s ease-out; border-left-color: var(--accent); }
+  .kid-row-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
+  .kid-name { font-weight: 700; font-size: 16px; letter-spacing: .2px; }
   .kid-value-display {
-    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
-    color: var(--accent); letter-spacing: 1px; min-width: 52px; text-align: right;
+    font-family: 'Bebas Neue', sans-serif; font-size: 26px;
+    color: var(--accent); letter-spacing: 1px; min-width: 56px; text-align: right; line-height: 1;
   }
+  .kid-input-area { min-height: 4px; }
+  .kid-row-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px; gap: 8px;
+  }
+  .kid-ts { font-size: 11px; color: var(--green); font-weight: 600; letter-spacing: .3px; }
+  .kid-ts.muted { color: var(--muted); font-weight: 500; }
+  .absent-btn {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+    border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 700;
+    cursor: pointer; transition: all .15s; letter-spacing: .3px;
+  }
+  .absent-btn:hover { border-color: var(--red); color: var(--red); }
+  .absent-btn.on { background: var(--red); color: #fff; border-color: var(--red); }
   .kid-slider {
     width: 100%; -webkit-appearance: none; appearance: none;
-    height: 6px; border-radius: 3px; background: var(--surface3); outline: none; cursor: pointer;
+    height: 8px; border-radius: 4px; background: var(--surface3); outline: none; cursor: pointer;
     touch-action: none;
   }
   .kid-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); cursor: pointer; box-shadow: 0 0 0 3px #f5c80033;
+    -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; box-shadow: 0 0 0 4px #f5c80033, 0 2px 6px #0008;
+    transition: box-shadow .15s;
   }
+  .kid-slider:active::-webkit-slider-thumb { box-shadow: 0 0 0 7px #f5c80044, 0 2px 8px #000a; }
   .kid-slider::-moz-range-thumb {
-    width: 22px; height: 22px; border-radius: 50%;
+    width: 26px; height: 26px; border-radius: 50%;
     background: var(--accent); cursor: pointer; border: none;
   }
-  .rating-row { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .rating-row { display: flex; gap: 8px; justify-content: center; margin-top: 2px; }
   .rating-star {
-    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--surface2); cursor: pointer; font-size: 15px; font-weight: 700;
+    flex: 1; max-width: 52px; height: 44px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface2); cursor: pointer; font-size: 17px; font-weight: 800;
     display: flex; align-items: center; justify-content: center;
-    transition: all .15s; color: var(--muted);
+    transition: transform .12s, background .15s, color .15s, box-shadow .15s; color: var(--muted);
   }
-  .rating-star.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .rating-star:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .rating-star:active { transform: scale(.92); }
+  .rating-star.active {
+    background: var(--accent); color: #000; border-color: var(--accent);
+    box-shadow: 0 0 14px #f5c80066; transform: translateY(-1px);
+  }
 
   .task-input-nav { display: flex; gap: 10px; margin-top: 20px; padding-bottom: 30px; }
   .btn-half {
@@ -1530,6 +1597,8 @@ function removeOGLogo() {
 let S = {
   day: null, course: null, taskIdx: 0,
   data: {}, customSkills: {}, skillOverrides: {},
+  absent: {},             // absent[courseId][kid][skillId] = true  (Kind war abwesend)
+  timestamps: {},         // timestamps[courseId][kid][skillId] = ms (wann zuletzt erfasst)
   courses: null,          // mutable course data per day
   _editingCourseId: null, // null = new, string = edit
   _pendingDeleteId: null, // course id pending delete
@@ -1667,7 +1736,24 @@ function fixAppdataFromFirebase(raw) {
       skillOverrides[fbDecode(cid)] = raw.skillOverrides[cid];
     }
   }
-  return { data, customSkills, skillOverrides };
+  // 3-stufige Strukturen (course/kid/skill) generisch dekodieren — für absent + timestamps
+  function decode3(rawObj) {
+    const out = {};
+    if (!rawObj) return out;
+    for (const encCid of Object.keys(rawObj)) {
+      const cid = fbDecode(encCid); out[cid] = {};
+      const kids = rawObj[encCid] || {};
+      for (const encKid of Object.keys(kids)) {
+        const kid = fbDecode(encKid); out[cid][kid] = {};
+        const skills = kids[encKid] || {};
+        for (const encSid of Object.keys(skills)) out[cid][kid][fbDecode(encSid)] = skills[encSid];
+      }
+    }
+    return out;
+  }
+  const absent = decode3(raw.absent);
+  const timestamps = decode3(raw.timestamps);
+  return { data, customSkills, skillOverrides, absent, timestamps };
 }
 
 // ─────────────────────────────────────────────────────────
@@ -2544,8 +2630,11 @@ async function setupRealtimeSync() {
       S.data = fixed.data;
       S.customSkills = fixed.customSkills;
       S.skillOverrides = fixed.skillOverrides;
+      S.absent = fixed.absent || {};
+      S.timestamps = fixed.timestamps || {};
       try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify({
-        data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides
+        data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides,
+        absent: S.absent, timestamps: S.timestamps
       })); } catch(_) {}
       refreshCurrentView();
     }
@@ -2635,8 +2724,9 @@ function flushScoreWrites() {
   // Build a multi-path update object on the root ref
   const rootBase = FB_PATH_DATA.replace(/^\//, ''); // strip leading slash
   const updates  = {};
-  for (const { courseId, kid, skillId, val } of Object.values(pending)) {
+  for (const { courseId, kid, skillId, val, ts } of Object.values(pending)) {
     updates[`${rootBase}/data/${fbKey(courseId)}/${fbKey(kid)}/${fbKey(skillId)}`] = val;
+    if (ts) updates[`${rootBase}/timestamps/${fbKey(courseId)}/${fbKey(kid)}/${fbKey(skillId)}`] = ts;
   }
   _suppressRemoteData = true;
   setSyncStatus('syncing');
@@ -2646,7 +2736,7 @@ function flushScoreWrites() {
       console.warn('Granular score write fehlgeschlagen, fallback auf full persist:', e);
       setSyncStatus('error');
       // Fallback: full payload write (encode keys so periods in kid names don't fail)
-      const payload = { data: encodeDataKeys(S.data), customSkills: S.customSkills, skillOverrides: S.skillOverrides };
+      const payload = { data: encodeDataKeys(S.data), customSkills: S.customSkills, skillOverrides: S.skillOverrides, absent: encodeDataKeys(S.absent || {}), timestamps: encodeDataKeys(S.timestamps || {}) };
       _db.ref(FB_PATH_DATA).set(payload).catch(() => {});
     })
     .finally(() => { setTimeout(() => { _suppressRemoteData = false; }, 800); });
@@ -2656,7 +2746,7 @@ function flushScoreWrites() {
 // NOT called by setVal() anymore — scores use granular writes instead.
 let _persistDataTimer = null;
 function persist() {
-  const payload = { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides };
+  const payload = { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides, absent: S.absent, timestamps: S.timestamps };
   try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(payload)); } catch(_) {}
   if (_fbActive && _db) {
     setSyncStatus('syncing');
@@ -2666,7 +2756,9 @@ function persist() {
       const fbPayload = {
         data: encodeDataKeys(S.data),
         customSkills: S.customSkills,
-        skillOverrides: S.skillOverrides
+        skillOverrides: S.skillOverrides,
+        absent: encodeDataKeys(S.absent || {}),
+        timestamps: encodeDataKeys(S.timestamps || {})
       };
       _suppressRemoteData = true;
       _db.ref(FB_PATH_DATA).set(fbPayload)
@@ -2692,7 +2784,7 @@ function persistCourses() {
 function hydrate() {
   try {
     const d = localStorage.getItem('og_sp_aufgaben_v2');
-    if (d) { const p = JSON.parse(d); S.data = p.data||{}; S.customSkills = p.customSkills||{}; S.skillOverrides = p.skillOverrides||{}; }
+    if (d) { const p = JSON.parse(d); S.data = p.data||{}; S.customSkills = p.customSkills||{}; S.skillOverrides = p.skillOverrides||{}; S.absent = p.absent||{}; S.timestamps = p.timestamps||{}; }
   } catch(_) {}
   // Load mutable courses (deep-clone defaults if not saved yet)
   try {
@@ -2741,24 +2833,89 @@ function setVal(courseId, kid, skillId, val) {
   if (oldVal === val) return; // kein No-Op-Audit
   S.data[courseId][kid][skillId] = val;
   auditLog('score', `${courseId}/${kid}/${skillId}`, oldVal, val);
+  // Zeitstempel: wann wurde dieser Wert erfasst/geändert
+  const now = Date.now();
+  if (!S.timestamps[courseId]) S.timestamps[courseId] = {};
+  if (!S.timestamps[courseId][kid]) S.timestamps[courseId][kid] = {};
+  S.timestamps[courseId][kid][skillId] = now;
+  // Ein Klick = anwesend: evtl. gesetzte Abwesenheit aufheben
+  if (S.absent?.[courseId]?.[kid]?.[skillId]) {
+    delete S.absent[courseId][kid][skillId];
+    if (_fbActive && _db) _db.ref(`${FB_PATH_DATA}/absent/${fbKey(courseId)}/${fbKey(kid)}/${fbKey(skillId)}`).remove().catch(()=>{});
+  }
   // Save locally immediately
   try {
     localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(
-      { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides }
+      { data: S.data, customSkills: S.customSkills, skillOverrides: S.skillOverrides, absent: S.absent, timestamps: S.timestamps }
     ));
   } catch(_) {}
-  // Queue a debounced granular write to Firebase (only this one value, not the full dataset)
+  // Queue a debounced granular write to Firebase (Score + Zeitstempel)
   if (_fbActive && _db) {
     setSyncStatus('syncing');
-    _pendingScoreWrites[`${courseId}||${kid}||${skillId}`] = { courseId, kid, skillId, val };
+    _pendingScoreWrites[`${courseId}||${kid}||${skillId}`] = { courseId, kid, skillId, val, ts: now };
     clearTimeout(_scoreWriteTimer);
     _scoreWriteTimer = setTimeout(flushScoreWrites, 400);
   }
 }
+// ── ABWESENHEIT ──
+function isAbsent(courseId, kid, skillId) {
+  return !!S.absent?.[courseId]?.[kid]?.[skillId];
+}
+function toggleAbsent(courseId, kid, skillId) {
+  const now = isAbsent(courseId, kid, skillId);
+  if (!S.absent[courseId]) S.absent[courseId] = {};
+  if (!S.absent[courseId][kid]) S.absent[courseId][kid] = {};
+  if (now) {
+    delete S.absent[courseId][kid][skillId];
+  } else {
+    S.absent[courseId][kid][skillId] = true;
+  }
+  auditLog('absent', `${courseId}/${kid}/${skillId}`, now, !now);
+  // lokal speichern
+  try { localStorage.setItem('og_sp_aufgaben_v2', JSON.stringify(
+    { data:S.data, customSkills:S.customSkills, skillOverrides:S.skillOverrides, absent:S.absent, timestamps:S.timestamps }
+  )); } catch(_) {}
+  // granular zur DB
+  if (_fbActive && _db) {
+    const path = `${FB_PATH_DATA}/absent/${fbKey(courseId)}/${fbKey(kid)}/${fbKey(skillId)}`;
+    _suppressRemoteData = true;
+    setSyncStatus('syncing');
+    const op = now ? _db.ref(path).remove() : _db.ref(path).set(true);
+    op.then(()=>setSyncStatus('live')).catch(()=>setSyncStatus('error'))
+      .finally(()=>{ setTimeout(()=>{ _suppressRemoteData=false; }, 800); });
+  }
+  return !now;
+}
+
+// ── ZEITSTEMPEL ──
+function getTimestamp(courseId, kid, skillId) {
+  return S.timestamps?.[courseId]?.[kid]?.[skillId] || null;
+}
+function formatTs(ms) {
+  if (!ms) return '';
+  const d = new Date(ms);
+  const now = new Date();
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  return sameYear ? `${dd}.${mm}. ${hh}:${mi}` : `${dd}.${mm}.${String(d.getFullYear()).slice(2)}`;
+}
+// Letzte Aktivität eines Skills über alle Kinder (für Übersichts-Kachel)
+function lastSkillActivity(course, skill) {
+  let max = 0;
+  (course.kids||[]).forEach(kid => {
+    const t = getTimestamp(course.id, kid, skill.id);
+    if (t && t > max) max = t;
+  });
+  return max || null;
+}
+
 function isSkillDone(course, skill) {
-  // Done only when EVERY kid has an explicitly stored value
+  // Erledigt wenn JEDES Kind entweder einen Wert hat ODER als abwesend markiert ist
   return course.kids.length > 0 && course.kids.every(kid =>
-    S.data?.[course.id]?.[kid]?.[skill.id] !== undefined
+    S.data?.[course.id]?.[kid]?.[skill.id] !== undefined || isAbsent(course.id, kid, skill.id)
   );
 }
 
@@ -3347,7 +3504,8 @@ function renderOverview() {
   groups.forEach(cat => {
     const header = document.createElement('div');
     header.className = 'task-group-header';
-    header.textContent = cat;
+    const emoji = (typeof categoryEmoji === 'function') ? categoryEmoji(cat) : '⭐';
+    header.innerHTML = `<span class="tg-emoji">${emoji}</span><span>${cat}</span><span class="tg-count">${groupMap[cat].length}</span>`;
     grid.appendChild(header);
 
     const tileRow = document.createElement('div');
@@ -3355,13 +3513,17 @@ function renderOverview() {
 
     groupMap[cat].forEach(({ skill, idx }) => {
       const done = isSkillDone(course, skill);
+      const lastTs = lastSkillActivity(course, skill);
       const tile = document.createElement('div');
       tile.className = 'task-tile' + (done ? ' done' : '');
       tile.innerHTML = `
         ${done ? '<span class="task-tile-check">✓</span>' : ''}
-        <div class="task-tile-num">${idx+1}</div>
+        <div class="task-tile-num">Nr. ${idx+1}</div>
         <div class="task-tile-name">${skill.label}</div>
-        <div class="task-tile-unit">${skill.unit}</div>
+        <div class="task-tile-foot">
+          <span class="task-tile-unit">${skill.unit}</span>
+          ${lastTs ? `<span class="task-tile-date">🕓 ${formatTs(lastTs)}</span>` : ''}
+        </div>
         <button class="task-tile-edit" title="Bearbeiten">✎</button>`;
       tile.onclick = (e) => {
         if (e.target.classList.contains('task-tile-edit')) {
@@ -3416,35 +3578,68 @@ function renderTaskInput() {
 
   course.kids.forEach(kid => {
     const val = getVal(course.id, kid, skill.id, skill);
+    const hasVal = S.data?.[course.id]?.[kid]?.[skill.id] !== undefined;
+    const absent = isAbsent(course.id, kid, skill.id);
+    const ts = getTimestamp(course.id, kid, skill.id);
     const row = document.createElement('div');
-    row.className = 'kid-row';
+    row.className = 'kid-row' + (absent ? ' absent' : '') + (hasVal && !absent ? ' has-val' : '');
+    row.id = `kr-${encodeId(kid)}-${encodeId(skill.id)}`;
+
+    const tsHtml = ts
+      ? `<span class="kid-ts" id="ts-${encodeId(kid)}-${encodeId(skill.id)}">🕓 ${formatTs(ts)}</span>`
+      : `<span class="kid-ts muted" id="ts-${encodeId(kid)}-${encodeId(skill.id)}">noch offen</span>`;
+    const absBtn = `<button class="absent-btn${absent?' on':''}" title="An-/Abwesend"
+        onclick="onToggleAbsent('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}')">${absent?'🚫 Abwesend':'Abwesend?'}</button>`;
+
+    let inputHtml;
     if (skill.type === 'rating') {
       let starsHtml = '';
       for (let v = skill.min; v <= skill.max; v += skill.step)
         starsHtml += `<button class="rating-star${val===v?' active':''}"
           onclick="rateKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',${v},this)">${v}</button>`;
-      row.innerHTML = `
-        <div class="kid-row-top">
-          <span class="kid-name">${kid}</span>
-          <span class="kid-value-display" id="dv-${encodeId(kid)}-${encodeId(skill.id)}">${val}${skill.unit}</span>
-        </div>
-        <div class="rating-row">${starsHtml}</div>`;
+      inputHtml = `<div class="rating-row">${starsHtml}</div>`;
     } else {
-      row.innerHTML = `
-        <div class="kid-row-top">
-          <span class="kid-name">${kid}</span>
-          <span class="kid-value-display" id="dv-${encodeId(kid)}-${encodeId(skill.id)}">${formatVal(val,skill)}</span>
-        </div>
-        <input type="range" class="kid-slider"
+      inputHtml = `<input type="range" class="kid-slider"
           id="sl-${encodeId(kid)}-${encodeId(skill.id)}"
           min="${skill.min}" max="${skill.max}" step="${skill.step}" value="${val}"
           oninput="slideKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',this)"
           onchange="slideKid('${escStr(course.id)}','${escStr(kid)}','${escStr(skill.id)}',this)">`;
     }
+
+    row.innerHTML = `
+      <div class="kid-row-top">
+        <span class="kid-name">${kid}</span>
+        <span class="kid-value-display" id="dv-${encodeId(kid)}-${encodeId(skill.id)}">${skill.type==='rating'?val+skill.unit:formatVal(val,skill)}</span>
+      </div>
+      <div class="kid-input-area">${inputHtml}</div>
+      <div class="kid-row-foot">
+        ${tsHtml}
+        ${absBtn}
+      </div>`;
     list.appendChild(row);
   });
 }
 
+// Abwesend-Toggle aus dem Task-Fenster: umschalten + Zeile sofort neu rendern
+function onToggleAbsent(courseId, kid, skillId) {
+  toggleAbsent(courseId, kid, skillId);
+  renderTaskInput(); // sofortiges visuelles Feedback (Färbung, Button)
+}
+
+// Nach dem Setzen: Zeitstempel-Anzeige + Zeilen-Status aktualisieren, kurz aufleuchten
+function _afterSet(courseId, kid, skillId) {
+  const tsEl = document.getElementById(`ts-${encodeId(kid)}-${encodeId(skillId)}`);
+  const t = getTimestamp(courseId, kid, skillId);
+  if (tsEl && t) { tsEl.textContent = `🕓 ${formatTs(t)}`; tsEl.classList.remove('muted'); }
+  const row = document.getElementById(`kr-${encodeId(kid)}-${encodeId(skillId)}`);
+  if (row) {
+    row.classList.remove('absent');
+    row.classList.add('has-val');
+    const ab = row.querySelector('.absent-btn');
+    if (ab) { ab.classList.remove('on'); ab.textContent = 'Abwesend?'; }
+    row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
+  }
+}
 function slideKid(courseId, kid, skillId, input) {
   const val = parseFloat(input.value);
   setVal(courseId, kid, skillId, val);
@@ -3454,6 +3649,7 @@ function slideKid(courseId, kid, skillId, input) {
     const skill = skills.find(s => s.id === skillId);
     if (skill) el.textContent = formatVal(val, skill);
   }
+  _afterSet(courseId, kid, skillId);
 }
 function rateKid(courseId, kid, skillId, val, btn) {
   setVal(courseId, kid, skillId, val);
@@ -3464,6 +3660,7 @@ function rateKid(courseId, kid, skillId, val, btn) {
   const skill = skills.find(s=>s.id===skillId);
   const el = document.getElementById(`dv-${encodeId(kid)}-${encodeId(skillId)}`);
   if (el&&skill) el.textContent = val+skill.unit;
+  _afterSet(courseId, kid, skillId);
 }
 function saveAndBack() { buildPrintView(); showOverview(); }
 
