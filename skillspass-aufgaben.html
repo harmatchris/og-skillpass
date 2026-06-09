@@ -718,10 +718,10 @@
     text-align: center; margin-top: 6px;
   }
   .diploma-course-name {
-    font-size: 10pt; font-weight: 700; color: #111;
+    font-size: 12pt; font-weight: 700; color: #111;
   }
   .diploma-meta-row {
-    font-size: 8pt; color: #555; margin-top: 2px; letter-spacing: .5px;
+    font-size: 10pt; color: #555; margin-top: 3px; letter-spacing: .3px;
   }
 
   /* Skills table */
@@ -814,24 +814,34 @@
     gap: 8px; padding: 3px 0;
   }
   .diploma-box-skill + .diploma-box-skill { border-top: 1px solid #f3f0e4; }
-  .diploma-box-label { font-size: 10.5pt; color: #222; line-height: 1.15; }
+  .diploma-box-label { font-size: 11pt; color: #222; line-height: 1.2; }
   .diploma-box-value { font-size: 11pt; font-weight: 800; color: #111; white-space: nowrap; }
   .diploma-box-stars { display: flex; gap: 1px; white-space: nowrap; }
   .diploma-box-star { font-size: 11pt; color: #ddd; line-height: 1; }
   .diploma-box-star.filled { color: #f5c800; }
 
-  /* Box-Dichtevarianten (greift bei vielen Skills) */
+  /* Box-Dichtevarianten: NUR Abstände verkleinern, Schrift bleibt ≥10pt (Eltern!) */
   .diploma-md .diploma-box-label,
-  .diploma-md .diploma-box-value { font-size: 10pt; }
-  .diploma-md .diploma-box-star  { font-size: 10pt; }
-  .diploma-md .diploma-cat-box-title { font-size: 10pt; }
+  .diploma-md .diploma-box-value,
+  .diploma-md .diploma-box-star,
+  .diploma-md .diploma-cat-box-title { font-size: 10.5pt; }
   .diploma-md .diploma-skills-grid { gap: 6px; }
   .diploma-sm .diploma-box-label,
-  .diploma-sm .diploma-box-value { font-size: 10pt; }
-  .diploma-sm .diploma-box-star  { font-size: 9.5pt; }
-  .diploma-sm .diploma-cat-box-title { font-size: 9.5pt; }
+  .diploma-sm .diploma-box-value,
+  .diploma-sm .diploma-box-star,
+  .diploma-sm .diploma-cat-box-title { font-size: 10pt; }
   .diploma-sm .diploma-cat-box { padding: 6px 8px; }
   .diploma-sm .diploma-skills-grid { gap: 5px; }
+  .diploma-xs .diploma-box-label,
+  .diploma-xs .diploma-box-value,
+  .diploma-xs .diploma-box-star,
+  .diploma-xs .diploma-cat-box-title { font-size: 10pt; }
+  .diploma-xs .diploma-skills-grid { gap: 5px; }
+
+  /* LESBARKEIT-GARANTIE für Eltern: Kopfzeile nie unter 10pt, egal welche Dichte */
+  .diploma-card .diploma-course-name { font-size: 12pt !important; }
+  .diploma-card .diploma-meta-row    { font-size: 10pt !important; }
+  .diploma-card .diploma-course-info { margin-top: 6px !important; }
 
   /* ── DIPLOMA DENSITY VARIANTS ─────────────────────────────
      Automatically applied based on number of skills per course.
@@ -903,35 +913,36 @@
 
   /* ── KOMPETENZRASTER DIPLOMA PAGE ──────────────────────── */
   .diploma-komp-title {
-    font-size: 7pt; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 2px; color: #999; text-align: center;
+    font-size: 10pt; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 2px; color: #888; text-align: center;
     margin-bottom: 2px;
   }
   .diploma-komp-subtitle {
-    font-size: 6pt; color: #bbb; text-align: center;
-    margin-bottom: 5px; letter-spacing: 1px;
+    font-size: 11pt; color: #999; text-align: center;
+    margin-bottom: 10px; letter-spacing: .5px;
   }
   .diploma-komp-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0 14px;
+    gap: 0 16px;
     flex: 1;
   }
   .diploma-komp-cat {
-    font-size: 5.5pt; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; color: #f5c800;
-    margin: 4px 0 1px;
+    font-size: 10pt; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1px; color: #f5c800;
+    margin: 10px 0 2px;
     grid-column: 1 / -1;
+    border-bottom: 1.5px solid #f5c80055; padding-bottom: 2px;
   }
   .diploma-komp-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 1.5px 0; border-bottom: 1px solid #f5f5f5;
-    font-size: 6.5pt; color: #333;
+    gap: 8px; padding: 4px 0; border-bottom: 1px solid #f0f0f0;
+    font-size: 11pt; color: #222;
     break-inside: avoid;
   }
-  .diploma-komp-label { flex: 1; padding-right: 3px; }
+  .diploma-komp-label { flex: 1; padding-right: 3px; line-height: 1.2; }
   .diploma-komp-stars { display: flex; gap: 1px; flex-shrink: 0; }
-  .diploma-komp-star  { font-size: 7pt; color: #ddd; line-height: 1; }
+  .diploma-komp-star  { font-size: 11pt; color: #ddd; line-height: 1; }
   .diploma-komp-star.filled { color: #f5c800; }
 
   /* ── COACH EMOJI PICKER ──────────────────────────────────── */
@@ -4348,7 +4359,8 @@ function autoscaleDiplomas() {
     // Verhindert dass bei display:none / Fehlmessung der Inhalt auf ~0 schrumpft.
     if (available < 200 || needed <= 0) return;
     if (needed > available * 0.995) {
-      const scale = Math.max(0.5, (available * 0.99) / needed); // nie kleiner als 50%
+      // Floor 0.91: bei 11pt-Basis bleibt der Text ≥10pt (Lesbarkeit für Eltern garantiert)
+      const scale = Math.max(0.91, (available * 0.99) / needed);
       inner.style.transform = `scale(${scale.toFixed(5)})`;
       inner.style.transformOrigin = 'top center';
     }
