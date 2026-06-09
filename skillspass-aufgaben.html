@@ -602,7 +602,10 @@
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     /* Reset height constraints so multi-kid content flows across pages */
     html, body { height: auto !important; min-height: 0 !important; overflow: visible !important; }
-    body { background: #fff; color: #000; max-width: 100%; }
+    /* WICHTIG: auch html weiss — sonst scheint der dunkle App-Hintergrund auf der
+       letzten Seite unter der Karte durch (schwarzer Kasten). */
+    html { background: #fff !important; }
+    body { background: #fff !important; color: #000; max-width: 100%; }
     .header, .no-print { display: none !important; }
     .screen { display: none !important; min-height: 0 !important; height: 0 !important; }
     .print-view { display: block !important; }
@@ -638,8 +641,8 @@
     break-after: page;
     page-break-inside: avoid;
     break-inside: avoid;
-    width: 210mm;
-    height: 296mm;             /* 1mm unter A4 → keine leere Folgeseite */
+    width: 100%;               /* füllt die Blattbreite (A4 210mm ODER Letter 216mm) */
+    height: 270mm;             /* passt sicher auf A4 UND Letter (279mm) — kein Überlauf */
     margin: 0 auto;
     /* Innenabstand = Rahmen-Inset + Luft, damit Inhalt im Rahmen liegt */
     padding: calc(var(--frame-inset) + 6mm) calc(var(--frame-inset) + 7mm);
@@ -781,14 +784,14 @@
   .diploma-md .diploma-og-logo-img { height: 28px; }
   .diploma-sm .diploma-og-logo-img, .diploma-xs .diploma-og-logo-img { height: 22px; }
 
-  /* ── DIPLOMA BOX-GRID (kindgerecht, eine Box pro Sportart) ── */
+  /* ── DIPLOMA BOX-GRID (Kasten-System, dicht gepackt, Platz sparen) ── */
   .diploma-skills-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px;
     align-content: start;
   }
-  /* Box, die viele Skills hat, darf über beide Spalten gehen */
+  /* Box mit sehr vielen Skills darf über beide Spalten (sonst eine Spalte sehr hoch) */
   .diploma-cat-box.wide { grid-column: 1 / -1; }
   .diploma-cat-box {
     border: 2px solid #f5c80055;
@@ -4183,7 +4186,7 @@ function buildDemoDiplomaCard() {
   demoSkills.forEach(s => { const c = s.category; if (!byCat[c]) { byCat[c]=[]; groups.push(c); } byCat[c].push(s); });
   const skillsHtml = groups.map(cat => {
     const skills = byCat[cat];
-    const wide = skills.length > 5 ? ' wide' : '';
+    const wide = skills.length > 8 ? ' wide' : '';
     const rows = skills.map(skill => {
       let valHtml;
       if (skill.type === 'rating') {
@@ -4273,10 +4276,17 @@ function categoryEmoji(cat) { return sportIcon(cat); }
 // Baut die Sport-Skills als Grid aus Kategorie-Boxen.
 // Sterne/Werte direkt neben dem Label (kompakt), grosse Schrift.
 function buildSkillBoxesHtml(course, kid, sportSkills) {
+  // NUR tatsächlich erfasste Skills aufs Diplom (nicht gemachte / abwesend = weglassen)
+  const recorded = sportSkills.filter(s =>
+    S.data?.[course.id]?.[kid]?.[s.id] !== undefined && !isAbsent(course.id, kid, s.id)
+  );
+  if (recorded.length === 0) {
+    return `<div style="grid-column:1/-1;text-align:center;color:#999;font-size:11pt;padding:20px 0">Noch keine Übungen erfasst</div>`;
+  }
   // nach Kategorie gruppieren (Reihenfolge wie im Skill-Array)
   const groups = [];
   const byCat = {};
-  sportSkills.forEach(skill => {
+  recorded.forEach(skill => {
     const cat = skill.category || 'Skills';
     if (!byCat[cat]) { byCat[cat] = []; groups.push(cat); }
     byCat[cat].push(skill);
@@ -4285,7 +4295,7 @@ function buildSkillBoxesHtml(course, kid, sportSkills) {
   return groups.map(cat => {
     const skills = byCat[cat];
     // Box mit vielen Skills (>5) über beide Spalten, sonst halbe Breite
-    const wide = skills.length > 5 ? ' wide' : '';
+    const wide = skills.length > 8 ? ' wide' : '';
     const rows = skills.map(skill => {
       const val = getVal(course.id, kid, skill.id, skill);
       let valHtml;
@@ -4344,14 +4354,39 @@ function autoscaleDiplomas() {
     }
   });
 }
-// Scale before the browser renders for print
-window.addEventListener('beforeprint', autoscaleDiplomas);
-// Reset after printing (not strictly necessary but keeps DOM clean)
+// ── EINHEITLICHER DRUCK ──
+// Egal wie gedruckt wird (In-App-Button ODER Browser-/Handy-Druck Cmd+P /
+// "Save as PDF"): IMMER das saubere Diplom ausgeben, nie die rohe Liste.
+function prepareDiplomaForPrint() {
+  // Wenn ein In-App-Button bereits gebaut hat → nichts tun
+  if (document.body.classList.contains('printing-diplomas')) return;
+  const dv = document.getElementById('diploma-view');
+  if (!dv) return;
+  dv.innerHTML = '';
+  if (S.course && S.day !== null) {
+    // Aktueller Kurs (Overview/Task) → nur dessen Diplome
+    const saved = S.courses[S.day];
+    S.courses[S.day] = [S.course];
+    buildDiplomaView(S.day);
+    S.courses[S.day] = saved;
+  } else if (S.day !== null) {
+    buildDiplomaView(S.day);   // ganzer Tag
+  } else {
+    return;
+  }
+  document.body.classList.add('printing-diplomas');
+  document.body.dataset.osPrint = '1';
+}
+window.addEventListener('beforeprint', () => { prepareDiplomaForPrint(); autoscaleDiplomas(); });
 window.addEventListener('afterprint', () => {
-  document.querySelectorAll('.diploma-card .diploma-inner').forEach(el => {
-    el.style.transform = '';
-    el.style.transformOrigin = '';
-  });
+  // Transforms zurücksetzen
+  document.querySelectorAll('.diploma-card .diploma-inner').forEach(el => { el.style.transform=''; el.style.transformOrigin=''; });
+  // Vom OS-Druck gesetzten Diplom-Modus wieder aufräumen
+  if (document.body.dataset.osPrint === '1') {
+    document.body.classList.remove('printing-diplomas');
+    delete document.body.dataset.osPrint;
+    const dv = document.getElementById('diploma-view'); if (dv) dv.innerHTML = '';
+  }
 });
 
 function printAllDiplomas() {

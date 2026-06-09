@@ -1,7 +1,7 @@
 // OG Skills-Pass Service Worker
 // Caches the app shell for offline use
 
-const CACHE_NAME = 'og-skillspass-v1';
+const CACHE_NAME = 'og-skillspass-v2';
 
 // Resources to cache immediately on install
 const PRECACHE_URLS = [
